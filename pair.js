@@ -1701,21 +1701,6 @@ break;
         break;
     }
 
-// 6. Runtime Command
-    case 'runtime':
-    case 'uptime': {
-        try {
-            let uptime = process.uptime();
-            let hours = Math.floor(uptime / 3600);
-            let minutes = Math.floor((uptime % 3600) / 60);
-            let seconds = Math.floor(uptime % 60);
-            reply(`⏱️ *SHAGGY XMD Runtime:*\n\n🔹 ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`);
-        } catch (error) {
-            console.error('Runtime error:', error);
-            reply('❌ දෝෂයක් සිදු විය!');
-        }
-        break;
-    }
                     async function setupMessageHandlers(socket) {
     const messageHandler = async ({ messages }) => {
         const msg = messages[0];
