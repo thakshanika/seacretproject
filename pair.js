@@ -1524,76 +1524,50 @@ break;
         }
         break;
     }
-
-            // Pornhub Video Search Command
+// Pornhub Search, Stream & Direct Video Download Command
     case 'phsearch':
     case 'pornhubsearch': {
         if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.phsearch japanese`');
         
-        reply('🔍 සෙවීම සිදු කරමින් පවතී, රැඳී සිටින්න...');
+        reply('🔍 වීඩියෝව සොයා බාගත කරමින් පවතී, කරුණාකර මොහොතක් රැඳී සිටින්න...');
 
         try {
             const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const apiUrl = `https://api.chamindu.site/api/adult/pornhub/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
+            // 1. වීඩියෝව සර්ච් කිරීම
+            const searchUrl = `https://api.chamindu.site/api/adult/pornhub/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
             
-            const response = await fetch(apiUrl);
-            const data = await response.json();
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
 
-            if (data && data.success && data.results && data.results.length > 0) {
-                let message = `🔞 *Pornhub Search Results for: "${text}"*\n\n`;
+            if (searchData && searchData.success && searchData.results && searchData.results.length > 0) {
+                let vid = searchData.results[0];
                 
-                //මුල් වීඩියෝ 5 පමණක් පෙන්වීමට (නැත්නම් මැසේජ් එක දිග වැඩි වෙයි)
-                let resultsToShow = data.results.slice(0, 5);
+                // 2. ඩවුන්ලෝඩ් API එක මඟින් ඩිරෙක්ට් ලින්ක් එක ලබා ගැනීම
+                let dlApiUrl = `https://api.chamindu.site/api/adult/pornhub/dl?url=${encodeURIComponent(vid.url)}&api_key=${apiKey}`;
                 
-                for (let i = 0; i < resultsToShow.length; i++) {
-                    let vid = resultsToShow[i];
-                    message  = `${i + 1}. *${vid.title}*\n⏱️ *Duration:* ${vid.duration}\n🔗 *URL:* ${vid.url}\n\n`;
+                const dlRes = await fetch(dlApiUrl);
+                const dlData = await dlRes.json();
+
+                if (dlData && dlData.success && dlData.download_url) {
+                    // 3. වීඩියෝ ෆයිල් එක කෙලින්ම වට්ස්ඇප් වෙත ඩවුන්ලෝඩ් කර යැවීම (sendVideo)
+                    let caption = `🔞 *Pornhub Video Found!*\n\n📌 *Title:* ${vid.title}\n⏱️ *Duration:* ${vid.duration}\n🔗 *URL:* ${vid.url}`;
+                    
+                    await conn.sendMessage(from, { 
+                        video: { url: dlData.download_url }, 
+                        caption: caption 
+                    }, { quoted: mek });
+                } else {
+                    reply(`❌ වීඩියෝ ලින්ක් එක ලබා ගැනීමට හැකි වුවත්, ඩිරෙක්ට් වීඩියෝ ෆයිල් එක ලබා ගැනීමට නොහැකි විය.\n\n🔗 *URL:* ${vid.url}`);
                 }
-                
-                message += `_ඩවුන්ලෝඩ් කර ගැනීමට:_\n`.trim();
-                message += `\`.phdl <video_url>\``;
-
-                await reply(message);
             } else {
                 reply('❌ කණගාටුයි, අදාළ සෙවුමට ප්‍රතිඵල හමු නොවීය.');
             }
         } catch (err) {
-            console.error('Pornhub Search Error:', err);
+            console.error('Pornhub Direct Video Download Error:', err);
             reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
         }
         break;
-    }
-
-    // Pornhub Video Download / Stream Command
-    case 'phdl':
-    case 'pornhubdl': {
-        if (!text) return reply('කරුණාකර Pornhub වීඩියෝ ලින්ක් එක දෙන්න!\nඋදා: `.phdl https://www.pornhub.com/view_video.php?viewkey=ph12345`');
-        
-        reply('📥 වීඩියෝ ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
-
-        try {
-            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const apiUrl = `https://api.chamindu.site/api/adult/pornhub/dl?url=${encodeURIComponent(text)}&api_key=${apiKey}`;
-            
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            if (data && data.success && data.download_url) {
-                let message = `📥 *Pornhub Video Download Found!*\n\n`;
-                message  = `🔗 *Direct Stream Link:* ${data.direct_link}\n\n`;
-                message  = `💾 *Download Link:* ${data.download_url}`;
-
-                await reply(message);
-            } else {
-                reply('❌ කණගාටුයි, අදාළ වීඩියෝව ලබා ගැනීමට නොහැකි විය.');
-            }
-        } catch (err) {
-            console.error('Pornhub DL Error:', err);
-            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
-        }
-        break;
-    }
-                case 'set':
+    }                case 'set':
                 case 'setting': {
                     if (!isOwner) {
                         return await socket.sendMessage(sender, {
