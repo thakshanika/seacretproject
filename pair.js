@@ -1505,9 +1505,16 @@ break;
             const response = await fetch(apiUrl);
             const data = await response.json();
 
-            if (data && (data.download_url || data.result || data.link || data.data)) {
-                let dlLink = data.download_url || data.result || data.link || data.data;
-                await reply(`📥 *AnimeClub TV Episode Found!*\n\n*Download Link:* ${dlLink}`);
+            if (data && data.status && data.downloads && data.downloads.length > 0) {
+                let message = `📥 *AnimeClub TV Episode Found!*\n\n`;
+                
+                for (let dl of data.downloads) {
+                    let quality = dl.quality || 'HD';
+                    let link = dl.link || dl.direct_link;
+                    message += `*Quality/Source:* ${quality}\n*Download Link:* ${link}\n\n`;
+                }
+
+                await reply(message.trim());
             } else {
                 reply('❌ කණගාටුයි, අදාළ ලින්ක් එකෙන් ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
             }
@@ -1517,7 +1524,75 @@ break;
         }
         break;
     }
-                    
+
+            // Pornhub Video Search Command
+    case 'phsearch':
+    case 'pornhubsearch': {
+        if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.phsearch japanese`');
+        
+        reply('🔍 සෙවීම සිදු කරමින් පවතී, රැඳී සිටින්න...');
+
+        try {
+            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+            const apiUrl = `https://api.chamindu.site/api/adult/pornhub/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
+            
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data && data.success && data.results && data.results.length > 0) {
+                let message = `🔞 *Pornhub Search Results for: "${text}"*\n\n`;
+                
+                //මුල් වීඩියෝ 5 පමණක් පෙන්වීමට (නැත්නම් මැසේජ් එක දිග වැඩි වෙයි)
+                let resultsToShow = data.results.slice(0, 5);
+                
+                for (let i = 0; i < resultsToShow.length; i++) {
+                    let vid = resultsToShow[i];
+                    message  = `${i + 1}. *${vid.title}*\n⏱️ *Duration:* ${vid.duration}\n🔗 *URL:* ${vid.url}\n\n`;
+                }
+                
+                message += `_ඩවුන්ලෝඩ් කර ගැනීමට:_\n`.trim();
+                message += `\`.phdl <video_url>\``;
+
+                await reply(message);
+            } else {
+                reply('❌ කණගාටුයි, අදාළ සෙවුමට ප්‍රතිඵල හමු නොවීය.');
+            }
+        } catch (err) {
+            console.error('Pornhub Search Error:', err);
+            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        }
+        break;
+    }
+
+    // Pornhub Video Download / Stream Command
+    case 'phdl':
+    case 'pornhubdl': {
+        if (!text) return reply('කරුණාකර Pornhub වීඩියෝ ලින්ක් එක දෙන්න!\nඋදා: `.phdl https://www.pornhub.com/view_video.php?viewkey=ph12345`');
+        
+        reply('📥 වීඩියෝ ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
+
+        try {
+            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+            const apiUrl = `https://api.chamindu.site/api/adult/pornhub/dl?url=${encodeURIComponent(text)}&api_key=${apiKey}`;
+            
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data && data.success && data.download_url) {
+                let message = `📥 *Pornhub Video Download Found!*\n\n`;
+                message  = `🔗 *Direct Stream Link:* ${data.direct_link}\n\n`;
+                message  = `💾 *Download Link:* ${data.download_url}`;
+
+                await reply(message);
+            } else {
+                reply('❌ කණගාටුයි, අදාළ වීඩියෝව ලබා ගැනීමට නොහැකි විය.');
+            }
+        } catch (err) {
+            console.error('Pornhub DL Error:', err);
+            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        }
+        break;
+    }
                 case 'set':
                 case 'setting': {
                     if (!isOwner) {
