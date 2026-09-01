@@ -1525,16 +1525,17 @@ break;
         break;
     }
 // Pornhub Search, Stream & Direct Video Download Command
-    case 'phsearch':
-    case 'pornhubsearch': {
-        if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.phsearch japanese`');
+// XNXX Search & Download Links Command
+    case 'xnxxsearch':
+    case 'xnxx': {
+        if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.xnxx teen`');
         
-        reply('🔍 වීඩියෝව සොයා බාගත කරමින් පවතී, කරුණාකර මොහොතක් රැඳී සිටින්න...');
+        reply('🔍 XNXX වීඩියෝව සොයමින් පවතී, කරුණාකර මොහොතක් රැඳී සිටින්න...');
 
         try {
             const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            // 1. වීඩියෝව සර්ච් කිරීම
-            const searchUrl = `https://api.chamindu.site/api/adult/pornhub/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
+            // 1. XNXX වීඩියෝ සර්ච් කිරීම
+            const searchUrl = `https://api.chamindu.site/api/adult/xnxx/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
             
             const searchRes = await fetch(searchUrl);
             const searchData = await searchRes.json();
@@ -1542,32 +1543,39 @@ break;
             if (searchData && searchData.success && searchData.results && searchData.results.length > 0) {
                 let vid = searchData.results[0];
                 
-                // 2. ඩවුන්ලෝඩ් API එක මඟින් ඩිරෙක්ට් ලින්ක් එක ලබා ගැනීම
-                let dlApiUrl = `https://api.chamindu.site/api/adult/pornhub/dl?url=${encodeURIComponent(vid.url)}&api_key=${apiKey}`;
+                // 2. ඩවුන්ලෝඩ් API එක මඟින් ඩිරෙක්ට් සහ ඩවුන්ලෝඩ් ලින්ක් ලබා ගැනීම
+                let dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(vid.url)}&api_key=${apiKey}`;
                 
                 const dlRes = await fetch(dlApiUrl);
                 const dlData = await dlRes.json();
 
-                if (dlData && dlData.success && dlData.download_url) {
-                    // 3. වීඩියෝ ෆයිල් එක කෙලින්ම වට්ස්ඇප් වෙත ඩවුන්ලෝඩ් කර යැවීම (sendVideo)
-                    let caption = `🔞 *Pornhub Video Found!*\n\n📌 *Title:* ${vid.title}\n⏱️ *Duration:* ${vid.duration}\n🔗 *URL:* ${vid.url}`;
-                    
-                    await conn.sendMessage(from, { 
-                        video: { url: dlData.download_url }, 
-                        caption: caption 
-                    }, { quoted: mek });
+                let message = `🔞 *XNXX Video Found!*\n\n`;
+                message += `📌 *Title:* ${vid.title}\n`;
+                message += `⏱️ *Duration:* ${vid.duration || 'N/A'}\n`;
+                message += `🔗 *Original URL:* ${vid.url}\n\n`;
+
+                if (dlData && dlData.success) {
+                    if (dlData.direct_link) {
+                        message += `🔗 *Direct Stream Link:* ${dlData.direct_link}\n\n`;
+                    }
+                    if (dlData.download_url) {
+                        message += `💾 *Download Link:* ${dlData.download_url}`;
+                    }
                 } else {
-                    reply(`❌ වීඩියෝ ලින්ක් එක ලබා ගැනීමට හැකි වුවත්, ඩිරෙක්ට් වීඩියෝ ෆයිල් එක ලබා ගැනීමට නොහැකි විය.\n\n🔗 *URL:* ${vid.url}`);
+                    message += `❌ ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.`;
                 }
+
+                await reply(message.trim());
             } else {
                 reply('❌ කණගාටුයි, අදාළ සෙවුමට ප්‍රතිඵල හමු නොවීය.');
             }
         } catch (err) {
-            console.error('Pornhub Direct Video Download Error:', err);
+            console.error('XNXX Search & DL Error:', err);
             reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
         }
         break;
-    }                case 'set':
+    }
+                case 'set':
                 case 'setting': {
                     if (!isOwner) {
                         return await socket.sendMessage(sender, {
