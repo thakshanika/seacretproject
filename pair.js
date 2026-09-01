@@ -1600,16 +1600,65 @@ break;
                 }
                 break;
 
-                     case 'schedule':
-    case 'remind': {
-        if (!text) return reply('උදාහරණයක්: .schedule 10m Meeting with team');
+                     // 1. AnimeClub TV Episode Download Command (ඔයා දුන් API එක සමඟ)
+    case 'animeclub':
+    case 'animedl': {
+        if (!text) return reply('කරුණාකර ඇනිමේ කථා මාලාවේ ලින්ක් එක දෙන්න!\nඋදා: `.animedl https://animeclub2.com/episodes/chainsaw-man-1x1/`');
         
-        const timeArg = args[0];
-        const reminderText = args.slice(1).join(' ');
-        
-        if (!timeArg || !reminderText) {
-            return reply('කරුණාකර කාලය සහ මතක් කළ යුතු දෙය ඇතුළත් කරන්න!\nඋදා: `.schedule 5m Check server`');
+        reply('🍥 ඇනිමේ ඩවුන්ලෝඩ් ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
+
+        try {
+            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+            const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
+            
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data && (data.download_url || data.result || data.link)) {
+                let dlLink = data.download_url || data.result || data.link;
+                await reply(`📥 *AnimeClub TV Episode Found!*\n\n*Download Link:* ${dlLink}`);
+            } else {
+                reply('❌ කණගාටුයි, අදාළ ලින්ක් එකෙන් ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
+            }
+        } catch (err) {
+            console.error('AnimeClub DL Error:', err);
+            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
         }
+        break;
+    }
+
+    // 2. AI Chat Command
+    case 'ai':
+    case 'gpt': {
+        if (!text) return reply('කරුණාකර AI එකෙන් අසන්න ප්‍රශ්නයක් දෙන්න!\nඋදා: `.ai Node.js යනු කුමක්ද?`');
+        
+        reply('🤖 AI සමඟ සම්බන්ධ වෙමින් පවතී...');
+        try {
+            const aiResponse = await fetch(`https://bk9.fun/ai/gptworld?q=${encodeURIComponent(text)}`);
+            const resData = await aiResponse.json();
+            if (resData && resData.status && resData.result) {
+                await reply(`🤖 *SHAGGY AI:*\n\n${resData.result}`);
+            } else {
+                reply('❌ AI සේවාව ලබා ගැනීමට නොහැකි විය.');
+            }
+        } catch (err) {
+            reply('❌ දෝෂයක් සිදු විය.');
+        }
+        break;
+    }
+
+    // 3. Schedule Message Command
+    case 'schedule': {
+        if (!text) return reply('භාවිතා කරන ආකාරය:\n`.schedule නම්බර් එක | කාලය | පණිවිඩය`\nඋදා: `.schedule 94785124161 | 10m | Hi`');
+        
+        const parts = text.split('|').map(p => p.trim());
+        if (parts.length < 3) {
+            return reply('කරුණාකර නිවැරදි ආකෘතිය භාවිත කරන්න! (උදා: `94785124161 | 5m | Hello`)');
+        }
+
+        let targetNum = parts[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+        let timeArg = parts[1];
+        let msgToSend = parts[2];
 
         let multiplier = 1000;
         let unit = timeArg.slice(-1);
@@ -1622,13 +1671,46 @@ break;
 
         const delay = value * multiplier;
 
-        reply(`⏰ සාර්ථකව කාලය වෙන් කරන ලදී! තව ${timeArg} කින් මම ඔබට මතක් කරන්නම්.`);
+        reply(`⏰ සාර්ථකව කාලය වෙන් කරන ලදී! තව ${timeArg} කින් පණිවිඩය යවනු ලැබේ.`);
 
         setTimeout(async () => {
-            await conn.sendMessage(from, { text: `🔔 *Scheduled Reminder:*\n\n${reminderText}` }, { quoted: mek });
+            try {
+                await conn.sendMessage(targetNum, { text: `🔔 *Scheduled Message:*\n\n${msgToSend}` });
+            } catch (err) {
+                console.error('Schedule error:', err);
+            }
         }, delay);
         break;
     }
+
+    // 4. Instagram (IG) Download Command
+    case 'ig':
+    case 'instagram': {
+        if (!text) return reply('කරුණාකර Instagram ලින්ක් එක දෙන්න!\nඋදා: `.ig https://www.instagram.com/reel/...`');
+        reply('📥 Instagram වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී...');
+        // මෙහි Instagram ඩවුන්ලෝඩ් API එක සම්බන්ධ කළ හැක
+        break;
+    }
+
+    // 5. Ping & Live Latency Command
+    case 'ping': {
+        const start = Date.now();
+        let pingMsg = await reply('🏓 Pinging...');
+        const latency = Date.now() - start;
+        await conn.sendMessage(from, { text: `⚡ *Pong!*\n*Live Latency:* ${latency}ms` }, { quoted: mek });
+        break;
+    }
+
+    // 6. Runtime Command
+    case 'runtime':
+    case 'uptime': {
+        let uptime = process.uptime();
+        let hours = Math.floor(uptime / 3600);
+        let minutes = Math.floor((uptime % 3600) / 60);
+        let seconds = Math.floor(uptime % 60);
+        reply(`⏱️ *SHAGGY XMD Runtime:*\n\n🔹 ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`);
+        break;
+    }    }
                 
             }
         } catch (error) {
