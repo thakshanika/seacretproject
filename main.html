@@ -3,74 +3,748 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🧪 Test Pair Code</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <title>SHAGGY XMD | Pair Code</title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #020604;
+            --card: rgba(8, 17, 13, 0.88);
+            --green: #00ff9d;
+            --green2: #00c878;
+            --text: #f1fff8;
+            --muted: #789087;
+            --border: rgba(0, 255, 157, 0.16);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+
+            font-family: Arial, sans-serif;
+            color: var(--text);
+
+            background:
+                radial-gradient(circle at 15% 15%,
+                    rgba(0, 255, 157, .12),
+                    transparent 25%),
+                radial-gradient(circle at 85% 85%,
+                    rgba(0, 200, 120, .09),
+                    transparent 28%),
+                linear-gradient(135deg,
+                    #010302,
+                    #07120d 50%,
+                    #010302);
+
+            overflow-x: hidden;
+        }
+
+        /* Background glow */
+        body::before {
+            content: "";
+            position: fixed;
+            width: 430px;
+            height: 430px;
+            border-radius: 50%;
+
+            background: rgba(0, 255, 157, .055);
+            filter: blur(90px);
+
+            top: -190px;
+            left: -170px;
+
+            animation: glowMove 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+
+            background: rgba(0, 255, 157, .04);
+            filter: blur(90px);
+
+            right: -160px;
+            bottom: -170px;
+
+            animation: glowMove2 9s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        /* Main Card */
+        .main-card {
+            position: relative;
+
+            width: 100%;
+            max-width: 450px;
+
+            padding: 32px !important;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(12, 25, 19, .95),
+                    rgba(3, 9, 6, .91)
+                ) !important;
+
+            border: 1px solid var(--border);
+            border-radius: 25px !important;
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, .65),
+                0 0 45px rgba(0, 255, 157, .055),
+                inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+
+            overflow: hidden;
+
+            animation: cardIn .7s ease;
+        }
+
+        /* Top neon line */
+        .main-card::before {
+            content: "";
+            position: absolute;
+
+            top: 0;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+
+            background: linear-gradient(
+                90deg,
+                transparent,
+                var(--green),
+                transparent
+            );
+
+            box-shadow: 0 0 20px var(--green);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 78px;
+            height: 78px;
+
+            margin: auto;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 38px;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(0, 255, 157, .15),
+                    rgba(0, 100, 70, .05)
+                );
+
+            border: 1px solid rgba(0, 255, 157, .22);
+
+            box-shadow:
+                0 0 25px rgba(0, 255, 157, .09),
+                inset 0 0 20px rgba(0, 255, 157, .04);
+
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .header h1 {
+            margin: 15px 0 5px;
+
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 2px;
+
+            color: #ffffff;
+
+            text-shadow:
+                0 0 12px rgba(0, 255, 157, .35);
+        }
+
+        .header h1 span {
+            color: var(--green);
+        }
+
+        .header p {
+            margin: 0;
+
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .header p i {
+            color: var(--green);
+        }
+
+        /* Label */
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-section label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #b5c8bf;
+            font-size: 13px;
+            font-weight: 700;
+
+            letter-spacing: .4px;
+        }
+
+        .input-section label i {
+            color: var(--green) !important;
+        }
+
+        /* Input */
+        .phone-box {
+            display: flex;
+            align-items: center;
+
+            min-height: 62px;
+
+            padding: 5px 6px 5px 17px;
+
+            background:
+                rgba(0, 0, 0, .28) !important;
+
+            border: 1px solid rgba(0, 255, 157, .13) !important;
+            border-radius: 15px !important;
+
+            transition: .3s ease;
+
+            box-shadow:
+                inset 0 0 20px rgba(0, 0, 0, .15);
+        }
+
+        .phone-box:focus-within {
+            border-color: rgba(0, 255, 157, .55) !important;
+
+            box-shadow:
+                0 0 0 3px rgba(0, 255, 157, .06),
+                0 0 25px rgba(0, 255, 157, .08),
+                inset 0 0 20px rgba(0, 0, 0, .15);
+        }
+
+        .phone-box .country {
+            color: var(--green);
+
+            font-weight: 800;
+
+            padding-right: 13px;
+
+            border-right: 1px solid rgba(255,255,255,.08);
+        }
+
+        #phoneInput {
+            flex: 1;
+
+            min-width: 0;
+
+            color: #ffffff !important;
+
+            padding: 14px 12px !important;
+
+            font-size: 16px !important;
+            font-weight: 600;
+
+            background: transparent !important;
+        }
+
+        #phoneInput::placeholder {
+            color: #50635b;
+        }
+
+        /* Clear */
+        #clearBtn {
+            background: rgba(255,255,255,.045) !important;
+            color: #6f827a !important;
+
+            transition: .25s ease;
+        }
+
+        #clearBtn:hover {
+            color: #ff6b6b !important;
+            background: rgba(255, 70, 70, .08) !important;
+        }
+
+        /* Pair Button */
+        #pairBtn {
+            position: relative;
+
+            min-height: 58px;
+
+            border: 1px solid rgba(0, 255, 157, .35) !important;
+            border-radius: 15px !important;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #00d985,
+                    #009e65
+                ) !important;
+
+            color: #001a10 !important;
+
+            font-size: 16px !important;
+            font-weight: 800 !important;
+
+            box-shadow:
+                0 10px 30px rgba(0, 255, 157, .13),
+                inset 0 1px 0 rgba(255,255,255,.2);
+
+            transition: .3s ease !important;
+
+            overflow: hidden;
+        }
+
+        #pairBtn::before {
+            content: "";
+
+            position: absolute;
+            top: 0;
+            left: -100%;
+
+            width: 60%;
+            height: 100%;
+
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.2),
+                transparent
+            );
+
+            transform: skewX(-20deg);
+
+            transition: .6s;
+        }
+
+        #pairBtn:hover::before {
+            left: 140%;
+        }
+
+        #pairBtn:hover {
+            background:
+                linear-gradient(
+                    135deg,
+                    #18f39c,
+                    #00b875
+                ) !important;
+
+            transform: translateY(-2px) !important;
+
+            box-shadow:
+                0 14px 38px rgba(0, 255, 157, .22),
+                0 0 20px rgba(0, 255, 157, .10);
+        }
+
+        #pairBtn:active {
+            transform: scale(.98) !important;
+        }
+
+        #pairBtn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Loader */
+        #loader {
+            border-color: rgba(0, 30, 18, .2) !important;
+            border-top-color: #002e1d !important;
+        }
+
+        /* Response */
+        #responseBox {
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(0, 255, 157, .055),
+                    rgba(0, 0, 0, .18)
+                ) !important;
+
+            border: 1px solid rgba(0, 255, 157, .12) !important;
+
+            border-radius: 16px !important;
+
+            box-shadow:
+                inset 0 0 25px rgba(0, 255, 157, .025);
+        }
+
+        #rIcon {
+            background: rgba(0, 255, 157, .08) !important;
+
+            border: 1px solid rgba(0, 255, 157, .13);
+
+            box-shadow:
+                0 0 18px rgba(0, 255, 157, .06);
+        }
+
+        #rTitle {
+            color: var(--green) !important;
+        }
+
+        #rCode {
+            color: #ffffff !important;
+
+            text-shadow:
+                0 0 12px rgba(0, 255, 157, .18);
+        }
+
+        #rMessage {
+            color: #71877d !important;
+        }
+
+        #copyBtn {
+            background: rgba(0, 255, 157, .07) !important;
+
+            border: 1px solid rgba(0, 255, 157, .12) !important;
+
+            color: var(--green) !important;
+        }
+
+        #copyBtn:hover {
+            background: rgba(0, 255, 157, .13) !important;
+
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 25px !important;
+            padding-top: 17px !important;
+
+            border-top: 1px solid rgba(255,255,255,.055) !important;
+
+            text-align: center;
+        }
+
+        .footer .brand {
+            color: #e8fff4 !important;
+
+            font-size: 14px !important;
+            font-weight: 800 !important;
+
+            letter-spacing: 1px;
+        }
+
+        .footer .brand::before {
+            content: "◆ ";
+            color: var(--green);
+        }
+
+        .footer .powered {
+            margin-top: 6px !important;
+
+            color: #53675f !important;
+
+            font-size: 10px !important;
+
+            letter-spacing: .5px;
+        }
+
+        .footer .powered i {
+            color: var(--green) !important;
+        }
+
+        /* Animations */
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes glowMove {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(100px, 80px);
+            }
+        }
+
+        @keyframes glowMove2 {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(-80px, -60px);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 500px) {
+            body {
+                padding: 14px;
+            }
+
+            .main-card {
+                padding: 25px 20px !important;
+                border-radius: 22px !important;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .logo {
+                width: 70px;
+                height: 70px;
+                font-size: 34px;
+            }
+
+            #rCode {
+                font-size: 23px !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <div style="max-width:450px;margin:40px auto;padding:30px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);font-family:Arial,sans-serif;text-align:center;">
-        <div style="margin-bottom:30px;">
-            <div style="font-size:48px;">🧪</div>
-            <h1 style="font-size:26px;font-weight:700;color:#1a1a2e;margin:10px 0 4px;">Test Pair</h1>
-            <p style="color:#888;font-size:14px;margin:0;"><i class="fas fa-phone"></i> Enter number to get pairing code</p>
+    <div class="main-card">
+
+        <div class="header">
+            <div class="logo">🧪</div>
+
+            <h1>
+                SHAGGY <span>XMD</span>
+            </h1>
+
+            <p>
+                <i class="fas fa-phone"></i>
+                Enter number to get pairing code
+            </p>
         </div>
-        <div style="margin-bottom:20px;text-align:left;">
-            <label style="display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px;">
-                <i class="fas fa-phone" style="color:#059669;"></i> Phone Number
+
+        <div class="input-section">
+
+            <label>
+                <i class="fas fa-phone"></i>
+                Phone Number
             </label>
-            <div style="display:flex;align-items:center;border:2px solid #e5e7eb;border-radius:12px;padding:4px 4px 4px 16px;background:#f9fafb;">
-                <span style="font-weight:600;color:#6b7280;padding-right:10px;border-right:1px solid #e5e7eb;">+94</span>
-                <input type="tel" id="phoneInput" placeholder="76 806 9800" maxlength="10"
-                    style="flex:1;border:none;outline:none;padding:14px 12px;font-size:16px;background:transparent;font-family:Arial,sans-serif;" />
-                <button id="clearBtn" onclick="clearInput()"
-                    style="background:#f3f4f6;border:none;border-radius:50%;width:36px;height:36px;color:#9ca3af;cursor:pointer;display:none;font-size:14px;">
+
+            <div class="phone-box">
+
+                <span class="country">+94</span>
+
+                <input
+                    type="tel"
+                    id="phoneInput"
+                    placeholder="76 806 9800"
+                    maxlength="10"
+                />
+
+                <button
+                    id="clearBtn"
+                    onclick="clearInput()"
+                    style="
+                        background:#f3f4f6;
+                        border:none;
+                        border-radius:50%;
+                        width:36px;
+                        height:36px;
+                        color:#9ca3af;
+                        cursor:pointer;
+                        display:none;
+                        font-size:14px;
+                    "
+                >
                     <i class="fas fa-times"></i>
                 </button>
+
             </div>
         </div>
-        <button id="pairBtn" onclick="getPairCode()"
-            style="width:100%;padding:16px;border:none;border-radius:12px;background:#059669;color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;">
-            <span id="loader" style="display:none;border:2px solid rgba(255,255,255,0.2);border-top:2px solid #fff;border-radius:50%;width:20px;height:20px;animation:spin 0.8s linear infinite;"></span>
-            <span id="btnText"><i class="fas fa-link"></i> Get Pair Code</span>
+
+        <button id="pairBtn" onclick="getPairCode()">
+
+            <span
+                id="loader"
+                style="
+                    display:none;
+                    border:2px solid rgba(255,255,255,.2);
+                    border-top:2px solid #fff;
+                    border-radius:50%;
+                    width:20px;
+                    height:20px;
+                    animation:spin .8s linear infinite;
+                "
+            ></span>
+
+            <span id="btnText">
+                <i class="fas fa-link"></i>
+                Get Pair Code
+            </span>
+
         </button>
 
-        <style>
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            #pairBtn:hover { background:#047857; transform:translateY(-2px); }
-            #pairBtn:active { transform:scale(0.97); }
-            #pairBtn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-        </style>
-        <div id="responseBox" style="display:none;margin-top:20px;padding:18px 20px;border-radius:12px;background:#f9fafb;border:1px solid #e5e7eb;text-align:left;">
+        <div
+            id="responseBox"
+            style="display:none;margin-top:20px;padding:18px 20px;text-align:left;"
+        >
 
             <div style="display:flex;align-items:center;gap:14px;">
-                <div style="font-size:28px;width:44px;height:44px;border-radius:12px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;" id="rIcon">🧪</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#9ca3af;" id="rTitle">Pairing Code</div>
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                        <div style="font-size:26px;font-weight:700;color:#1a1a2e;font-family:'Courier New',monospace;letter-spacing:2px;word-break:break-all;" id="rCode">—</div>
-                        <button id="copyBtn" onclick="copyCode()"
-                            style="display:none;background:#f3f4f6;border:none;border-radius:8px;padding:6px 14px;color:#6b7280;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.3s;font-family:Arial,sans-serif;">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                    <div style="font-size:13px;color:#9ca3af;margin-top:2px;" id="rMessage">Enter code in WhatsApp</div>
+
+                <div
+                    id="rIcon"
+                    style="
+                        font-size:28px;
+                        width:44px;
+                        height:44px;
+                        border-radius:12px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        flex-shrink:0;
+                    "
+                >
+                    🧪
                 </div>
+
+                <div style="flex:1;min-width:0;">
+
+                    <div
+                        id="rTitle"
+                        style="
+                            font-size:10px;
+                            font-weight:700;
+                            text-transform:uppercase;
+                            letter-spacing:.8px;
+                        "
+                    >
+                        Pairing Code
+                    </div>
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        flex-wrap:wrap;
+                    ">
+
+                        <div
+                            id="rCode"
+                            style="
+                                font-size:26px;
+                                font-weight:700;
+                                font-family:'Courier New',monospace;
+                                letter-spacing:2px;
+                                word-break:break-all;
+                            "
+                        >
+                            —
+                        </div>
+
+                        <button
+                            id="copyBtn"
+                            onclick="copyCode()"
+                            style="
+                                display:none;
+                                border-radius:8px;
+                                padding:6px 14px;
+                                cursor:pointer;
+                                font-size:13px;
+                                font-weight:600;
+                            "
+                        >
+                            <i class="fas fa-copy"></i>
+                            Copy
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="rMessage"
+                        style="
+                            font-size:13px;
+                            margin-top:2px;
+                        "
+                    >
+                        Enter code in WhatsApp
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
-        <div style="margin-top:24px;padding-top:16px;border-top:1px solid #f3f4f6;">
-            <div style="font-size:14px;font-weight:600;color:#1a1a2e;">
-                🧪 Test MD Bot
+
+        <div class="footer">
+
+            <div class="brand">
+                SHAGGY XMD
             </div>
-            <div style="font-size:11px;color:#9ca3af;margin-top:4px;">
-                <i class="fas fa-flask"></i> Powered by Lakiya <i class="fas fa-circle" style="font-size:6px;vertical-align:middle;"></i> v2.0
+
+            <div class="powered">
+                <i class="fas fa-bolt"></i>
+                Powered by LYNKO
+                <i class="fas fa-circle" style="font-size:5px;"></i>
+                v2.0
             </div>
+
         </div>
 
     </div>
 
+
     <script>
+
         const phoneInput = document.getElementById('phoneInput');
         const pairBtn = document.getElementById('pairBtn');
         const clearBtn = document.getElementById('clearBtn');
@@ -83,106 +757,259 @@
         const rMessage = document.getElementById('rMessage');
         const copyBtn = document.getElementById('copyBtn');
 
+
         function clearInput() {
             phoneInput.value = '';
             phoneInput.focus();
             clearBtn.style.display = 'none';
         }
 
-        phoneInput.addEventListener('input', function() {
+
+        phoneInput.addEventListener('input', function () {
+
             this.value = this.value.replace(/\D/g, '');
-            clearBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+
+            clearBtn.style.display =
+                this.value.length > 0 ? 'block' : 'none';
+
         });
+
 
         phoneInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') getPairCode();
+
+            if (e.key === 'Enter') {
+                getPairCode();
+            }
+
         });
 
-        window.addEventListener('load', () => phoneInput.focus());
 
-        function showResponse(icon, title, code, message, isError = false) {
+        window.addEventListener('load', () => {
+            phoneInput.focus();
+        });
+
+
+        function showResponse(
+            icon,
+            title,
+            code,
+            message,
+            isError = false
+        ) {
+
             responseBox.style.display = 'block';
+
             rIcon.textContent = icon;
             rTitle.textContent = title;
             rCode.textContent = code;
-            rCode.style.color = isError ? '#dc2626' : '#1a1a2e';
-            rCode.style.fontSize = isError ? '14px' : '26px';
-            rCode.style.fontFamily = isError ? 'Arial, sans-serif' : "'Courier New', monospace";
+
+            rCode.style.color =
+                isError ? '#ff6464' : '#ffffff';
+
+            rCode.style.fontSize =
+                isError ? '14px' : '26px';
+
+            rCode.style.fontFamily =
+                isError
+                    ? 'Arial, sans-serif'
+                    : "'Courier New', monospace";
+
             rMessage.textContent = message;
-            copyBtn.style.display = (isError || code === '—' || code === 'Enter a number!') ? 'none' : 'inline-flex';
+
+            copyBtn.style.display =
+                (
+                    isError ||
+                    code === '—' ||
+                    code === 'Enter a number!'
+                )
+                    ? 'none'
+                    : 'inline-flex';
         }
+
+
         function copyCode() {
+
             const code = rCode.textContent;
+
             if (!code || code === '—') return;
 
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(code).then(() => {
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(() => copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy', 2000);
-                }).catch(() => fallbackCopy(code));
+            if (
+                navigator.clipboard &&
+                navigator.clipboard.writeText
+            ) {
+
+                navigator.clipboard
+                    .writeText(code)
+                    .then(() => {
+
+                        copyBtn.innerHTML =
+                            '<i class="fas fa-check"></i> Copied!';
+
+                        setTimeout(() => {
+
+                            copyBtn.innerHTML =
+                                '<i class="fas fa-copy"></i> Copy';
+
+                        }, 2000);
+
+                    })
+                    .catch(() => fallbackCopy(code));
+
             } else {
+
                 fallbackCopy(code);
+
             }
         }
 
+
         function fallbackCopy(text) {
+
             const ta = document.createElement('textarea');
+
             ta.value = text;
-            ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+
+            ta.style.cssText =
+                'position:fixed;left:-9999px;top:-9999px;';
+
             document.body.appendChild(ta);
+
             ta.select();
+
             document.execCommand('copy');
+
             document.body.removeChild(ta);
-            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy', 2000);
+
+            copyBtn.innerHTML =
+                '<i class="fas fa-check"></i> Copied!';
+
+            setTimeout(() => {
+
+                copyBtn.innerHTML =
+                    '<i class="fas fa-copy"></i> Copy';
+
+            }, 2000);
         }
 
+
         async function getPairCode() {
+
             const phone = phoneInput.value.trim();
 
             if (!phone) {
-                showResponse('⚠️', 'Error', 'Enter a number!', 'Please enter your phone number', true);
+
+                showResponse(
+                    '⚠️',
+                    'Error',
+                    'Enter a number!',
+                    'Please enter your phone number',
+                    true
+                );
+
                 phoneInput.focus();
+
                 return;
             }
 
+
             if (phone.length < 9) {
-                showResponse('⚠️', 'Error', 'Too short!', 'Must be at least 9 digits', true);
+
+                showResponse(
+                    '⚠️',
+                    'Error',
+                    'Too short!',
+                    'Must be at least 9 digits',
+                    true
+                );
+
                 return;
             }
+
 
             const fullNumber = `94${phone}`;
 
 
             pairBtn.disabled = true;
+
             loader.style.display = 'block';
+
             btnText.innerHTML = '';
 
-            showResponse('⏳', 'Generating', '—', 'Requesting pairing code...', false);
+
+            showResponse(
+                '⏳',
+                'Generating',
+                '—',
+                'Requesting pairing code...',
+                false
+            );
+
 
             try {
-                const response = await fetch(`/code?number=${fullNumber}`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
+
+                const response = await fetch(
+                    `/code?number=${fullNumber}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }
+                );
+
 
                 const data = await response.json();
 
+
                 if (response.ok && data.code) {
-                    showResponse('🧪', 'Pairing Code ✅', data.code, 'Click Copy to copy the code', false);
+
+                    showResponse(
+                        '🧪',
+                        'Pairing Code ✅',
+                        data.code,
+                        'Click Copy to copy the code',
+                        false
+                    );
+
                 } else {
-                    showResponse('❌', 'Failed', data.error || data.message || 'Unknown error', 'Please try again', true);
+
+                    showResponse(
+                        '❌',
+                        'Failed',
+                        data.error ||
+                        data.message ||
+                        'Unknown error',
+                        'Please try again',
+                        true
+                    );
+
                 }
 
+
             } catch (error) {
-                showResponse('❌', 'Network Error', 'Connection failed!', 'Make sure the bot is running', true);
+
+                showResponse(
+                    '❌',
+                    'Network Error',
+                    'Connection failed!',
+                    'Make sure the bot is running',
+                    true
+                );
+
             } finally {
+
                 pairBtn.disabled = false;
+
                 loader.style.display = 'none';
-                btnText.innerHTML = '<i class="fas fa-link"></i> Get Pair Code';
+
+                btnText.innerHTML =
+                    '<i class="fas fa-link"></i> Get Pair Code';
+
             }
+
         }
+
     </script>
 
 </body>
-</html>
+    </html>
