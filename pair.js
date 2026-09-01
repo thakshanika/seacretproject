@@ -1489,7 +1489,35 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
         console.error(e);
     }
 }
-break;    
+break;  
+
+                    // AnimeClub TV Episode Download Command
+    case 'animeclub':
+    case 'animedl': {
+        if (!text) return reply('කරුණාකර ඇනිමේ කථා මාලාවේ ලින්ක් එක දෙන්න!\nඋදා: `.animedl https://animeclub2.com/episodes/chainsaw-man-1x1/`');
+        
+        reply('🍥 ඇනිමේ ඩවුන්ලෝඩ් ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
+
+        try {
+            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+            const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
+            
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data && (data.download_url || data.result || data.link || data.data)) {
+                let dlLink = data.download_url || data.result || data.link || data.data;
+                await reply(`📥 *AnimeClub TV Episode Found!*\n\n*Download Link:* ${dlLink}`);
+            } else {
+                reply('❌ කණගාටුයි, අදාළ ලින්ක් එකෙන් ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
+            }
+        } catch (err) {
+            console.error('AnimeClub DL Error:', err);
+            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        }
+        break;
+    }
+                    
                 case 'set':
                 case 'setting': {
                     if (!isOwner) {
