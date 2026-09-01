@@ -1683,24 +1683,6 @@ break;
         break;
     }
 
-    // 4. Instagram (IG) Download Command
-    case 'ig':
-    case 'instagram': {
-        if (!text) return reply('කරුණාකර Instagram ලින්ක් එක දෙන්න!\nඋදා: `.ig https://www.instagram.com/reel/...`');
-        reply('📥 Instagram වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී...');
-        // මෙහි Instagram ඩවුන්ලෝඩ් API එක සම්බන්ධ කළ හැක
-        break;
-    }
-
-    // 5. Ping & Live Latency Command
-    case 'ping': {
-        const start = Date.now();
-        let pingMsg = await reply('🏓 Pinging...');
-        const latency = Date.now() - start;
-        await conn.sendMessage(from, { text: `⚡ *Pong!*\n*Live Latency:* ${latency}ms` }, { quoted: mek });
-        break;
-    }
-
                     async function setupMessageHandlers(socket) {
     const messageHandler = async ({ messages }) => {
         const msg = messages[0];
