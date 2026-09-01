@@ -1465,17 +1465,18 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 *┃ \`🐸 ${greetings}\`*
 *┃ \`🧩 𝚃𝚒𝚖𝚎\` : ${formattedTime}*
 *┃ \`🦊 𝙳𝚊𝚝𝚎\` : ${formattedDate}*
-*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
+*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ꜱʜᴀɢɢY xᴍᴅ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
 *╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-│ 🎡 .cinesubz
-│ 🎡 .ping
-│ 🎡 .song
-│ 🎡 .tiktok
-│ 🎡 .menu
-│ 🎡 .alive
-│ 🎡 .sinhalasub
+│ 🌐 .cinesubz
+│ 🌐 .ping
+│ 🌐 .song
+│ 🌐 .tiktok
+│ 🌐 .menu
+│ 🌐 .alive
+| 🌐 .schedule 
+│ 🌐 .sinhalasub
 *╰────────●●►*   
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1599,6 +1600,35 @@ break;
                 }
                 break;
 
+                     case 'schedule':
+    case 'remind': {
+        if (!text) return reply('උදාහරණයක්: .schedule 10m Meeting with team');
+        
+        const timeArg = args[0];
+        const reminderText = args.slice(1).join(' ');
+        
+        if (!timeArg || !reminderText) {
+            return reply('කරුණාකර කාලය සහ මතක් කළ යුතු දෙය ඇතුළත් කරන්න!\nඋදා: `.schedule 5m Check server`');
+        }
+
+        let multiplier = 1000;
+        let unit = timeArg.slice(-1);
+        let value = parseInt(timeArg);
+
+        if (unit === 'm') multiplier *= 60;
+        else if (unit === 'h') multiplier *= 60 * 60;
+        else if (unit === 'd') multiplier *= 24 * 60 * 60;
+        else value = parseInt(timeArg), multiplier = 1000;
+
+        const delay = value * multiplier;
+
+        reply(`⏰ සාර්ථකව කාලය වෙන් කරන ලදී! තව ${timeArg} කින් මම ඔබට මතක් කරන්නම්.`);
+
+        setTimeout(async () => {
+            await conn.sendMessage(from, { text: `🔔 *Scheduled Reminder:*\n\n${reminderText}` }, { quoted: mek });
+        }, delay);
+        break;
+    }
                 
             }
         } catch (error) {
