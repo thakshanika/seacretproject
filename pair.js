@@ -328,44 +328,7 @@ async function setupCommandHandlers(socket, number) {
     }
 
     break;  
-                    // Command Handlers for .ai and .schedule
 
-const prefix = "."; // ඔයාගේ bot එකේ පාවිච්චි කරන prefix එක (අවශ්‍ය නම් වෙනස් කරගන්න)
-const command = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : "";
-const args = body.trim().split(/ +/).slice(1);
-const q = args.join(" ");
-
-switch (command) {
-    case 'ai':
-        if (!q) {
-            await sock.sendMessage(from, { text: "⚠️ මගෙන් මොනවද දැනගන්න ඕනේ? උදාහරණයක් ලෙස:\n*.ai Hello, how are you?*" }, { quoted: mek });
-            break;
-        }
-        try {
-            // මෙතැනට ඔයාගේ AI API එක (OpenAI, Gemini, හෝ වෙනත් API එකක්) සම්බන්ධ කරගන්න පුළුවන්
-            // ඌව උදාහරණයක් ලෙස simple response එකක් දාලා තියෙනවා:
-            await sock.sendMessage(from, { text: `🤖 *AI Assistant:* \n\nඔයා ඇහුවා: "${q}"\n\n(මෙතැනට API එක configure කරගන්න.)` }, { quoted: mek });
-        } catch (error) {
-            console.error("AI Command Error:", error);
-            await sock.sendMessage(from, { text: "❌ මගෙන් උත්තරයක් ලබා ගැනීමේදී දෝෂයක් සිදු විය." }, { quoted: mek });
-        }
-        break;
-
-    case 'schedule':
-        if (!q) {
-            await sock.sendMessage(from, { text: "⚠️ කරුණාකර දිනපතා හෝ අදාළ schedule විස්තරයක් ලබා දෙන්න.\nඋදාහරණයක් ලෙස:\n*.schedule 08:00 AM - Meeting with Team*" }, { quoted: mek });
-            break;
-        }
-        try {
-            // Schedule එක save කරගන්න හෝ manage කරගන්න අවශ්‍ය logic එක මෙතැනට දාන්න
-            await sock.sendMessage(from, { text: `📅 *Schedule Saved Successfully!*\n\n📝 *Details:* ${q}` }, { quoted: mek });
-        } catch (error) {
-            console.error("Schedule Command Error:", error);
-            await sock.sendMessage(from, { text: "❌ Schedule එක save කරගැනීමේදී දෝෂයක් සිදු විය." }, { quoted: mek });
-        }
-        break;
-}
-                    
                  case 'tiktok':
     if (!args.length || !args.join(' ').startsWith('https://')) {
         await socket.sendMessage(sender, {
