@@ -2005,4 +2005,4 @@ process.on('uncaughtException', (err) => {
     exec(`pm2 restart ${process.env.PM2_NAME || '{test-{md-{mini-{bot-session'}`);
 });
 
-module.exports = router;
+    export default router;
