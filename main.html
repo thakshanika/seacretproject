@@ -12,12 +12,12 @@
 
         :root {
             --bg: #020604;
-            --card: rgba(8, 17, 13, 0.88);
+            --card: rgba(8, 17, 13, 0.92);
             --green: #00ff9d;
             --green2: #00c878;
             --text: #f1fff8;
             --muted: #789087;
-            --border: rgba(0, 255, 157, 0.25);
+            --border: rgba(0, 255, 157, 0.3);
         }
 
         html, body {
@@ -25,7 +25,8 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             font-family: Arial, sans-serif;
             color: var(--text);
             background: #010302;
@@ -102,7 +103,7 @@
 
         .intro-title {
             margin-top: 30px;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
             letter-spacing: 4px;
             color: #ffffff;
@@ -141,12 +142,12 @@
         .wrapper {
             position: relative;
             z-index: 10;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 22px;
+            padding: 20px;
             opacity: 0;
             visibility: hidden;
             transition: opacity 1s ease;
@@ -161,19 +162,19 @@
         .main-card {
             position: relative;
             width: 100%;
-            max-width: 450px;
-            padding: 32px;
-            background: rgba(6, 15, 10, 0.90);
+            max-width: 480px;
+            background: var(--card);
             border: 1.5px solid var(--border);
             border-radius: 25px;
             box-shadow: 
-                0 30px 80px rgba(0, 0, 0, 0.8),
-                0 0 35px rgba(0, 255, 157, 0.15),
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                0 0 40px rgba(0, 255, 157, 0.2),
                 inset 0 0 25px rgba(0, 255, 157, 0.05);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             overflow: hidden;
             animation: cardIn .8s ease;
+            margin: auto;
         }
 
         /* Neon Border Light Flow Animation on Card */
@@ -198,25 +199,58 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* Banner Container */
+        .banner-container {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .banner-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9);
+        }
+
+        .banner-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to top, rgba(8, 17, 13, 1), transparent);
+        }
+
+        /* Card Content Inner Padding */
+        .card-body {
+            padding: 24px 28px 32px 28px;
+        }
+
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
+            margin-top: -10px;
         }
 
         .logo {
-            width: 82px;
-            height: 82px;
-            margin: auto;
+            width: 85px;
+            height: 85px;
+            margin: -50px auto 12px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 24px;
-            background: linear-gradient(145deg, rgba(0, 255, 157, .18), rgba(0, 100, 70, .08));
-            border: 1.5px solid rgba(0, 255, 157, 0.4);
-            box-shadow: 0 0 30px rgba(0, 255, 157, 0.25), inset 0 0 15px rgba(0, 255, 157, 0.1);
+            border-radius: 22px;
+            background: #060f0a;
+            border: 2px solid var(--green);
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.4), inset 0 0 15px rgba(0, 255, 157, 0.2);
             animation: logoFloat 3s ease-in-out infinite;
             overflow: hidden;
+            position: relative;
+            z-index: 5;
         }
 
         .logo img {
@@ -226,8 +260,8 @@
         }
 
         .header h1 {
-            margin: 15px 0 5px;
-            font-size: 28px;
+            margin: 5px 0 5px;
+            font-size: 26px;
             font-weight: 800;
             letter-spacing: 2px;
             color: #ffffff;
@@ -246,6 +280,32 @@
 
         .header p i {
             color: var(--green);
+        }
+
+        /* Feature Highlight Badge (Movie Downloader Highlight) */
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(0, 255, 157, 0.08);
+            border: 1px dashed var(--green);
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0,255,157,0.3);
+        }
+
+        .feature-badge i {
+            animation: bounceIcon 1.5s infinite;
+        }
+
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
 
         /* Input */
@@ -269,32 +329,32 @@
         .phone-box {
             display: flex;
             align-items: center;
-            min-height: 60px;
-            padding: 5px 6px 5px 17px;
-            background: rgba(0, 0, 0, 0.4) !important;
-            border: 1px solid rgba(0, 255, 157, 0.25) !important;
+            min-height: 58px;
+            padding: 5px 6px 5px 16px;
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid rgba(0, 255, 157, 0.3) !important;
             border-radius: 15px !important;
             transition: .3s ease;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, .3);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, .4);
         }
 
         .phone-box:focus-within {
             border-color: var(--green) !important;
-            box-shadow: 0 0 0 3px rgba(0, 255, 157, 0.12), 0 0 25px rgba(0, 255, 157, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 255, 157, 0.15), 0 0 25px rgba(0, 255, 157, 0.25);
         }
 
         .phone-box .country {
             color: var(--green);
             font-weight: 800;
-            padding-right: 13px;
-            border-right: 1px solid rgba(255,255,255,0.12);
+            padding-right: 12px;
+            border-right: 1px solid rgba(255,255,255,0.15);
         }
 
         #phoneInput {
             flex: 1;
             min-width: 0;
             color: #ffffff !important;
-            padding: 14px 12px !important;
+            padding: 12px 12px !important;
             font-size: 16px !important;
             font-weight: 600;
             background: transparent !important;
@@ -330,14 +390,14 @@
             position: relative;
             width: 100%;
             min-height: 56px;
-            border: 1px solid rgba(0, 255, 157, 0.5) !important;
+            border: 1px solid rgba(0, 255, 157, 0.6) !important;
             border-radius: 15px !important;
             background: linear-gradient(135deg, #00d985, #009e65) !important;
             color: #001a10 !important;
             font-size: 16px !important;
             font-weight: 800 !important;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.25), inset 0 1px 0 rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.3), inset 0 1px 0 rgba(255,255,255,0.4);
             transition: .3s ease !important;
             overflow: hidden;
             display: flex;
@@ -349,7 +409,7 @@
         #pairBtn:hover {
             background: linear-gradient(135deg, #18f39c, #00b875) !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 14px 38px rgba(0, 255, 157, 0.4), 0 0 25px rgba(0, 255, 157, 0.2);
+            box-shadow: 0 14px 38px rgba(0, 255, 157, 0.5), 0 0 25px rgba(0, 255, 157, 0.3);
         }
 
         #pairBtn:active {
@@ -368,17 +428,17 @@
             margin-top: 20px;
             padding: 18px 20px;
             text-align: left;
-            background: rgba(0, 255, 157, 0.04) !important;
+            background: rgba(0, 255, 157, 0.05) !important;
             border: 1.5px solid var(--green) !important;
             border-radius: 16px !important;
-            box-shadow: 0 0 25px rgba(0, 255, 157, 0.25), inset 0 0 15px rgba(0, 255, 157, 0.1);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.3), inset 0 0 15px rgba(0, 255, 157, 0.1);
             position: relative;
             animation: responseGlowPulse 2.5s infinite alternate;
         }
 
         @keyframes responseGlowPulse {
-            0% { box-shadow: 0 0 15px rgba(0, 255, 157, 0.2), inset 0 0 10px rgba(0, 255, 157, 0.08); }
-            100% { box-shadow: 0 0 35px rgba(0, 255, 157, 0.4), inset 0 0 20px rgba(0, 255, 157, 0.2); }
+            0% { box-shadow: 0 0 15px rgba(0, 255, 157, 0.25), inset 0 0 10px rgba(0, 255, 157, 0.08); }
+            100% { box-shadow: 0 0 35px rgba(0, 255, 157, 0.5), inset 0 0 20px rgba(0, 255, 157, 0.2); }
         }
 
         #rCode {
@@ -393,7 +453,7 @@
         }
 
         #copyBtn {
-            background: rgba(0, 255, 157, 0.15) !important;
+            background: rgba(0, 255, 157, 0.2) !important;
             border: 1px solid var(--green) !important;
             color: var(--green) !important;
             border-radius: 8px;
@@ -454,10 +514,8 @@
 </head>
 <body>
 
-    <!-- Neon Bubble Canvas Background -->
     <canvas id="bgCanvas"></canvas>
 
-    <!-- Intro Butterfly Loading Screen -->
     <div id="introScreen">
         <div class="butterfly-loader">
             <div class="wing left"></div>
@@ -465,66 +523,76 @@
             <div class="wing right"></div>
         </div>
         <div class="intro-title">SHAGGY XMD</div>
-        <div class="intro-sub"><i class="fas fa-circle-notch fa-spin"></i> Initializing Neon System...</div>
+        <div class="intro-sub"><i class="fas fa-circle-notch fa-spin"></i> Initializing Movie DL System...</div>
     </div>
 
-    <!-- Main Content Wrapper -->
     <div class="wrapper" id="mainWrapper">
         <div class="main-card">
-            <div class="header">
-                <div class="logo">
-                    <img src="https://cdn.phototourl.com/free/2026-09-01-c9fad274-7d07-49ea-9ed1-34832687d820.jpg" alt="Logo">
-                </div>
-                <h1>SHAGGY <span>XMD</span></h1>
-                <p><i class="fas fa-phone"></i> Enter number to get pairing code</p>
+            <div class="banner-container">
+                <img src="https://cdn.phototourl.com/free/2026-09-01-b959ea45-2b09-463d-af11-be53dde760ee.jpg" alt="Banner">
+                <div class="banner-overlay"></div>
             </div>
 
-            <div class="input-section">
-                <label><i class="fas fa-phone"></i> Phone Number</label>
-                <div class="phone-box">
-                    <span class="country">+94</span>
-                    <input type="tel" id="phoneInput" placeholder="76 806 9800" maxlength="10" />
-                    <button id="clearBtn" onclick="clearInput()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-
-            <button id="pairBtn" onclick="getPairCode()">
-                <span id="loader" style="display:none; border:2px solid rgba(0,26,16,0.3); border-top:2px solid #001a10; border-radius:50%; width:20px; height:20px; animation:spin .8s linear infinite;"></span>
-                <span id="btnText">
-                    <i class="fas fa-link"></i> Get Pair Code
-                </span>
-            </button>
-
-            <div id="responseBox">
-                <div style="display:flex; align-items:center; gap:14px;">
-                    <div id="rIcon" style="font-size:26px; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(0,255,157,0.1); border:1px solid rgba(0,255,157,0.3);">
-                        ⚡
+            <div class="card-body">
+                <div class="header">
+                    <div class="logo">
+                        <img src="https://cdn.phototourl.com/free/2026-09-01-46a05f97-db49-4c9c-99ef-bc7d9f649769.png" alt="Logo">
                     </div>
-                    <div style="flex:1; min-width:0;">
-                        <div id="rTitle" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--green);">
-                            Pairing Code Ready
+                    <h1>SHAGGY <span>XMD</span></h1>
+                    <p><i class="fas fa-phone"></i> Enter number to get pairing code</p>
+                </div>
+
+                <div class="feature-badge">
+                    <i class="fas fa-film"></i> Built-in Fast Movie & Video Downloader Enabled!
+                </div>
+
+                <div class="input-section">
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
+                    <div class="phone-box">
+                        <span class="country">+94</span>
+                        <input type="tel" id="phoneInput" placeholder="76 806 9800" maxlength="10" />
+                        <button id="clearBtn" onclick="clearInput()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="pairBtn" onclick="getPairCode()">
+                    <span id="loader" style="display:none; border:2px solid rgba(0,26,16,0.3); border-top:2px solid #001a10; border-radius:50%; width:20px; height:20px; animation:spin .8s linear infinite;"></span>
+                    <span id="btnText">
+                        <i class="fas fa-link"></i> Get Pair Code
+                    </span>
+                </button>
+
+                <div id="responseBox">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div id="rIcon" style="font-size:26px; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(0,255,157,0.15); border:1px solid rgba(0,255,157,0.4);">
+                            ⚡
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px;">
-                            <div id="rCode" onclick="copyCode()" title="Click to Copy" style="font-size:26px; font-weight:800; font-family:'Courier New',monospace; letter-spacing:2px; word-break:break-all;">
-                                —
+                        <div style="flex:1; min-width:0;">
+                            <div id="rTitle" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--green);">
+                                Pairing Code Ready
                             </div>
-                            <button id="copyBtn" onclick="copyCode()" style="display:none;">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                        <div id="rMessage" style="font-size:12px; margin-top:4px; color:#8fa89e;">
-                            Tap code or button to copy instantly
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                                <div id="rCode" onclick="copyCode()" title="Click to Copy" style="font-size:26px; font-weight:800; font-family:'Courier New',monospace; letter-spacing:2px; word-break:break-all;">
+                                    —
+                                </div>
+                                <button id="copyBtn" onclick="copyCode()" style="display:none;">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <div id="rMessage" style="font-size:12px; margin-top:4px; color:#8fa89e;">
+                                Tap code or button to copy instantly
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="footer">
-                <div class="brand">SHAGGY XMD</div>
-                <div class="powered">
-                    <i class="fas fa-bolt"></i> Powered by LYNKO <i class="fas fa-circle" style="font-size:4px;"></i> v2.0
+                <div class="footer">
+                    <div class="brand">SHAGGY XMD</div>
+                    <div class="powered">
+                        <i class="fas fa-bolt"></i> Powered by SHAGGY TECH <i class="fas fa-circle" style="font-size:4px;"></i> v2.0
+                    </div>
                 </div>
             </div>
         </div>
@@ -645,7 +713,7 @@
             setTimeout(() => {
                 rCode.textContent = originalText;
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyBtn.style.background = 'rgba(0, 255, 157, 0.15)';
+                copyBtn.style.background = 'rgba(0, 255, 157, 0.2)';
                 copyBtn.style.color = 'var(--green)';
             }, 2000);
         }
