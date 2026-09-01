@@ -1712,7 +1712,6 @@ break;
         break;
     }    }
                 
-            }
         } catch (error) {
             console.error('Command handler error:', error);
             await socket.sendMessage(sender, {
