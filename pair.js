@@ -39,10 +39,10 @@ const config = {
     API_MOVIE_URL: 'https://api-siteh-22e22e4cb068.herokuapp.com',
     API_KEY:'lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e',
     BOT_IMAGE:'https://cdn.phototourl.com/free/2026-09-01-c9fad274-7d07-49ea-9ed1-34832687d820.jpg',
-    BOT_FOOTER:"ꜱʜᴀɢɢY ✘ 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
+    BOT_FOOTER:"Fʟɪxᴏʀᴀ ✘ 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
      MGROUP_LINK: 'https://chat.whatsapp.com/JpFSNrnqtnQIqdM0WlNds1',
-    MOVIE_FOOTER:"​⏤͟͟͞͞★❮ SHAGGY 〽️OVIE ⏤͟͟͞͞★",
-     MOVIE_CAPTION:"SHAGGY XDMD",
+    MOVIE_FOOTER:"​⏤͟͟͞͞★❮ LAKIYA 〽️OVIE ⏤͟͟͞͞★",
+     MOVIE_CAPTION:"LAKIYA MOVIE",
     PREFIX: '.',
     OWNER_NUMBERS: ['94703830GGGG990'],
     BOT_NAME: "TEST-BOT",
@@ -328,7 +328,6 @@ async function setupCommandHandlers(socket, number) {
     }
 
     break;  
-
                  case 'tiktok':
     if (!args.length || !args.join(' ').startsWith('https://')) {
         await socket.sendMessage(sender, {
@@ -574,16 +573,16 @@ case 'cinesubz':
 
                         const tvInfo = tvShowData.data;
                         
-                       
+                        // 🟢 NEW STRUCTURE - Extract data correctly
                         const rating = tvInfo.rating?.score || 'N/A';
                         const totalEpisodes = tvInfo.episodes?.total || 'N/A';
                         const episodesList = tvInfo.episodes?.list || [];
                         
-                       
+                        // Group episodes by season (extract season from episode title or URL)
                         const seasonsMap = {};
                         episodesList.forEach(ep => {
                             let seasonNum = '1';
-                          
+                            // Try to extract season from episode number or title
                             const seasonMatch = ep.number?.match(/^(\d+)/);
                             if (seasonMatch) {
                                 seasonNum = seasonMatch[1];
@@ -716,7 +715,7 @@ case 'cinesubz':
                                         }, { quoted: episodeMek });
 
                                         try {
-                                           
+                                            // 🟢 NEW: Episode API URL
                                             const episodeResponse = await axios.get(`https://apis.laksidu.site/api/episode?url=${encodeURIComponent(selectedEpisode.url)}&api_key=lakiyaofc2`);
                                             const episodeData = episodeResponse.data;
 
@@ -779,7 +778,7 @@ case 'cinesubz':
                                                     }, { quoted: qualityMek });
 
                                                     try {
-                                                      
+                                                        // 🟢 NEW: Download API - using selectedQuality.url (full ZT link)
                                                         const downloadApiUrl = `https://apis.laksidu.site/dl/cinesubz?url=${encodeURIComponent(selectedQuality.url)}&api_key=lakiyaofc2`;
                                                         const darkShanResponse = await axios.get(downloadApiUrl);
                                                         const darkShanData = darkShanResponse.data;
@@ -1465,18 +1464,17 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 *┃ \`🐸 ${greetings}\`*
 *┃ \`🧩 𝚃𝚒𝚖𝚎\` : ${formattedTime}*
 *┃ \`🦊 𝙳𝚊𝚝𝚎\` : ${formattedDate}*
-*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ꜱʜᴀɢɢY xᴍᴅ*
+*┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
 *╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-│ 🌐 .cinesubz
-│ 🌐 .ping
-│ 🌐 .song
-│ 🌐 .tiktok
-│ 🌐 .menu
-│ 🌐 .alive
-| 🌐 .schedule 
-│ 🌐 .sinhalasub
+│ 🎡 .cinesubz
+│ 🎡 .ping
+│ 🎡 .song
+│ 🎡 .tiktok
+│ 🎡 .menu
+│ 🎡 .alive
+│ 🎡 .sinhalasub
 *╰────────●●►*   
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1600,90 +1598,17 @@ break;
                 }
                 break;
 
-                     // 1. AnimeClub TV Episode Download Command (ඔයා දුන් API එක සමඟ)
-    case 'animeclub':
-    case 'animedl': {
-        if (!text) return reply('කරුණාකර ඇනිමේ කථා මාලාවේ ලින්ක් එක දෙන්න!\nඋදා: `.animedl https://animeclub2.com/episodes/chainsaw-man-1x1/`');
-        
-        reply('🍥 ඇනිමේ ඩවුන්ලෝඩ් ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
-
-        try {
-            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
-            
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            if (data && (data.download_url || data.result || data.link)) {
-                let dlLink = data.download_url || data.result || data.link;
-                await reply(`📥 *AnimeClub TV Episode Found!*\n\n*Download Link:* ${dlLink}`);
-            } else {
-                reply('❌ කණගාටුයි, අදාළ ලින්ක් එකෙන් ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
+                
             }
-        } catch (err) {
-            console.error('AnimeClub DL Error:', err);
-            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        } catch (error) {
+            console.error('Command handler error:', error);
+            await socket.sendMessage(sender, {
+                text: `❌ ERROR\nAn error occurred: ${error.message}`,
+            });
         }
-        break;
-    }
-
-    // 2. AI Chat Command
-    case 'ai':
-    case 'gpt': {
-        if (!text) return reply('කරුණාකර AI එකෙන් අසන්න ප්‍රශ්නයක් දෙන්න!\nඋදා: `.ai Node.js යනු කුමක්ද?`');
-        
-        reply('🤖 AI සමඟ සම්බන්ධ වෙමින් පවතී...');
-        try {
-            const aiResponse = await fetch(`https://bk9.fun/ai/gptworld?q=${encodeURIComponent(text)}`);
-            const resData = await aiResponse.json();
-            if (resData && resData.status && resData.result) {
-                await reply(`🤖 *SHAGGY AI:*\n\n${resData.result}`);
-            } else {
-                reply('❌ AI සේවාව ලබා ගැනීමට නොහැකි විය.');
-            }
-        } catch (err) {
-            reply('❌ දෝෂයක් සිදු විය.');
-        }
-        break;
-    }
-
-    // 3. Schedule Message Command
-    case 'schedule': {
-        if (!text) return reply('භාවිතා කරන ආකාරය:\n`.schedule නම්බර් එක | කාලය | පණිවිඩය`\nඋදා: `.schedule 94785124161 | 10m | Hi`');
-        
-        const parts = text.split('|').map(p => p.trim());
-        if (parts.length < 3) {
-            return reply('කරුණාකර නිවැරදි ආකෘතිය භාවිත කරන්න! (උදා: `94785124161 | 5m | Hello`)');
-        }
-
-        let targetNum = parts[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-        let timeArg = parts[1];
-        let msgToSend = parts[2];
-
-        let multiplier = 1000;
-        let unit = timeArg.slice(-1);
-        let value = parseInt(timeArg);
-
-        if (unit === 'm') multiplier *= 60;
-        else if (unit === 'h') multiplier *= 60 * 60;
-        else if (unit === 'd') multiplier *= 24 * 60 * 60;
-        else value = parseInt(timeArg), multiplier = 1000;
-
-        const delay = value * multiplier;
-
-        reply(`⏰ සාර්ථකව කාලය වෙන් කරන ලදී! තව ${timeArg} කින් පණිවිඩය යවනු ලැබේ.`);
-
-        setTimeout(async () => {
-            try {
-                await conn.sendMessage(targetNum, { text: `🔔 *Scheduled Message:*\n\n${msgToSend}` });
-            } catch (err) {
-                console.error('Schedule error:', err);
-            }
-        }, delay);
-        break;
-    }
-
-                    async function setupMessageHandlers(socket) {
+    });
+}
+async function setupMessageHandlers(socket) {
     const messageHandler = async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message || msg.key.remoteJid === 'status@broadcast') return;
@@ -2005,4 +1930,4 @@ process.on('uncaughtException', (err) => {
     exec(`pm2 restart ${process.env.PM2_NAME || '{test-{md-{mini-{bot-session'}`);
 });
 
-module.exports = router;
+export default router;
