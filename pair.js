@@ -1701,23 +1701,22 @@ break;
         break;
     }
 
-    // 6. Runtime Command
+// 6. Runtime Command
     case 'runtime':
     case 'uptime': {
-        let uptime = process.uptime();
-        let hours = Math.floor(uptime / 3600);
-        let minutes = Math.floor((uptime % 3600) / 60);
-        let seconds = Math.floor(uptime % 60);
-        reply(`⏱️ *SHAGGY XMD Runtime:*\n\n🔹 ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`);
+        try {
+            let uptime = process.uptime();
+            let hours = Math.floor(uptime / 3600);
+            let minutes = Math.floor((uptime % 3600) / 60);
+            let seconds = Math.floor(uptime % 60);
+            reply(`⏱️ *SHAGGY XMD Runtime:*\n\n🔹 ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`);
+        } catch (error) {
+            console.error('Runtime error:', error);
+            reply('❌ දෝෂයක් සිදු විය!');
+        }
         break;
-    } 
-} catch (error) {
-    console.error('Command handler error:', error);
-    await socket.sendMessage(sender, {
-        text: `❌ ERROR:\nAn error occurred: ${error.message}`
-    });
-}
-async function setupMessageHandlers(socket) {
+    }
+                    async function setupMessageHandlers(socket) {
     const messageHandler = async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message || msg.key.remoteJid === 'status@broadcast') return;
