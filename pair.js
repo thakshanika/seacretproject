@@ -328,6 +328,45 @@ async function setupCommandHandlers(socket, number) {
     }
 
     break;  
+                    if (command === 'ai') {
+    const q = text.trim();
+    
+    if (!q) {
+        return m.reply('❌ කරුණාකර ප්‍රශ්නයක් හෝ විස්තරයක් ලබා දෙන්න!\nඋදාහරණයක් ලෙස: `.ai කොහොමද?`');
+    }
+
+    await m.reply('⏳ කුඩා මොහොතක් රැඳී සිටින්න...');
+
+    try {
+        const CODEX_API_KEY = "cx_live_0y1a4w5g3g0x2l0u6l3n044d54680j57";
+        const CODEX_URL = "https://code-x-ai.lovable.app/api/public/v1/chat";
+        const chatId = m.chat; // Unique session ID per chat for long-term memory
+
+        const fetch = (await import('node-fetch')).default;
+        
+        const res = await fetch(CODEX_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${CODEX_API_KEY}`,
+            },
+            body: JSON.stringify({
+                message: q,
+                session: chatId, // Enables per-chat memory and personalization
+            }),
+        });
+
+        const data = await res.json();
+        const reply = data.reply || data.error || "(no reply)";
+
+        await sock.sendMessage(m.chat, { text: `🤖 *Codex AI*\n\n${reply}` }, { quoted: m });
+
+    } catch (error) {
+        console.error('Error in .ai command:', error);
+        await m.reply('❌ AI සේවාව සමඟ සම්බන්ධ වීමේදී දෝෂයක් ඇති විය.');
+    }
+            }
+                    
                  case 'tiktok':
     if (!args.length || !args.join(' ').startsWith('https://')) {
         await socket.sendMessage(sender, {
