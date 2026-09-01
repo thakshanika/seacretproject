@@ -1525,7 +1525,7 @@ break;
         break;
     }
 
-// XNXX Search & Download Links Command
+// 1. XNXX Video Search Command (.xnxxsearch <query>)
     case 'xnxxsearch':
     case 'xnxx': {
         if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.xnxx teen`');
@@ -1534,43 +1534,70 @@ break;
 
         try {
             const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            // 1. XNXX වීඩියෝ සර්ච් කිරීම
             const searchUrl = `https://api.chamindu.site/api/adult/xnxx/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
             
             const searchRes = await fetch(searchUrl);
             const searchData = await searchRes.json();
 
             if (searchData && searchData.success && searchData.results && searchData.results.length > 0) {
-                let vid = searchData.results[0];
+                let message = `🔞 *XNXX Search Results for: "${text}"*\n\n`;
                 
-                // 2. ඩවුන්ලෝඩ් API එක මඟින් ඩිරෙක්ට් සහ ඩවුන්ලෝඩ් ලින්ක් ලබා ගැනීම
-                let dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(vid.url)}&api_key=${apiKey}`;
+                // මුල් වීඩියෝ 5 පෙන්වීමට
+                let resultsToShow = searchData.results.slice(0, 5);
                 
-                const dlRes = await fetch(dlApiUrl);
-                const dlData = await dlRes.json();
-
-                let message = `🔞 *XNXX Video Found!*\n\n`;
-                message += `📌 *Title:* ${vid.title}\n`;
-                message += `⏱️ *Duration:* ${vid.duration || 'N/A'}\n`;
-                message += `🔗 *Original URL:* ${vid.url}\n\n`;
-
-                if (dlData && dlData.success) {
-                    if (dlData.direct_link) {
-                        message += `🔗 *Direct Stream Link:* ${dlData.direct_link}\n\n`;
-                    }
-                    if (dlData.download_url) {
-                        message += `💾 *Download Link:* ${dlData.download_url}`;
-                    }
-                } else {
-                    message += `❌ ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.`;
+                for (let i = 0; i < resultsToShow.length; i++) {
+                    let vid = resultsToShow[i];
+                    message += `${i + 1}. *${vid.title}*\n🔗 *URL:* ${vid.url}\n\n`;
                 }
+                
+                message += `_ඩවුන්ලෝඩ් කර ගැනීමට:_\n\`.xndl <video_url>\``;
 
                 await reply(message.trim());
             } else {
                 reply('❌ කණගාටුයි, අදාළ සෙවුමට ප්‍රතිඵල හමු නොවීය.');
             }
         } catch (err) {
-            console.error('XNXX Search & DL Error:', err);
+            console.error('XNXX Search Error:', err);
+            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        }
+        break;
+    }
+
+    // 2. XNXX Video Stream & DL Command (.xndl <url>)
+    case 'xndl':
+    case 'xnxxindl': {
+        if (!text) return reply('කරුණාකර XNXX වීඩියෝ ලින්ක් එක දෙන්න!\nඋදා: `.xndl https://www.xnxx.com/video-...`');
+        
+        let cleanUrl = text.replace(/[<>]/g, '').trim();
+        
+        reply('📥 XNXX ඩවුන්ලෝඩ් සහ ස්ට්‍රීම් ලින්ක් සූදානම් කරමින් පවතී...');
+
+        try {
+            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+            const dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(cleanUrl)}&api_key=${apiKey}`;
+            
+            const dlRes = await fetch(dlApiUrl);
+            const dlData = await dlRes.json();
+
+            if (dlData && dlData.success) {
+                let message = `📥 *XNXX Video Links Found!*\n\n`;
+                
+                if (dlData.direct_link) {
+                    message += `🔗 *Direct Stream Link:* ${dlData.direct_link}\n\n`;
+                }
+                if (dlData.download_url) {
+                    message += `💾 *Download Link:* ${dlData.download_url}\n\n`;
+                }
+                if (dlData.note) {
+                    message += `ℹ️ _${dlData.note}_`;
+                }
+
+                await reply(message.trim());
+            } else {
+                reply('❌ කණගාටුයි, අදාළ වීඩියෝව සඳහා ලින්ක් ලබා ගැනීමට නොහැකි විය.');
+            }
+        } catch (err) {
+            console.error('XNXX DL Error:', err);
             reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
         }
         break;
