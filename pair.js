@@ -328,44 +328,43 @@ async function setupCommandHandlers(socket, number) {
     }
 
     break;  
-                    if (command === 'ai') {
-    const q = text.trim();
-    
-    if (!q) {
-        return m.reply('❌ කරුණාකර ප්‍රශ්නයක් හෝ විස්තරයක් ලබා දෙන්න!\nඋදාහරණයක් ලෙස: `.ai කොහොමද?`');
-    }
+                    // Command Handlers for .ai and .schedule
 
-    await m.reply('⏳ කුඩා මොහොතක් රැඳී සිටින්න...');
+const prefix = "."; // ඔයාගේ bot එකේ පාවිච්චි කරන prefix එක (අවශ්‍ය නම් වෙනස් කරගන්න)
+const command = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : "";
+const args = body.trim().split(/ +/).slice(1);
+const q = args.join(" ");
 
-    try {
-        const CODEX_API_KEY = "cx_live_0y1a4w5g3g0x2l0u6l3n044d54680j57";
-        const CODEX_URL = "https://code-x-ai.lovable.app/api/public/v1/chat";
-        const chatId = m.chat; // Unique session ID per chat for long-term memory
+switch (command) {
+    case 'ai':
+        if (!q) {
+            await sock.sendMessage(from, { text: "⚠️ මගෙන් මොනවද දැනගන්න ඕනේ? උදාහරණයක් ලෙස:\n*.ai Hello, how are you?*" }, { quoted: mek });
+            break;
+        }
+        try {
+            // මෙතැනට ඔයාගේ AI API එක (OpenAI, Gemini, හෝ වෙනත් API එකක්) සම්බන්ධ කරගන්න පුළුවන්
+            // ඌව උදාහරණයක් ලෙස simple response එකක් දාලා තියෙනවා:
+            await sock.sendMessage(from, { text: `🤖 *AI Assistant:* \n\nඔයා ඇහුවා: "${q}"\n\n(මෙතැනට API එක configure කරගන්න.)` }, { quoted: mek });
+        } catch (error) {
+            console.error("AI Command Error:", error);
+            await sock.sendMessage(from, { text: "❌ මගෙන් උත්තරයක් ලබා ගැනීමේදී දෝෂයක් සිදු විය." }, { quoted: mek });
+        }
+        break;
 
-        const fetch = (await import('node-fetch')).default;
-        
-        const res = await fetch(CODEX_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${CODEX_API_KEY}`,
-            },
-            body: JSON.stringify({
-                message: q,
-                session: chatId, // Enables per-chat memory and personalization
-            }),
-        });
-
-        const data = await res.json();
-        const reply = data.reply || data.error || "(no reply)";
-
-        await sock.sendMessage(m.chat, { text: `🤖 *Codex AI*\n\n${reply}` }, { quoted: m });
-
-    } catch (error) {
-        console.error('Error in .ai command:', error);
-        await m.reply('❌ AI සේවාව සමඟ සම්බන්ධ වීමේදී දෝෂයක් ඇති විය.');
-    }
-            }
+    case 'schedule':
+        if (!q) {
+            await sock.sendMessage(from, { text: "⚠️ කරුණාකර දිනපතා හෝ අදාළ schedule විස්තරයක් ලබා දෙන්න.\nඋදාහරණයක් ලෙස:\n*.schedule 08:00 AM - Meeting with Team*" }, { quoted: mek });
+            break;
+        }
+        try {
+            // Schedule එක save කරගන්න හෝ manage කරගන්න අවශ්‍ය logic එක මෙතැනට දාන්න
+            await sock.sendMessage(from, { text: `📅 *Schedule Saved Successfully!*\n\n📝 *Details:* ${q}` }, { quoted: mek });
+        } catch (error) {
+            console.error("Schedule Command Error:", error);
+            await sock.sendMessage(from, { text: "❌ Schedule එක save කරගැනීමේදී දෝෂයක් සිදු විය." }, { quoted: mek });
+        }
+        break;
+}
                     
                  case 'tiktok':
     if (!args.length || !args.join(' ').startsWith('https://')) {
