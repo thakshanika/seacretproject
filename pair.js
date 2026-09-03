@@ -2137,6 +2137,84 @@ case 'wether': {
 
     break;
 }
+                    case 'dubzone':
+    if (!args.length) {
+        await socket.sendMessage(sender, {
+             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE},
+            caption: formatMessage('❌ ERROR', '*කරුණාකර චිත්‍රපටයේ නම ලබාදෙන්න! උදා:.dubzone kgf*', `${config.BOT_FOOTER}`)
+        }, { quoted: msg });
+        break;
+    }
+
+    const dubQuery = args.join(' ');
+    await socket.sendMessage(sender, { text: '🎬 𝙎𝙚𝙖𝙧𝙘𝙝𝙞𝙣𝙜 𝙤𝙣 𝘿𝙪𝙗𝙯𝙤𝙣𝙚...' });
+
+    try {
+        // 1. SEARCH
+        const searchResponse = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(dubQuery)}&api_key=${config.API_KEY}`);
+        const movies = searchResponse.data.results.slice(0, 10);
+
+        let listText = `🎬 *𝗗𝗨𝗕𝗭𝗢𝗡𝗘 𝗦𝗘𝗔𝗥𝗖𝗛*\n\n`;
+        movies.forEach((m, i) => listText += `*${i+1}.* ${m.title}\n`);
+        const sentMsg = await socket.sendMessage(sender, { image: { url: config.BOT_IMAGE}, caption: listText }, { quoted: msg });
+        const msgID = sentMsg.key.id;
+
+        // 2. WAIT FOR SELECTION
+        const selectionHandler = async ({ messages }) => {
+            const reply = messages[0];
+            if(reply.message.extendedTextMessage?.contextInfo?.stanzaId!== msgID) return;
+
+            const num = parseInt(reply.message.conversation) - 1;
+            const selected = movies[num];
+            socket.ev.off('messages.upsert', selectionHandler);
+
+            await socket.sendMessage(sender, { text: '📽️ 𝙂𝙚𝙩𝙞𝙣𝙜 𝙙𝙚𝙩𝙖𝙞𝙡𝙨...' }, { quoted: reply });
+
+            // 3. GET INFO
+            const infoRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
+            const movie = infoRes.data.data;
+
+            // 4. GET DOWNLOADS
+            const dlRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
+            const qualities = dlRes.data.downloads;
+
+            let qText = `*⬇️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗤𝗨𝗔𝗟𝗜𝗧𝗬*\n\n`;
+            qualities.forEach((q, i) => qText += `*${i+1}.* ${q.quality} - ${q.size}\n`);
+            const qMsg = await socket.sendMessage(sender, { text: qText }, { quoted: reply });
+            const qID = qMsg.key.id;
+
+            // 5. WAIT FOR QUALITY
+            const qualityHandler = async ({ messages }) => {
+                const qReply = messages[0];
+                if(qReply.message.extendedTextMessage?.contextInfo?.stanzaId!== qID) return;
+
+                const qNum = parseInt(qReply.message.conversation) - 1;
+                const selectedQ = qualities[qNum];
+                const dctLink = selectedQ.links.find(l => l.provider === 'DCT');
+                socket.ev.off('messages.upsert', qualityHandler);
+
+                await socket.sendMessage(sender, { text: '⏳ 𝙐𝙥𝙡𝙤𝙖𝙙𝙞𝙣𝙜... ' + selectedQ.size }, { quoted: qReply });
+
+                // 6. SEND DIRECT MP4 FILE - Oyage screenshot eke wage
+                const fileName = `${movie.title} [${selectedQ.quality}].mp4`.replace(/[\/:*?"<>|]/g, "_");
+
+                await socket.sendMessage(sender, {
+                    document: { url: dctLink.url }, // DCT direct link
+                    mimetype: 'video/mp4',
+                    fileName: fileName,
+                    caption: `☘️ *${movie.title}*\n\n┃=SHAGGY - XMD MOVIE=\n[WEB-DL-${selectedQ.quality} - ${selectedQ.size}]\n\n┃─★ SHAGGY XMD ᴍᴏᴠɪᴇ ★─`
+                }, { quoted: qReply });
+
+            };
+            socket.ev.on('messages.upsert', qualityHandler);
+
+        };
+        socket.ev.on('messages.upsert', selectionHandler);
+
+    } catch(e) {
+        await socket.sendMessage(sender, { text: '❌ Error: ' + e.message }, { quoted: msg });
+    }
+    break;
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
 // ==========================================
