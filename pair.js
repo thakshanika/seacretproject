@@ -1888,8 +1888,7 @@ case 'wether': {
 
     break;
 }
-               const fs = require('fs');
-const path = require('path');
+         
 
 case 'movie':
     if (!args.length) {
