@@ -1923,6 +1923,71 @@ case 'instagram': {
     }
 }
 break;
+case 'news': {
+    try {
+        const apiKey = 'lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e';
+
+        await socket.sendMessage(sender, {
+            text: '📰 *Latest News Loading...*'
+        }, { quoted: msg });
+
+        const url = `https://api-siteh-22e22e4cb068.herokuapp.com/news/siyatha?api_key=${apiKey}`;
+
+        const response = await axios.get(url, {
+            timeout: 30000
+        });
+
+        console.log('NEWS API:', response.data);
+
+        const data = response.data;
+
+        if (!data || !data.status || !data.result) {
+            throw new Error('API returned invalid news data');
+        }
+
+        const news = data.result;
+
+        const caption = `
+📰 *SIYATHA NEWS*
+
+╭━━━━━━━━━━━━━━╮
+📌 *${news.title || 'No Title'}*
+╰━━━━━━━━━━━━━━╯
+
+📝 *${news.desc || 'No description available'}*
+
+📅 *Date:* ${news.date || 'N/A'}
+
+🔗 *Link:*
+${news.link || 'N/A'}
+
+━━━━━━━━━━━━━━━━
+⚡ *Powered by Shaggy XMD*
+        `.trim();
+
+        if (news.image) {
+            await socket.sendMessage(sender, {
+                image: {
+                    url: news.image
+                },
+                caption: caption
+            }, { quoted: msg });
+        } else {
+            await socket.sendMessage(sender, {
+                text: caption
+            }, { quoted: msg });
+        }
+
+    } catch (error) {
+        console.error('NEWS ERROR:', error);
+
+        await socket.sendMessage(sender, {
+            text: `❌ *NEWS ERROR*\n\n${error.message}`
+        }, { quoted: msg });
+    }
+
+    break;
+}
 
 // ==========================================
 // 1. STICKER COMMAND (.sticker)
@@ -2138,82 +2203,43 @@ case 'wether': {
     break;
 }
 case 'dubzone':
-    if (!args.length) {
-        await socket.sendMessage(sender, {
-             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE},
-            caption: formatMessage('❌ ERROR', '*කරුණාකර චිත්‍රපටයේ නම ලබාදෙන්න! උදා:.dubzone kgf*', `${config.BOT_FOOTER}`)
-        }, { quoted: msg });
-        break;
-    }
-
-    const dubQuery = args.join(' ');
-    await socket.sendMessage(sender, { text: '🎬 𝙎𝙚𝙖𝙧𝙘𝙝𝙞𝙣𝙜 𝙤𝙣 𝘿𝙪𝙗𝙯𝙤𝙣𝙚...' });
+case 'dubzone':
+    if (!args.length) return await socket.sendMessage(sender, { text: '❌.dubzone movie name' }, { quoted: msg });
+    const q = args.join(' ');
+    let m1 = await socket.sendMessage(sender, { text: '🎬 *Dubzone search...*' });
 
     try {
-        // 1. SEARCH
-        const searchResponse = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(dubQuery)}&api_key=${config.API_KEY}`);
-        const movies = searchResponse.data.results.slice(0, 10);
+        const s = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(q)}&api_key=${config.API_KEY}`);
+        const r = s.data.results.slice(0,10);
+        let t = `🎬 *DUBZONE*\n\n`; r.forEach((x,i)=> t+= `*${i+1}.* ${x.title}\n`);
+        let sm = await socket.sendMessage(sender, { image: {url: config.BOT_IMAGE}, caption: t }, {quoted: msg});
 
-        let listText = `🎬 *𝗗𝗨𝗕𝗭𝗢𝗡𝗘 𝗦𝗘𝗔𝗥𝗖𝗛*\n\n`;
-        movies.forEach((m, i) => listText += `*${i+1}.* ${m.title}\n`);
-        const sentMsg = await socket.sendMessage(sender, { image: { url: config.BOT_IMAGE}, caption: listText }, { quoted: msg });
-        const msgID = sentMsg.key.id;
+        socket.ev.on('messages.upsert', async function h1({messages}){
+            const rm = messages[0];
+            if(rm.message.extendedTextMessage?.contextInfo?.stanzaId!== sm.key.id) return;
+            socket.ev.off('messages.upsert', h1);
+            let n = parseInt(rm.message.conversation)-1;
+            let sel = r[n];
 
-        // 2. WAIT FOR SELECTION
-        const selectionHandler = async ({ messages }) => {
-            const reply = messages[0];
-            if(reply.message.extendedTextMessage?.contextInfo?.stanzaId!== msgID) return;
+            const i = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(sel.link)}&slug=${sel.slug}&api_key=${config.API_KEY}`);
+            const d = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${sel.slug}&api_key=${config.API_KEY}`);
 
-            const num = parseInt(reply.message.conversation) - 1;
-            const selected = movies[num];
-            socket.ev.off('messages.upsert', selectionHandler);
+            let t2 = `☘️ *${i.data.title}*\n\n*⬇️ SELECT QUALITY*\n`;
+            d.data.downloads.forEach((x,i)=> t2+= `*${i+1}.* ${x.quality} - ${x.size}\n`);
+            let dm = await socket.sendMessage(sender, { image: {url: i.data.thumbnail}, caption: t2 }, {quoted: rm});
 
-            await socket.sendMessage(sender, { text: '📽️ 𝙂𝙚𝙩𝙞𝙣𝙜 𝙙𝙚𝙩𝙖𝙞𝙡𝙨...' }, { quoted: reply });
-
-            // 3. GET INFO
-            const infoRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
-            const movie = infoRes.data.data;
-
-            // 4. GET DOWNLOADS
-            const dlRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
-            const qualities = dlRes.data.downloads;
-
-            let qText = `*⬇️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗤𝗨𝗔𝗟𝗜𝗧𝗬*\n\n`;
-            qualities.forEach((q, i) => qText += `*${i+1}.* ${q.quality} - ${q.size}\n`);
-            const qMsg = await socket.sendMessage(sender, { text: qText }, { quoted: reply });
-            const qID = qMsg.key.id;
-
-            // 5. WAIT FOR QUALITY
-            const qualityHandler = async ({ messages }) => {
-                const qReply = messages[0];
-                if(qReply.message.extendedTextMessage?.contextInfo?.stanzaId!== qID) return;
-
-                const qNum = parseInt(qReply.message.conversation) - 1;
-                const selectedQ = qualities[qNum];
-                const dctLink = selectedQ.links.find(l => l.provider === 'DCT');
-                socket.ev.off('messages.upsert', qualityHandler);
-
-                await socket.sendMessage(sender, { text: '⏳ 𝙐𝙥𝙡𝙤𝙖𝙙𝙞𝙣𝙜... ' + selectedQ.size }, { quoted: qReply });
-
-                // 6. SEND DIRECT MP4 FILE - Oyage screenshot eke wage
-                const fileName = `${movie.title} [${selectedQ.quality}].mp4`.replace(/[\/:*?"<>|]/g, "_");
-
-                await socket.sendMessage(sender, {
-                    document: { url: dctLink.url }, // DCT direct link
-                    mimetype: 'video/mp4',
-                    fileName: fileName,
-                    caption: `☘️ *${movie.title}*\n\n┃=SHAGGY - XMD MOVIE=\n[WEB-DL-${selectedQ.quality} - ${selectedQ.size}]\n\n┃─★ SHAGGY XMD ᴍᴏᴠɪᴇ ★─`
-                }, { quoted: qReply });
-
-            };
-            socket.ev.on('messages.upsert', qualityHandler);
-
-        };
-        socket.ev.on('messages.upsert', selectionHandler);
-
-    } catch(e) {
-        await socket.sendMessage(sender, { text: '❌ Error: ' + e.message }, { quoted: msg });
-    }
+            socket.ev.on('messages.upsert', async function h2({messages}){
+                const qm = messages[0];
+                if(qm.message.extendedTextMessage?.contextInfo?.stanzaId!== dm.key.id) return;
+                socket.ev.off('messages.upsert', h2);
+                let qn = parseInt(qm.message.conversation)-1;
+                let ql = d.data.downloads[qn];
+                let links = `*📥 ${i.data.title} - ${ql.quality}*\n*Size: ${ql.size}*\n\n`;
+                ql.links.forEach(l => links += `*${l.provider}:* ${l.url}\n\n`);
+                await socket.sendMessage(sender, { text: links }, {quoted: qm});
+            });
+        });
+    } catch(e){ await socket.sendMessage(sender, { text: '❌ '+e.message }); }
     break;
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
