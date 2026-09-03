@@ -1533,7 +1533,6 @@ case 'animedl': {
     }
     break;
 }
-│ 🎡 .ai
 case 'schedule':
 case 'remind': {
     if (!isOwner) {
