@@ -1968,18 +1968,18 @@ case 'dubzone':
                     if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
 
                     socket.ev.off('messages.upsert', qualityHandler);
-                    const selQ = quals[qNum]; // මෙතැනදී පරිශීලකයා දුන් නිවැරදි අංකයට අදාළ Quality Object එක තෝරා ගනී
+                    const selQ = quals[qNum]; // පරිශීලකයා තෝරාගත් නිවැරදි Quality එක (උදා: 480p හෝ 720p)
 
-                    // API එකෙන් එන විවිධ ලින්ක් ෆෝමැට් එක හඳුනාගැනීම (direct_link හෝ links array එකේ නිවැරදි එක)
+                    // **මෙතැනදී නිවැරදිම Direct Link එක ලබා ගැනීම (2.1KB වැරදි ෆයිල් ඒම වැළැක්වීමට)**
                     let directUrl = null;
                     if (selQ.direct_link) {
                         directUrl = selQ.direct_link;
                     } else if (selQ.url) {
                         directUrl = selQ.url;
-                    } else if (selQ.links && selQ.links.length > 0) {
-                        // සේරම links වලින් මූවී එක බාගත හැකි සැබෑ direct link එක හෝ වැඩිම ප්‍රමාණය ඇති ලින්ක් එක සොයාගැනීම
-                        const foundLink = selQ.links.find(l => l.url && (l.url.includes('http') || l.url.includes('drive') || l.url.includes('download')));
-                        directUrl = foundLink ? foundLink.url : selQ.links[0].url;
+                    } else if (selQ.links && Array.isArray(selQ.links)) {
+                        // links array එකෙන් බාගත හැකි සැබෑ url එක සෙවීම
+                        const targetLink = selQ.links.find(l => l.url && (l.url.includes('http') || l.url.includes('download') || l.url.includes('file')));
+                        directUrl = targetLink ? targetLink.url : selQ.links[0]?.url;
                     }
 
                     if (!directUrl) {
@@ -1991,7 +1991,7 @@ case 'dubzone':
                     }, { quoted: qm });
 
                     try {
-                        // Document එකක් ලෙස නිවැරදි ෆයිල් ලින්ක් එක යැවීම
+                        // Document එකක් ලෙස නිවැරදි ෆයිල් එක යැවීම
                         await socket.sendMessage(sender, {
                             document: { url: directUrl },
                             mimetype: 'video/mp4',
@@ -2006,7 +2006,7 @@ case 'dubzone':
 
                     } catch (dlErr) {
                         console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (File size එක වැඩි වැඩි නිසා හෝ ලින්ක් එක expired වී නිසා වන්නට පුළුවන්).' }, { quoted: qm });
+                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (ဖයිල් සයිස් එක වැඩි වැඩි නිසා හෝ ලින්ක් එක expired වී නිසා වන්නට පුළුවන්).' }, { quoted: qm });
                     }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
