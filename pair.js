@@ -1479,8 +1479,8 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 │ 🎡 .schedule
 │ 🎡 .ai
 │ 🎡 .set
-│ 🎡 .rexporn
-│ 🎡 .animeclub
+│ 🎡 .xnxx
+│ 🎡 .system
 *╰────────●●►*   
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1533,66 +1533,7 @@ case 'animedl': {
     }
     break;
 }
-// ==========================================
-// XNXX VIDEO DOCUMENT SENDER (.xndl)
-// ==========================================
-case 'xndl':
-case 'xnxxindl': {
-    if (!text) return reply('❌ කරුණාකර XNXX වීඩියෝ අංකය හෝ ලින්ක් එක දෙන්න!\n✨ උදා: `.xndl 1`');
-    
-    let targetUrl = text.trim();
-
-    if (/^\d+$/.test(targetUrl)) {
-        global.xnxxCache = global.xnxxCache || {};
-        const userCache = global.xnxxCache[sender];
-        
-        if (!userCache || userCache.length === 0) {
-            return reply('❌ කරුණාකර මුලින්ම `.xnxx <query>` මඟින් සෙවුමක් සිදු කරන්න!');
-        }
-
-        const index = parseInt(targetUrl) - 1;
-        if (index < 0 || index >= userCache.length) {
-            return reply(`❌ කරුණාකර 1 සහ ${userCache.length} අතර නිවැරදි අංකයක් ලබා දෙන්න!`);
-        }
-
-        targetUrl = userCache[index].url;
-    }
-
-    let cleanUrl = targetUrl.replace(/[<>]/g, '').trim();
-    
-    reply('📥 වීඩියෝව ඩොකියුමන්ට් එකක් ලෙස සූදානම් කරමින් පවතී, ටිකක් ඉඳපන්...');
-
-    try {
-        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-        const dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(cleanUrl)}&api_key=${apiKey}`;
-        
-        const dlRes = await fetch(dlApiUrl);
-        const dlData = await dlRes.json();
-
-        if (dlData && dlData.success) {
-            let videoFileUrl = dlData.download_url || dlData.direct_link;
-
-            if (!videoFileUrl) {
-                return reply('❌ වීඩියෝ ෆයිල් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
-            }
-
-            // Document එකක් ලෙස 2GB දක්වා ෆයිල් යැවීම (mimetype සහ fileName සමඟ)
-            await conn.sendMessage(sender, {
-                document: { url: videoFileUrl },
-                mimetype: 'video/mp4',
-                fileName: `SHAGGY_XMD_Video.mp4`,
-                caption: `🔞 *SHAGGY XMD - XNXX DOWNLOADER*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-
-        } else {
-            reply('❌ කණගාටුයි, අදාළ වීඩියෝව ඩවුන්ලෝඩ් කිරීමට නොහැකි විය.');
-        }
-    } catch (err) {
-        console.error('XNXX DL Error:', err);
-        reply('❌ දෝෂයක් සිදු විය! සර්වර් එක බිඳ වැටී ඇත හෝ ලින්ක් එක කල් ඉකුත් වී ඇත.');
-    }
-    break;
-}
+│ 🎡 .ai
 case 'schedule':
 case 'remind': {
     if (!isOwner) {
