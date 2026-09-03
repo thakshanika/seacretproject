@@ -2073,6 +2073,135 @@ case 'xvideos': {
     }
 }
 break;
+case 'weather':
+case 'wether': {
+    try {
+        const city = args.join(' ').trim() || 'colombo';
+
+        await sock.sendMessage(from, {
+            text: `🌦️ *${city.toUpperCase()} Weather* check කරනවා...`
+        });
+
+        const apiKey = process.env.WEATHER_API_KEY;
+
+        const apiUrl =
+            `https://api-siteh-22e22e4cb068.herokuapp.com/api/weather/lk?city=${encodeURIComponent(city)}&api_key=${apiKey}`;
+
+        const response = await axios.get(apiUrl, {
+            timeout: 30000
+        });
+
+        const data = response.data;
+
+        if (!data?.status || !data?.weather) {
+            return await sock.sendMessage(from, {
+                text: '❌ Weather information එක ලබාගන්න බැරි වුණා.'
+            });
+        }
+
+        const w = data.weather;
+
+        const message = `
+🌦️ *WEATHER REPORT*
+
+📍 *City:* ${data.city}
+📌 *Location:* ${data.location}
+
+🌡️ *Temperature:* ${w.temperature}
+🥵 *Feels Like:* ${w.feels_like}
+🌧️ *Condition:* ${w.description}
+
+💧 *Humidity:* ${w.humidity}
+💨 *Wind:* ${w.wind_speed}
+🧭 *Direction:* ${w.wind_direction}
+🎚️ *Pressure:* ${w.pressure}
+👁️ *Visibility:* ${w.visibility}
+☀️ *UV Index:* ${w.uv_index}
+
+━━━━━━━━━━━━━━━━
+⚡ *Powered by Shaggy XMD*
+        `.trim();
+
+        await sock.sendMessage(from, {
+            text: message
+        });
+
+    } catch (error) {
+        console.error('WEATHER CASE ERROR:', error);
+
+        await sock.sendMessage(from, {
+            text: `❌ *Weather API Error*\n\n${error.message}`
+        });
+    }
+
+    break;
+}
+case 'news': {
+    try {
+        await sock.sendMessage(from, {
+            text: '📰 *Siyatha News* ගන්නවා...'
+        });
+
+        const apiUrl =
+            'https://api-siteh-22e22e4cb068.herokuapp.com/news/siyatha?api_key=lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e';
+
+        const response = await axios.get(apiUrl, {
+            timeout: 30000
+        });
+
+        const data = response.data;
+
+        if (!data?.status || !data?.result) {
+            return await sock.sendMessage(from, {
+                text: '❌ News එක ලබාගන්න බැරි වුණා.'
+            });
+        }
+
+        const news = data.result;
+
+        const caption = `
+📰 *SIYATHA NEWS*
+
+╭───────────────╮
+📌 *${news.title}*
+╰───────────────╯
+
+📅 *Date:* ${news.date}
+
+📝 *Description:*
+${news.desc}
+
+🔗 *Read More:*
+${news.link}
+
+━━━━━━━━━━━━━━━━
+⚡ *Powered by Shaggy XMD*
+        `.trim();
+
+        if (news.image) {
+            await sock.sendMessage(from, {
+                image: {
+                    url: news.image
+                },
+                caption: caption
+            });
+        } else {
+            await sock.sendMessage(from, {
+                text: caption
+            });
+        }
+
+    } catch (error) {
+        console.error('NEWS CASE ERROR:', error);
+
+        await sock.sendMessage(from, {
+            text: `❌ *News API Error*\n\n${error.message}`
+        });
+    }
+
+    break;
+}
+
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
 // ==========================================
