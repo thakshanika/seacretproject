@@ -1888,8 +1888,7 @@ case 'wether': {
 
     break;
 }
-               const fs = require('fs');
-const path = require('path');
+         
 
 case 'movie':
     if (!args.length) {
@@ -2094,30 +2093,161 @@ case 'movie':
                         }, { quoted: qm });
 
                         // ඉන්පසු ලෝකල් ෆයිල් එක මකා දැමීම
-                        if (fs.existsSync(filePath)) {
-                            fs.unlinkSync(filePath);
+const fs = require('fs');
+const path = require('path');
+
+// ඔයාගේ කෝඩ් එක ඇතුළේ switch statement එකක් ඇතුළේ තමයි case 'movie' තියෙන්න ඕනේ:
+switch (command) { // මෙතැන command වෙනුවට ඔයා පාවිච්චි කරන variable නම දෙන්න (උදා: cmd, command, etc.)
+
+    case 'movie':
+        if (!args.length) {
+            return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name> (Ex: .movie avatar)' }, { quoted: msg });
+        }
+        const query = args.join(' ');
+        await socket.sendMessage(sender, { text: `🎬 *Searching for "${query}"... Please wait!*` }, { quoted: msg });
+
+        try {
+            const searchUrl = `${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`;
+            const search = await axios.get(searchUrl).catch(() => null);
+
+            const searchResults = search?.data?.results || search?.data?.data || search?.data;
+
+            if (!searchResults || (Array.isArray(searchResults) && searchResults.length === 0)) {
+                return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු සිනමාපටයක් හමු නොවීය. කරුණාකර වෙනත් නමකින් උත්සාහ කරන්න.` }, { quoted: msg });
+            }
+
+            const results = searchResults.slice(0, 10);
+            let list = `🎬 *CODE X - MOVIE SEARCH RESULTS*\n\n`;
+            results.forEach((r, i) => {
+                list += `*${i + 1}.* ${r.title || r.name}\n`;
+            });
+            list += `\n*Reply with the movie number:*`;
+
+            const searchMsg = await socket.sendMessage(sender, {
+                image: { url: config.BOT_IMAGE },
+                caption: list
+            }, { quoted: msg });
+
+            const movieHandler = async ({ messages }) => {
+                const m = messages[0];
+                if (!m?.message?.extendedTextMessage) return;
+                if (m.message.extendedTextMessage.contextInfo.stanzaId !== searchMsg.key.id) return;
+                if (m.key.remoteJid !== sender) return;
+
+                const num = parseInt(m.message.extendedTextMessage.text) - 1;
+                if (isNaN(num) || num < 0 || num >= results.length) return;
+
+                socket.ev.off('messages.upsert', movieHandler);
+                const selected = results[num];
+                await socket.sendMessage(sender, { text: '⏳ *Fetching movie details & qualities...*' }, { quoted: m });
+
+                try {
+                    const targetLink = selected.link || selected.url;
+                    const targetSlug = selected.slug;
+
+                    const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(targetLink)}&slug=${targetSlug}&api_key=${config.API_KEY}`);
+                    const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${targetSlug}&api_key=${config.API_KEY}`);
+
+                    const movie = info.data.data || info.data;
+                    const quals = dl.data.downloads || dl.data;
+
+                    if (!quals || quals.length === 0) {
+                        return await socket.sendMessage(sender, { text: '❌ මෙම මූවී එක සඳහා ඩවුන්ලෝඩ් ලින්ක් කිසිවක් හමු නොවීය!' }, { quoted: m });
+                    }
+
+                    let detail = `🎥 *${movie.title}*\n\n`;
+                    detail += `⭐ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
+                    detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 150) + '...' : 'N/A'}\n\n`;
+                    detail += `📥 *SELECT QUALITY (480p / 720p / 1080p):*\n\n`;
+                    
+                    quals.forEach((q, i) => {
+                        detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
+                    });
+                    
+                    detail += `\n*Reply with your quality number:*`;
+
+                    const detailMsg = await socket.sendMessage(sender, {
+                        image: { url: movie.thumbnail || movie.image || config.BOT_IMAGE },
+                        caption: detail
+                    }, { quoted: m });
+
+                    const qualityHandler = async ({ messages }) => {
+                        const qm = messages[0];
+                        if (!qm?.message?.extendedTextMessage) return;
+                        if (qm.message.extendedTextMessage.contextInfo.stanzaId !== detailMsg.key.id) return;
+                        if (qm.key.remoteJid !== sender) return;
+
+                        const qNum = parseInt(qm.message.extendedTextMessage.text) - 1;
+                        if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
+
+                        socket.ev.off('messages.upsert', qualityHandler);
+                        const selQ = quals[qNum];
+
+                        let directUrl = selQ.direct_link || selQ.url || (selQ.links && selQ.links[0] ? selQ.links[0].url : null);
+
+                        if (!directUrl) {
+                            return await socket.sendMessage(sender, { text: '❌ අදාළ කොලිටිය සඳහා direct download link එක ලබා ගැනීමට නොහැකි විය!' }, { quoted: qm });
                         }
 
-                    } catch (dlErr) {
-                        console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කිරීමේදී දෝෂයක් ඇති විය (File size එක ඉතා වැඩි වැඩි වීම හෝ Link එක expired වී ඇත).' }, { quoted: qm });
-                    }
-                };
-                socket.ev.on('messages.upsert', qualityHandler);
+                        await socket.sendMessage(sender, { 
+                            text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait, downloading and sending as Document MP4..._` 
+                        }, { quoted: qm });
 
-            } catch(e) {
-                console.log(e);
-                await socket.sendMessage(sender, { text: '❌ මූවී විස්තර ලබා ගැනීමේදී දෝෂයක් ඇති විය.' }, { quoted: m });
-            }
-        };
-        socket.ev.on('messages.upsert', movieHandler);
+                        try {
+                            const fileName = `${movie.title.replace(/[/\\?%*:|"<>]/g, '')} [${selQ.quality}] - CODE X.mp4`;
+                            const filePath = path.join(__dirname, fileName);
 
-    } catch (err) {
-        console.log(err);
-        await socket.sendMessage(sender, { text: '❌ API Error: ' + (err.message || 'Unknown error') }, { quoted: msg });
-    }
-    break;
+                            const response = await axios({
+                                method: 'GET',
+                                url: directUrl,
+                                responseType: 'arraybuffer',
+                                headers: {
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                                },
+                                maxContentLength: Infinity,
+                                maxBodyLength: Infinity
+                            });
 
+                            fs.writeFileSync(filePath, Buffer.from(response.data));
+
+                            await socket.sendMessage(sender, {
+                                document: { url: filePath },
+                                mimetypes: 'video/mp4',
+                                mimetype: 'video/mp4',
+                                fileName: fileName,
+                                caption: `╔═════════════════════╗
+║   🎬 *CODE X MOVIE BOT* ╚═════════════════════╝
+📌 *Title:* ${movie.title}
+🎞️ *Quality:* ${selQ.quality}
+📦 *File Size:* ${selQ.size || 'N/A'}
+⭐ *Developer:* Code X Game Developer`
+                            }, { quoted: qm });
+
+                            if (fs.existsSync(filePath)) {
+                                fs.unlinkSync(filePath);
+                            }
+
+                        } catch (dlErr) {
+                            console.log(dlErr);
+                            await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කිරීමේදී දෝෂයක් ඇති විය.' }, { quoted: qm });
+                        }
+                    };
+                    socket.ev.on('messages.upsert', qualityHandler);
+
+                } catch(e) {
+                    console.log(e);
+                    await socket.sendMessage(sender, { text: '❌ මූවී විස්තර ලබා ගැනීමේදී දෝෂයක් ඇති විය.' }, { quoted: m });
+                }
+            };
+            socket.ev.on('messages.upsert', movieHandler);
+
+        } catch (err) {
+            console.log(err);
+            await socket.sendMessage(sender, { text: '❌ API Error: ' + (err.message || 'Unknown error') }, { quoted: msg });
+        }
+        break; // අනිවාර්යයෙන්ම case එක අවසානයේ break තියෙන්න ඕනේ
+
+}
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
 // ==========================================
