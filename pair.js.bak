@@ -1890,137 +1890,578 @@ case 'wether': {
 }
 case 'dubzone':
     if (!args.length) {
-        return await socket.sendMessage(sender, { text: '❌ *Usage:* .dubzone movie name' }, { quoted: msg });
+        await socket.sendMessage(sender, {
+            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+            caption: formatMessage(
+                '❌ ERROR',
+                '*කරුණාකර චිත්‍රපටයේ හෝ TV series එකේ නම ලබාදෙන්න! උදා: .dubzone spider*',
+                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+            )
+        }, { quoted: msg });
+        break;
     }
-    const query = args.join(' ');
-    await socket.sendMessage(sender, { text: '🎬 *Dubzone search karanawa... Poddak inna!*' }, { quoted: msg });
+
+    const dubzoneQuery = args.join(' ');
+    await socket.sendMessage(sender, { text: '📽️ 𝙎𝙚𝙖𝙧𝙘𝙝𝙞𝙣𝙜 𝙤𝙣 𝘿𝙪𝙗𝙯𝙤𝙣𝙚...' });
 
     try {
-        // 1. SEARCH MOVIES
-        const search = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`);
+        const searchResponse = await axios.get(`https://apis.laksidu.site/dubzone/search?query=${encodeURIComponent(dubzoneQuery)}&api_key=lakiyaofc2`);
+        const searchData = searchResponse.data;
 
-        if (!search.data.success || !search.data.results || search.data.results.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *"${query}"* walata matching movies mokuth hamba une na!` }, { quoted: msg });
+        if (!searchData.status || !searchData.results || searchData.results.length === 0) {
+            await socket.sendMessage(sender, {
+                image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                caption: formatMessage(
+                    '❌ NO RESULTS',
+                    '*Dubzone හි චිත්‍රපට හමුවෙන්නේ නැත! 😞*',
+                    `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                )
+            }, { quoted: msg });
+            break;
         }
 
-        const results = search.data.results.slice(0, 10);
-        let list = `🎬 *SHAGGY XMD - DUBZONE SEARCH RESULTS*\n\n`;
-        results.forEach((r, i) => {
-            list += `*${i + 1}.* ${r.title}\n`;
-        });
-        list += `\n*Reply with the movie number you want:*`;
+        const dubzoneResults = searchData.results.slice(0, 25);
+        let listText = `☘️ *𝗧𝗩-𝗦𝗘𝗥𝗜𝗘𝗦 : _𝗦𝗘𝗔𝗥𝗖𝗛 𝗥𝗘𝗦𝗨𝗟𝗧𝗦_* 🔍
+╭──────●➤
+🔎 *𝗤𝘂𝗲𝗿𝘆 ➟* _${dubzoneQuery}_
+📊 *Status ➟* _Results Found_
+╰──────────●➤
+╭──────●➤
+*🔢 ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ɴᴜᴍʙᴇʀ*
+╰──────────●➤
+💡 *𝗥ᴇᴘʟʏ ᴡɪᴛʜ ᴀ 𝗡ᴜᴍʙᴇʀ 𝘁ọ 𝗦ᴇʟᴇᴄ𝘛*
+*╭──────●➤*\n\n`;
 
-        const searchMsg = await socket.sendMessage(sender, {
-            image: { url: config.BOT_IMAGE },
-            caption: list
+        dubzoneResults.forEach((item, index) => {
+            const type = item.link.includes('/tvshows/') ? '📺 TV Series' : '🎬 Movie';
+            listText += `*♦️ ${index + 1} ║❯❯ ${type} | ${item.title}*\n`;
+        });
+
+        listText += `╰──────────●➤\n> ${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`;
+        
+        const sentMsg = await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE},
+            caption: listText
         }, { quoted: msg });
 
-        // 2. MOVIE NUMBER SELECT
-        const movieHandler = async ({ messages }) => {
-            const m = messages[0];
-            if (!m?.message?.extendedTextMessage) return;
-            if (m.message.extendedTextMessage.contextInfo.stanzaId !== searchMsg.key.id) return;
-            if (m.key.remoteJid !== sender) return;
+        const messageID = sentMsg.key.id;
 
-            const num = parseInt(m.message.extendedTextMessage.text) - 1;
-            if (isNaN(num) || num < 0 || num >= results.length) return;
+        const handleSelection = async ({ messages: replyMessages }) => {
+            const replyMek = replyMessages[0];
+            if (!replyMek?.message) return;
 
-            socket.ev.off('messages.upsert', movieHandler);
-            const selected = results[num];
-            await socket.sendMessage(sender, { text: '⏳ *Movie details and download links gannawa...*' }, { quoted: m });
+            const messageType = replyMek.message.conversation || replyMek.message.extendedTextMessage?.text;
+            const isReplyToSentMsg = replyMek.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-            try {
-                // 3. FETCH INFO & DOWNLOAD QUALITIES
-                const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
-                const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
-
-                const movie = info.data.data;
-                const quals = dl.data.downloads;
-
-                if (!quals || quals.length === 0) {
-                    return await socket.sendMessage(sender, { text: '❌ Me movie ekata download links kisiwak natha!' }, { quoted: m });
+            if (isReplyToSentMsg && sender === replyMek.key.remoteJid) {
+                const choice = parseInt(messageType) - 1;
+                if (isNaN(choice) || choice < 0 || choice >= dubzoneResults.length) {
+                    await socket.sendMessage(sender, {
+                        image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                        caption: formatMessage(
+                            '❌ INVALID SELECTION',
+                            `*වැරදි අංකයක්! 1-${dubzoneResults.length} අතර තෝරන්න! 😕*`,
+                            `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                        )
+                    }, { quoted: replyMek });
+                    return;
                 }
 
-                let detail = `🎥 *${movie.title}*\n\n`;
-                detail += `⭐ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
-                detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 180) + '...' : 'N/A'}\n\n`;
-                detail += `📥 *SELECT YOUR PREFERRED QUALITY:*\n\n`;
+                const selectedItem = dubzoneResults[choice];
+                const isTvShow = selectedItem.link.includes('/tvshows/');
                 
-                quals.forEach((q, i) => {
-                    detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
-                });
-                
-                detail += `\n*Reply with quality number:*`;
-
-                const detailMsg = await socket.sendMessage(sender, {
-                    image: { url: movie.thumbnail },
-                    caption: detail
-                }, { quoted: m });
-
-                // 4. QUALITY SELECT & DOCUMENT MP4 DOWNLOAD
-                const qualityHandler = async ({ messages }) => {
-                    const qm = messages[0];
-                    if (!qm?.message?.extendedTextMessage) return;
-                    if (qm.message.extendedTextMessage.contextInfo.stanzaId !== detailMsg.key.id) return;
-                    if (qm.key.remoteJid !== sender) return;
-
-                    const qNum = parseInt(qm.message.extendedTextMessage.text) - 1;
-                    if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
-
-                    socket.ev.off('messages.upsert', qualityHandler);
-                    const selQ = quals[qNum]; // පරිශීලකයා තෝරාගත් නිවැරදි Quality එක (උදා: 480p හෝ 720p)
-
-                    // **මෙතැනදී නිවැරදිම Direct Link එක ලබා ගැනීම (2.1KB වැරදි ෆයිල් ඒම වැළැක්වීමට)**
-                    let directUrl = null;
-                    if (selQ.direct_link) {
-                        directUrl = selQ.direct_link;
-                    } else if (selQ.url) {
-                        directUrl = selQ.url;
-                    } else if (selQ.links && Array.isArray(selQ.links)) {
-                        // links array එකෙන් බාගත හැකි සැබෑ url එක සෙවීම
-                        const targetLink = selQ.links.find(l => l.url && (l.url.includes('http') || l.url.includes('download') || l.url.includes('file')));
-                        directUrl = targetLink ? targetLink.url : selQ.links[0]?.url;
-                    }
-
-                    if (!directUrl) {
-                        return await socket.sendMessage(sender, { text: '❌ Me quality ekata adala direct download link eka hoya ganna bari una!' }, { quoted: qm });
-                    }
-
+                if (isTvShow) {
                     await socket.sendMessage(sender, { 
-                        text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait a moment, sending as Document MP4..._` 
-                    }, { quoted: qm });
+                        text: '📺 𝙁𝙚𝙩𝙘𝙝𝙞𝙣𝙜 𝙏𝙑 𝙨𝙚𝙧𝙞𝙚𝙨 𝙙𝙚𝙩𝙖𝙞𝙡𝙨...' 
+                    }, { quoted: replyMek });
 
                     try {
-                        // Document එකක් ලෙස නිවැරදි ෆයිල් එක යැවීම
+                        const tvShowResponse = await axios.get(`https://apis.laksidu.site/dubzone/tvshow?url=${encodeURIComponent(selectedItem.link)}&api_key=lakiyaofc2`);
+                        const tvShowData = tvShowResponse.data;
+
+                        if (!tvShowData.status || !tvShowData.data) {
+                            throw new Error('Failed to fetch TV show details');
+                        }
+
+                        const tvInfo = tvShowData.data;
+                        
+                        const rating = tvInfo.rating?.score || 'N/A';
+                        const totalEpisodes = tvInfo.episodes?.total || 'N/A';
+                        const episodesList = tvInfo.episodes?.list || [];
+                        
+                        const seasonsMap = {};
+                        episodesList.forEach(ep => {
+                            let seasonNum = '1';
+                            const seasonMatch = ep.number?.match(/^(\d+)/);
+                            if (seasonMatch) {
+                                seasonNum = seasonMatch[1];
+                            }
+                            if (!seasonsMap[seasonNum]) {
+                                seasonsMap[seasonNum] = [];
+                            }
+                            seasonsMap[seasonNum].push(ep);
+                        });
+                        
+                        const seasonsArray = Object.keys(seasonsMap).map(season => ({
+                            season: parseInt(season),
+                            total_episodes: seasonsMap[season].length,
+                            episodes: seasonsMap[season].map(ep => ({
+                                episode: ep.number || '1',
+                                title: ep.title || 'Episode',
+                                url: ep.url || ''
+                            }))
+                        }));
+                        
+                        const totalSeasons = seasonsArray.length;
+                        
+                        let tvDetailsText = 
+    `☘️ *𝗧ɪᴛʟᴇ ➟* _${tvInfo.title || 'N/A'}_
+▫️🥇 *𝗜𝗺𝗱𝗯 𝗥ᴀᴛɪɴɢ ➟*  _${rating}_
+▫️📅 *𝗥ᴇʟᴇᴀꜱᴇ 𝗬ᴇᴀʀ ➟*_${tvInfo.year || 'N/A'}_
+▫️📀 *𝗦ᴇᴀꜱᴏɴꜱ ➟* _${totalSeasons} Total_
+▫️📊 *𝗘ᴘɪꜱᴏᴅᴇꜱ ➟* _${totalEpisodes} Total_
+*➟➟➟➟➟➟➟➟➟➟*
+📖 *𝗦𝗧𝗢𝗥𝗬*_${tvInfo.description?.substring(0, 30) || 'No description available.'}..._`;
+
                         await socket.sendMessage(sender, {
-                            document: { url: directUrl },
-                            mimetype: 'video/mp4',
-                            fileName: `${movie.title} [${selQ.quality}] - SHAGGY XMD.mp4`,
-                            caption: `╔═════════════════════╗
-║   🎬 *SHAGGY XMD MOVIE* ╚═════════════════════╝
-📌 *Title:* ${movie.title}
-🎞️ *Quality:* ${selQ.quality}
-📦 *File Size:* ${selQ.size || 'N/A'}
-⭐ *Powered by:* Code X Game Developer`
-                        }, { quoted: qm });
+                            image: { url: tvInfo.poster || sessionConfig.LAKIYA_IMAGE_PATH || config.LAKIYA_IMAGE_PATH },
+                            caption: tvDetailsText
+                        }, { quoted: replyMek });
 
-                    } catch (dlErr) {
-                        console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (ဖයිල් සයිස් එක වැඩි වැඩි නිසා හෝ ලින්ක් එක expired වී නිසා වන්නට පුළුවන්).' }, { quoted: qm });
+                        let seasonsText = 
+    `☘️ *𝗧𝗩-𝗦𝗘𝗥𝗜𝗘𝗦 : _𝗦𝗘𝗔𝗦𝗢𝗡 𝗦𝗘𝗟𝗘𝗖𝗧𝗜𝗢𝗡_* 📺
+*➟➟➟➟➟➟➟➟➟➟*
+⬇️🍀 *𝗦𝗘𝗟𝗘𝗖𝗧 𝗬𝗢𝗨𝗥 𝗦𝗘𝗔𝗦𝗢𝗡*
+*➟➟➟➟➟➟➟➟➟➟*
+💡 *𝗥ᴇᴘʟʏ ᴡɪᴛʜ ᴀ 𝗡ᴜᴍʙᴇʀ 𝘁ᴏ 𝗦ᴇʟᴇᴄ𝘛*
+*➟➟➟➟➟➟➟➟➟➟*\n\n`;
+
+                        seasonsArray.forEach((season, idx) => {
+                            seasonsText += `🍀 *${idx + 1} ┃》📀 Season ${season.season} (${season.total_episodes} episodes)*\n`;
+                        });
+
+                        seasonsText += `\n> ${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`;
+
+                        const seasonMsg = await socket.sendMessage(sender, {
+                            text: seasonsText
+                        }, { quoted: replyMek });
+
+                        const seasonMsgID = seasonMsg.key.id;
+
+                        const handleSeasonSelect = async ({ messages: seasonMessages }) => {
+                            const seasonMek = seasonMessages[0];
+                            if (!seasonMek?.message) return;
+
+                            const seasonChoice = seasonMek.message.conversation || seasonMek.message.extendedTextMessage?.text;
+                            const isReplyToSeasonMsg = seasonMek.message.extendedTextMessage?.contextInfo?.stanzaId === seasonMsgID;
+
+                            if (isReplyToSeasonMsg && sender === seasonMek.key.remoteJid) {
+                                const seasonNum = parseInt(seasonChoice) - 1;
+                                
+                                if (isNaN(seasonNum) || seasonNum < 0 || seasonNum >= seasonsArray.length) {
+                                    await socket.sendMessage(sender, {
+                                        image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                        caption: formatMessage(
+                                            '❌ INVALID SELECTION',
+                                            `*වැරදි අංකයක්! 1-${seasonsArray.length} අතර තෝරන්න!*`,
+                                            `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                        )
+                                    }, { quoted: seasonMek });
+                                    return;
+                                }
+
+                                const selectedSeason = seasonsArray[seasonNum];
+                                
+                                let episodesText =
+    `☘️ *𝗧𝗩-𝗦𝗘𝗥𝗜𝗘𝗦 : _𝗘𝗣𝗜𝗦𝗢𝗗𝗘 𝗦𝗘𝗟𝗘𝗖𝗧𝗜𝗢𝗡_* 📺
+╭──────●➤
+☘️ *𝗧ɪᴛʟᴇ ➟* _${tvInfo.title || 'N/A'}_
+📀 *𝗦ᴇᴀꜱᴏɴ ➟* _Season ${selectedSeason.season}_
+📊 *𝗧ᴏᴛᴀʟ ➟* _${selectedSeason.total_episodes} Episodes_
+╰──────────●➤
+╭──────●➤
+*🔢 ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ɴᴜᴍʙᴇʀ*
+╰──────────●➤\n\n`;
+
+                                selectedSeason.episodes.forEach((ep, idx) => {
+                                    episodesText += `*♦️${idx + 1} ║❯❯ 📺 Episode ${ep.episode}: ${ep.title}*\n`;
+                                });
+
+                                episodesText += `\n> ${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`;
+
+                                const episodeMsg = await socket.sendMessage(sender, {
+                                    text: episodesText
+                                }, { quoted: seasonMek });
+
+                                const episodeMsgID = episodeMsg.key.id;
+
+                                const handleEpisodeSelect = async ({ messages: episodeMessages }) => {
+                                    const episodeMek = episodeMessages[0];
+                                    if (!episodeMek?.message) return;
+
+                                    const episodeChoice = episodeMek.message.conversation || episodeMek.message.extendedTextMessage?.text;
+                                    const isReplyToEpisodeMsg = episodeMek.message.extendedTextMessage?.contextInfo?.stanzaId === episodeMsgID;
+
+                                    if (isReplyToEpisodeMsg && sender === episodeMek.key.remoteJid) {
+                                        const choiceNum = parseInt(episodeChoice);
+                                        
+                                        if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > selectedSeason.episodes.length) {
+                                            await socket.sendMessage(sender, {
+                                                image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                                caption: formatMessage(
+                                                    '❌ INVALID SELECTION',
+                                                    `*වැරදි අංකයක්! 1-${selectedSeason.episodes.length} අතර තෝරන්න!*`,
+                                                    `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                                )
+                                            }, { quoted: episodeMek });
+                                            return;
+                                        }
+
+                                        const selectedEpisode = selectedSeason.episodes[choiceNum - 1];
+                                        
+                                        await socket.sendMessage(sender, { 
+                                            text: `📥 𝙁𝙚𝙩𝙘𝙝𝙞𝙣𝙜 𝙙𝙤𝙬𝙣𝙡𝙤𝙖𝙙 𝙡𝙞𝙣𝙠𝙨 𝙛𝙤𝙧 S${selectedSeason.season}E${selectedEpisode.episode}...` 
+                                        }, { quoted: episodeMek });
+
+                                        try {
+                                            const episodeResponse = await axios.get(`https://apis.laksidu.site/dubzone/episode?url=${encodeURIComponent(selectedEpisode.url)}&api_key=lakiyaofc2`);
+                                            const episodeData = episodeResponse.data;
+
+                                            if (!episodeData.status || !episodeData.data?.download_links?.length) {
+                                                throw new Error('Failed to get episode download links');
+                                            }
+
+                                            const episodeDownloadLinks = episodeData.data.download_links;
+                                            
+                                            let qualityText = 
+    `☘️ *𝗧𝗩-𝗦𝗘𝗥𝗜𝗘𝗦 : _𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 𝗢𝗣𝗧𝗜𝗢𝗡𝗦_* 📺
+╭──────●➤
+🎬 *𝗧ɪᴛʟᴇ ➟* _${tvInfo.title || 'N/A'}_
+📀 *𝗦ᴇᴀꜱᴏɴ ➟* _Season ${selectedSeason.season}_
+📺 *𝗘ᴘɪꜱ𝗢ᴅᴇ ➟* _${selectedEpisode.episode} : ${selectedEpisode.title}_
+╰──────────●➤
+╭──────●➤
+*🔢 ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ɴᴜᴍʙᴇʀ*
+╰──────────●➤\n\n`;
+
+                                            episodeDownloadLinks.forEach((link, idx) => {
+                                                const quality = link.meta || link.type || `Quality ${idx + 1}`;
+                                                qualityText += `♦️ *${idx + 1} ║❯❯ 📥 ${quality}*\n`;
+                                            });
+
+                                            qualityText += `\n${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
+
+                                            const qualityMsg = await socket.sendMessage(sender, {
+                                                text: qualityText
+                                            }, { quoted: episodeMek });
+
+                                            const qualityMsgID = qualityMsg.key.id;
+
+                                            const handleQualitySelect = async ({ messages: qualityMessages }) => {
+                                                const qualityMek = qualityMessages[0];
+                                                if (!qualityMek?.message) return;
+
+                                                const qualityChoice = qualityMek.message.conversation || qualityMek.message.extendedTextMessage?.text;
+                                                const isReplyToQualityMsg = qualityMek.message.extendedTextMessage?.contextInfo?.stanzaId === qualityMsgID;
+
+                                                if (isReplyToQualityMsg && sender === qualityMek.key.remoteJid) {
+                                                    const qualityNum = parseInt(qualityChoice) - 1;
+                                                    
+                                                    if (isNaN(qualityNum) || qualityNum < 0 || qualityNum >= episodeDownloadLinks.length) {
+                                                        await socket.sendMessage(sender, {
+                                                            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                                            caption: formatMessage(
+                                                                '❌ INVALID SELECTION',
+                                                                `*වැරදි අංකයක්! 1-${episodeDownloadLinks.length} අතර තෝරන්න!*`,
+                                                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                                            )
+                                                        }, { quoted: qualityMek });
+                                                        return;
+                                                    }
+
+                                                    const selectedQuality = episodeDownloadLinks[qualityNum];
+                                                    
+                                                    await socket.sendMessage(sender, { 
+                                                        text: `⏳ 𝙂𝙚𝙩𝙩𝙞𝙣𝙜 𝙙𝙤𝙬𝙣𝙡𝙤𝙖𝙙 𝙡𝙞𝙣𝙠...` 
+                                                    }, { quoted: qualityMek });
+
+                                                    try {
+                                                        const downloadApiUrl = `https://apis.laksidu.site/dl/dubzone?url=${encodeURIComponent(selectedQuality.url)}&api_key=lakiyaofc2`;
+                                                        const darkShanResponse = await axios.get(downloadApiUrl);
+                                                        const darkShanData = darkShanResponse.data;
+
+                                                        if (!darkShanData.status || !darkShanData.data?.download) {
+                                                            throw new Error('Failed to get download URL');
+                                                        }
+
+                                                        const finalDownloadLinks = darkShanData.data.download;
+                                                        
+                                                        const finalNonTelegramLinks = finalDownloadLinks.filter(link => 
+                                                            link.name && link.name.toLowerCase() !== 'telegram'
+                                                        );
+                                                        
+                                                        if (finalNonTelegramLinks.length === 0) {
+                                                            throw new Error('No non-Telegram download links available');
+                                                        }
+                                                        
+                                                        const finalLink = finalNonTelegramLinks.find(link => link.name === 'unknown') || finalNonTelegramLinks[0];
+                                                        
+                                                        await socket.sendMessage(sender, { react: { text: '📥', key: qualityMek.key } });
+
+                                                        await socket.sendMessage(sender, {
+                                                            document: { url: finalLink.url },
+                                                            mimetype: 'video/mp4',
+                                                            fileName: `${tvInfo.title || 'Series'} S${selectedSeason.season}E${selectedEpisode.episode} - ${selectedEpisode.title}.mp4`,
+                                                            caption: `*☘️ ${tvInfo.title || 'Series'} - ${selectedSeason.season}*
+
+\`[Episode-${selectedEpisode.episode}]\`
+
+${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`
+                                                        }, { quoted: qualityMek });
+
+                                                        await socket.sendMessage(sender, { react: { text: '✅', key: qualityMek.key } });
+
+                                                    } catch (downloadError) {
+                                                        console.error('Download error:', downloadError);
+                                                        await socket.sendMessage(sender, {
+                                                            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                                            caption: formatMessage(
+                                                                '❌ DOWNLOAD ERROR',
+                                                                `*Download link එක ලබාගැනීමේ දෝෂයක්.*\n${downloadError.message}`,
+                                                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                                            )
+                                                        }, { quoted: qualityMek });
+                                                    } finally {
+                                                        socket.ev.off('messages.upsert', handleQualitySelect);
+                                                        socket.ev.off('messages.upsert', handleEpisodeSelect);
+                                                        socket.ev.off('messages.upsert', handleSeasonSelect);
+                                                        socket.ev.off('messages.upsert', handleSelection);
+                                                    }
+                                                }
+                                            };
+
+                                            socket.ev.on('messages.upsert', handleQualitySelect);
+
+                                        } catch (error) {
+                                            console.error('Error fetching episode links:', error);
+                                            await socket.sendMessage(sender, {
+                                                image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                                caption: formatMessage(
+                                                    '❌ ERROR',
+                                                    `*Download links ලබාගැනීමේ දෝෂයක්*\n${error.message}`,
+                                                    `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                                )
+                                            }, { quoted: episodeMek });
+                                            socket.ev.off('messages.upsert', handleEpisodeSelect);
+                                            socket.ev.off('messages.upsert', handleSeasonSelect);
+                                            socket.ev.off('messages.upsert', handleSelection);
+                                        }
+                                    }
+                                };
+
+                                socket.ev.on('messages.upsert', handleEpisodeSelect);
+                            }
+                        };
+
+                        socket.ev.on('messages.upsert', handleSeasonSelect);
+
+                    } catch (tvShowError) {
+                        console.error('TV Show error:', tvShowError);
+                        await socket.sendMessage(sender, {
+                            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                            caption: formatMessage(
+                                '❌ ERROR',
+                                `*TV series details ලබාගැනීමේ දෝෂයක්*\n${tvShowError.message}`,
+                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                            )
+                        }, { quoted: replyMek });
+                        socket.ev.off('messages.upsert', handleSelection);
                     }
-                };
-                socket.ev.on('messages.upsert', qualityHandler);
+                    
+                } else {
+                    await socket.sendMessage(sender, { 
+                        text: '📽️ 𝙁𝙚𝙩𝙘𝙝𝙞𝙣𝙜 𝙙𝙚𝙩𝙖𝙞𝙡𝙨...' 
+                    }, { quoted: replyMek });
 
-            } catch(e) {
-                console.log(e);
-                await socket.sendMessage(sender, { text: '❌ Movie details ganna bari una. Try again later!' }, { quoted: m });
+                    try {
+                        const detailsResponse = await axios.get(`https://apis.laksidu.site/dubzone/details?url=${encodeURIComponent(selectedItem.link)}&api_key=lakiyaofc2`);
+                        const detailsData = detailsResponse.data;
+
+                        if (!detailsData.status || !detailsData.data) {
+                            throw new Error('Failed to fetch details');
+                        }
+
+                        const movieInfo = detailsData.data;
+                        
+                        const validDownloads = movieInfo.downloads?.filter(dl => dl && dl.quality && dl.url) || [];
+                        
+                        if (validDownloads.length === 0) {
+                            await socket.sendMessage(sender, {
+                                image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                caption: formatMessage(
+                                    '❌ NO DOWNLOADS',
+                                    '*මෙම චිත්‍රපටය සඳහා බාගත කිරීමේ link නොමැත!*',
+                                    `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                )
+                            }, { quoted: replyMek });
+                            return;
+                        }
+                        
+                        const description = movieInfo.description?.substring(0, 300) + (movieInfo.description?.length > 300 ? '...' : '') || 'No description available.';
+                        
+                        const imdbRating = movieInfo.imdb_rating ? `${movieInfo.imdb_rating}/10` : 'N/A';
+                        const year = movieInfo.year || 'N/A';
+                        const runtime = movieInfo.runtime || 'N/A';
+                        const director = movieInfo.director || 'N/A';
+                        const country = movieInfo.country || 'N/A';
+                        const cast = Array.isArray(movieInfo.cast) ? movieInfo.cast.join(', ') : movieInfo.cast || 'N/A';
+                        
+                        const movieDetailsCaption = formatMessage(
+                            `☘️ *𝗧ɪᴛʟᴇ ➟* _${movieInfo.title}_`,
+                            `▫️🥇 *𝗜𝗺𝗱𝗯 𝗥ᴀᴛɪɴɢ ➟* _${imdbRating}_
+▫️⏳ *𝗗ᴜʀᴀᴛɪᴏɴ ➟* _${runtime}_
+▫️📅 *𝗥ᴇʟᴇᴀꜱᴇ 𝗬ᴇᴀʀ ➟* _${year}_
+▫️🎬 *𝗗ɪʀᴇᴄᴛᴏʀ ➟* _${director}_
+▫️🌎 *𝗖ᴏᴜɴᴛʀʏ ➟* _${country}_
+▫️👥 *𝗖ᴀꜱᴛ ➟* _${cast}_
+*➟➟➟➟➟➟➟➟➟➟*
+*📖 𝗦𝗧𝗢𝗥𝗬 ➟*_${description}_`,
+                            `${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`
+                        );
+
+                        await socket.sendMessage(sender, {
+                            image: { url: movieInfo.poster || sessionConfig.LAKIYA_IMAGE_PATH || config.LAKIYA_IMAGE_PATH },
+                            caption: movieDetailsCaption
+                        }, { quoted: replyMek });
+
+                        const downloadOptionsCaption = formatMessage(
+                            `⬇️🍀 *𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 𝗢𝗣𝗧𝗜𝗢𝗡𝗦*`,
+                            `${validDownloads.map((dl, i) => `▫️ *${(i + 1).toString().padStart(2, '0')} ❱❱ 📥 ${dl.quality}*`).join('\n')}\n
+
+╭──────●➤
+*🔢 ʀᴇᴘʟʏ ʙᴇʟᴏᴡ ɴᴜᴍʙᴇʀ*
+╰──────────●➤`,
+                            `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                        );
+
+                        const downloadOptionsMsg = await socket.sendMessage(sender, {
+                            text: downloadOptionsCaption
+                        }, { quoted: replyMek });
+
+                        const optionsMsgID = downloadOptionsMsg.key.id;
+
+                        const handleDownload = async ({ messages: downloadMessages }) => {
+                            const downloadMek = downloadMessages[0];
+                            if (!downloadMek?.message) return;
+
+                            const downloadChoice = downloadMek.message.conversation || downloadMek.message.extendedTextMessage?.text;
+                            const isReplyToOptionsMsg = downloadMek.message.extendedTextMessage?.contextInfo?.stanzaId === optionsMsgID;
+
+                            if (isReplyToOptionsMsg && sender === downloadMek.key.remoteJid) {
+                                const choiceNum = parseInt(downloadChoice) - 1;
+                                
+                                if (isNaN(choiceNum) || choiceNum < 0 || choiceNum >= validDownloads.length) {
+                                    await socket.sendMessage(sender, {
+                                        image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                        caption: formatMessage(
+                                            '❌ INVALID SELECTION',
+                                            `*වැරදි අංකයක්! 1-${validDownloads.length} අතර තෝරන්න!*`,
+                                            `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                        )
+                                    }, { quoted: downloadMek });
+                                    return;
+                                }
+
+                                const selectedDownload = validDownloads[choiceNum];
+                                
+                                await socket.sendMessage(sender, { 
+                                    text: `⏳ 𝙂𝙚𝙩𝙩𝙞𝙣𝙜 𝙙𝙤𝙬𝙣𝙡𝙤𝙖𝙙 𝙡𝙞𝙣𝙠...` 
+                                }, { quoted: downloadMek });
+
+                                try {
+                                    const downloadResponse = await axios.get(`https://apis.laksidu.site/dl/dubzone?url=${encodeURIComponent(selectedDownload.url)}&api_key=lakiyaofc2`);
+                                    const downloadData = downloadResponse.data;
+
+                                    if (!downloadData.status || !downloadData.data?.download) {
+                                        throw new Error('Failed to get download URL');
+                                    }
+
+                                    const downloadLinks = downloadData.data.download;
+                                    
+                                    const nonTelegramLinks = downloadLinks.filter(link => 
+                                        link.name && link.name.toLowerCase() !== 'telegram'
+                                    );
+                                    
+                                    if (nonTelegramLinks.length === 0) {
+                                        throw new Error('No non-Telegram download links available');
+                                    }
+                                    
+                                    const preferredLink = nonTelegramLinks.find(link => link.name === 'unknown') || nonTelegramLinks[0];
+                                    
+                                    await socket.sendMessage(sender, { react: { text: '📥', key: downloadMek.key } });
+
+                                    await socket.sendMessage(sender, {
+                                        document: { url: preferredLink.url },
+                                        mimetype: 'video/mp4',
+                                        fileName: downloadData.data.title || `${movieInfo.title} ${selectedDownload.quality}.mp4`,
+                                        caption: formatMessage(
+                                            `☘️ ${movieInfo.title}`,
+                                            `\`❚█═${sessionConfig.MOVIE_CAPTION || config.MOVIE_CAPTION}═█❚\`
+                                            
+\`[WEB-DL-${selectedDownload.quality}]\``,
+                                            `${sessionConfig.MOVIE_FOOTER || config.MOVIE_FOOTER}`
+                                        )
+                                    }, { quoted: downloadMek });
+
+                                    await socket.sendMessage(sender, { react: { text: '✅', key: downloadMek.key } });
+
+                                } catch (downloadError) {
+                                    console.error('Download link error:', downloadError);
+                                    await socket.sendMessage(sender, {
+                                        image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                                        caption: formatMessage(
+                                            '❌ DOWNLOAD ERROR',
+                                            `*Download link එක ලබාගැනීමේ දෝෂයක්.*\n${downloadError.message}`,
+                                            `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                        )
+                                    }, { quoted: downloadMek });
+                                } finally {
+                                    socket.ev.off('messages.upsert', handleDownload);
+                                    socket.ev.off('messages.upsert', handleSelection);
+                                }
+                            }
+                        };
+
+                        socket.ev.on('messages.upsert', handleDownload);
+
+                    } catch (detailsError) {
+                        console.error('Details error:', detailsError);
+                        await socket.sendMessage(sender, {
+                            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                            caption: formatMessage(
+                                '❌ ERROR',
+                                `*MovieDetails ලබාගැනීමේ දෝෂයක්.*\n${detailsError.message}`,
+                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                            )
+                        }, { quoted: replyMek });
+                        socket.ev.off('messages.upsert', handleSelection);
+                    }
+                }
             }
         };
-        socket.ev.on('messages.upsert', movieHandler);
 
-    } catch (err) {
-        console.log(err);
-        await socket.sendMessage(sender, { text: '❌ API Error: ' + err.message }, { quoted: msg });
+        socket.ev.on('messages.upsert', handleSelection);
+
+    } catch (searchError) {
+        console.error('Dubzone search error:', searchError);
+        await socket.sendMessage(sender, {
+            image:  { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+            caption: formatMessage(
+                '❌ ERROR',
+                `*Search කිරීමේදී දෝෂයක් ඇතිවිය.*\n${searchError.message}`,
+                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+            )
+        }, { quoted: msg });
     }
     break;
 // ==========================================
