@@ -2203,43 +2203,95 @@ case 'wether': {
     break;
 }
 case 'dubzone':
-case 'dubzone':
-    if (!args.length) return await socket.sendMessage(sender, { text: '❌.dubzone movie name' }, { quoted: msg });
-    const q = args.join(' ');
-    let m1 = await socket.sendMessage(sender, { text: '🎬 *Dubzone search...*' });
+    if (!args.length) {
+        return await socket.sendMessage(sender, { text: '❌ *Usage:*.dubzone movie name' }, { quoted: msg });
+    }
+    const query = args.join(' ');
+    await socket.sendMessage(sender, { text: '🎬 *Dubzone search karanawa...*' }, { quoted: msg });
 
     try {
-        const s = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(q)}&api_key=${config.API_KEY}`);
-        const r = s.data.results.slice(0,10);
-        let t = `🎬 *DUBZONE*\n\n`; r.forEach((x,i)=> t+= `*${i+1}.* ${x.title}\n`);
-        let sm = await socket.sendMessage(sender, { image: {url: config.BOT_IMAGE}, caption: t }, {quoted: msg});
+        // 1. SEARCH
+        const search = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`);
 
-        socket.ev.on('messages.upsert', async function h1({messages}){
-            const rm = messages[0];
-            if(rm.message.extendedTextMessage?.contextInfo?.stanzaId!== sm.key.id) return;
-            socket.ev.off('messages.upsert', h1);
-            let n = parseInt(rm.message.conversation)-1;
-            let sel = r[n];
+        if (!search.data.success ||!search.data.results || search.data.results.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *"${query}"* walata results nathi` }, { quoted: msg });
+        }
 
-            const i = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(sel.link)}&slug=${sel.slug}&api_key=${config.API_KEY}`);
-            const d = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${sel.slug}&api_key=${config.API_KEY}`);
-
-            let t2 = `☘️ *${i.data.title}*\n\n*⬇️ SELECT QUALITY*\n`;
-            d.data.downloads.forEach((x,i)=> t2+= `*${i+1}.* ${x.quality} - ${x.size}\n`);
-            let dm = await socket.sendMessage(sender, { image: {url: i.data.thumbnail}, caption: t2 }, {quoted: rm});
-
-            socket.ev.on('messages.upsert', async function h2({messages}){
-                const qm = messages[0];
-                if(qm.message.extendedTextMessage?.contextInfo?.stanzaId!== dm.key.id) return;
-                socket.ev.off('messages.upsert', h2);
-                let qn = parseInt(qm.message.conversation)-1;
-                let ql = d.data.downloads[qn];
-                let links = `*📥 ${i.data.title} - ${ql.quality}*\n*Size: ${ql.size}*\n\n`;
-                ql.links.forEach(l => links += `*${l.provider}:* ${l.url}\n\n`);
-                await socket.sendMessage(sender, { text: links }, {quoted: qm});
-            });
+        const results = search.data.results.slice(0, 10);
+        let list = `🎬 *DUBZONE RESULTS*\n\n`;
+        results.forEach((r, i) => {
+            list += `*${i + 1}.* ${r.title}\n`;
         });
-    } catch(e){ await socket.sendMessage(sender, { text: '❌ '+e.message }); }
+        list += `\n*Reply with number*`;
+
+        const searchMsg = await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE },
+            caption: list
+        }, { quoted: msg });
+
+        // 2. MOVIE SELECT
+        const movieHandler = async ({ messages }) => {
+            const m = messages[0];
+            if (!m?.message?.extendedTextMessage) return;
+            if (m.message.extendedTextMessage.contextInfo.stanzaId!== searchMsg.key.id) return;
+            if (m.key.remoteJid!== sender) return;
+
+            const num = parseInt(m.message.extendedTextMessage.text) - 1;
+            if (isNaN(num) || num < 0 || num >= results.length) return;
+
+            socket.ev.off('messages.upsert', movieHandler);
+            const selected = results[num];
+            await socket.sendMessage(sender, { text: '⏳ *Details gannawa...*' }, { quoted: m });
+
+            try {
+                // 3. INFO + DOWNLOADS
+                const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
+                const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
+
+                const movie = info.data.data;
+                const quals = dl.data.downloads;
+
+                let detail = `☘️ *${movie.title}*\n\n`;
+                detail += `▫️ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
+                detail += `▫️ *Story:* ${movie.description?.substring(0, 200)}...\n\n`;
+                detail += `*⬇️ SELECT QUALITY*\n\n`;
+                quals.forEach((q, i) => detail += `*${i + 1}.* ${q.quality} - ${q.size}\n`);
+
+                const detailMsg = await socket.sendMessage(sender, {
+                    image: { url: movie.thumbnail },
+                    caption: detail
+                }, { quoted: m });
+
+                // 4. QUALITY SELECT
+                const qualityHandler = async ({ messages }) => {
+                    const qm = messages[0];
+                    if (!qm?.message?.extendedTextMessage) return;
+                    if (qm.message.extendedTextMessage.contextInfo.stanzaId!== detailMsg.key.id) return;
+                    if (qm.key.remoteJid!== sender) return;
+
+                    const qNum = parseInt(qm.message.extendedTextMessage.text) - 1;
+                    if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
+
+                    socket.ev.off('messages.upsert', qualityHandler);
+                    const selQ = quals[qNum];
+
+                    let links = `*📥 ${movie.title} - ${selQ.quality}*\n*Size: ${selQ.size}*\n\n`;
+                    selQ.links.forEach(l => links += `*${l.provider}:* ${l.url}\n\n`);
+
+                    await socket.sendMessage(sender, { text: links }, { quoted: qm });
+                };
+                socket.ev.on('messages.upsert', qualityHandler);
+
+            } catch(e) {
+                await socket.sendMessage(sender, { text: '❌ Movie details ganna bari' }, { quoted: m });
+            }
+        };
+        socket.ev.on('messages.upsert', movieHandler);
+
+    } catch (err) {
+        console.log(err);
+        await socket.sendMessage(sender, { text: '❌ API Error: ' + err.message }, { quoted: msg });
+    }
     break;
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
