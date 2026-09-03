@@ -1467,28 +1467,25 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 *┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
-*╭───❖ 「 🎬 𝕄𝕆𝕍𝕀𝔼 & 𝔻𝕆𝕎ℕ𝕃𝕆𝔸𝔻 」❖───╮*
-*│*
-*│* 🎥 \`『.cinesubz』\`     ➤ _🎞️ Movie Search_
-*│* 🎭 \`『.dubzone』\`      ➤ _🔊 Dubbed Movies_
-*│* 📝 \`『.sinhalasub』\`   ➤ _🇱🇰 Sinhala Subtitles_
-*│* 🎵 \`『.song』\`         ➤ _🎧 Song Download_
-*│* 🎶 \`『.tiktok』\`       ➤ _📱 TikTok Downloader_
-*│* 📸 \`『.ig』\`           ➤ _📷 Instagram Downloader_
-*│*
-*╰─────⚡●►*
+╭─  ♡  ᴄᴏᴍᴍᴀɴᴅꜱ  ♡  ─╮
 
-*╭───❖ 「 ⚙️ 𝔾𝔼ℕ𝔼ℝ𝔸𝕃 & 𝕋𝕆𝕃𝕊 」❖───╮*
-*│*
-*│* ⚡ \`『.ping』\`         ➤ _🚀 Check Bot Speed_
-*│* 💚 \`『.alive』\`        ➤ _✅ Bot Status_
-*│* 📜 \`『.menu』\`         ➤ _📖 Show Menu_
-*│* 📅 \`『.schedule』\`     ➤ _🗓️ Movie Schedule_
-*│* 🤖 \`『.ai』\`           ➤ _🧠 AI Chat_
-*│* 🔧 \`『.set』\`          ➤ _⚙️ Bot Settings_
-*│* 🖥️ \`『.system』\`       ➤ _💻 System Info_
-*│*
-*╰─────🔥●►*
+🎬  𝗠𝗼𝘃𝗶𝗲 & 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱
+  • .cinesubz    — Movie dl
+  • .dubzone     — Movie dl
+  • .sinhalasub — Movie dl
+  • .song            — Music dl
+  • .tiktok           —Tiktok dl
+
+⚙️  𝗚𝗲𝗻𝗲𝗿𝗮𝗹
+  • .alive       — status
+  • .menu        — menu
+  • .schedule    — custom masej
+  • .ai          — discussing with ai
+  • .set         — settings
+  • .system      — info
+
+╰─  © 𝚂ʜᴀɢY-xᴍᴅ  ─╯
+
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
         await socket.sendMessage(sender, {
@@ -1938,7 +1935,7 @@ case 'dubzone':
                 const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
 
                 const movie = info.data.data;
-                const quals = dl.data.downloads; // මෙහි 480p, 720p, 1080p ආදී ලැයිස්තුව අඩංගු වේ
+                const quals = dl.data.downloads;
 
                 if (!quals || quals.length === 0) {
                     return await socket.sendMessage(sender, { text: '❌ Me movie ekata download links kisiwak natha!' }, { quoted: m });
@@ -1953,7 +1950,7 @@ case 'dubzone':
                     detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
                 });
                 
-                detail += `\n*Reply with quality number (Ex: 1 for 480p):*`;
+                detail += `\n*Reply with quality number:*`;
 
                 const detailMsg = await socket.sendMessage(sender, {
                     image: { url: movie.thumbnail },
@@ -1971,29 +1968,36 @@ case 'dubzone':
                     if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
 
                     socket.ev.off('messages.upsert', qualityHandler);
-                    const selQ = quals[qNum];
+                    const selQ = quals[qNum]; // මෙතැනදී පරිශීලකයා දුන් නිවැරදි අංකයට අදාළ Quality Object එක තෝරා ගනී
 
-                    // 480p හෝ තෝරාගත් කොලිටියට අදාළ Direct Link එක ලබා ගැනීම
-                    const directUrl = selQ.direct_link || (selQ.links && selQ.links[0] ? selQ.links[0].url : null);
-
-                    if (!directUrl) {
-                        return await socket.sendMessage(sender, { text: '❌ Direct download link eka hoya ganna bari una!' }, { quoted: qm });
+                    // API එකෙන් එන විවිධ ලින්ක් ෆෝමැට් එක හඳුනාගැනීම (direct_link හෝ links array එකේ නිවැරදි එක)
+                    let directUrl = null;
+                    if (selQ.direct_link) {
+                        directUrl = selQ.direct_link;
+                    } else if (selQ.url) {
+                        directUrl = selQ.url;
+                    } else if (selQ.links && selQ.links.length > 0) {
+                        // සේරම links වලින් මූවී එක බාගත හැකි සැබෑ direct link එක හෝ වැඩිම ප්‍රමාණය ඇති ලින්ක් එක සොයාගැනීම
+                        const foundLink = selQ.links.find(l => l.url && (l.url.includes('http') || l.url.includes('drive') || l.url.includes('download')));
+                        directUrl = foundLink ? foundLink.url : selQ.links[0].url;
                     }
 
-                    // ලස්සනට පෙනීමට Downloading status එක යැවීම
+                    if (!directUrl) {
+                        return await socket.sendMessage(sender, { text: '❌ Me quality ekata adala direct download link eka hoya ganna bari una!' }, { quoted: qm });
+                    }
+
                     await socket.sendMessage(sender, { 
                         text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait a moment, sending as Document MP4..._` 
                     }, { quoted: qm });
 
                     try {
-                        // Document එකක් ලෙස MP4 ෆයිල් එක යැවීම (ඔබ ඉල්ලූ පරිදි)
+                        // Document එකක් ලෙස නිවැරදි ෆයිල් ලින්ක් එක යැවීම
                         await socket.sendMessage(sender, {
                             document: { url: directUrl },
                             mimetype: 'video/mp4',
                             fileName: `${movie.title} [${selQ.quality}] - SHAGGY XMD.mp4`,
                             caption: `╔═════════════════════╗
-║   🎬 *SHAGGY XMD MOVIE*   
-╚═════════════════════╝
+║   🎬 *SHAGGY XMD MOVIE* ╚═════════════════════╝
 📌 *Title:* ${movie.title}
 🎞️ *Quality:* ${selQ.quality}
 📦 *File Size:* ${selQ.size || 'N/A'}
@@ -2002,7 +2006,7 @@ case 'dubzone':
 
                     } catch (dlErr) {
                         console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (File size එක වැඩි වැඩි නිසා වන්නට පුළුවන්).' }, { quoted: qm });
+                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (File size එක වැඩි වැඩි නිසා හෝ ලින්ක් එක expired වී නිසා වන්නට පුළුවන්).' }, { quoted: qm });
                     }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
