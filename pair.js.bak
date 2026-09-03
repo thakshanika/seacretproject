@@ -1888,23 +1888,25 @@ case 'wether': {
 
     break;
 }
-               case 'movie':
+               const fs = require('fs');
+const path = require('path');
+
+case 'movie':
     if (!args.length) {
-        return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name>' }, { quoted: msg });
+        return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name> (Ex: .movie marco)' }, { quoted: msg });
     }
     const query = args.join(' ');
     await socket.sendMessage(sender, { text: `🎬 *Searching for "${query}"... Please wait!*` }, { quoted: msg });
 
     try {
-        // 1. SEARCH API (Query එක encode කර නිවැරදිව සර්ච් කිරීම)
+        // 1. SEARCH API (Safe Encoding)
         const searchUrl = `${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`;
         const search = await axios.get(searchUrl);
 
-        // API එකෙන් array හෝ වෙනත් key එකකින් ප්‍රතිඵල එනවා නම් ඒවා handle කරගැනීමට
         const searchResults = search.data.results || search.data.data || search.data;
 
-        if (!search.data.success && !searchResults || searchResults.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු සිනමාපටයක් හමු නොවීය. කරුණාකර වෙනත් නමකින් උත්සාහ කරන්න.` }, { quoted: msg });
+        if (!searchResults || searchResults.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු සිනමාපටයක් හමු නොවීය. නම නිවැරදි දැයි පරීක්ෂා කරන්න.` }, { quoted: msg });
         }
 
         const results = searchResults.slice(0, 10);
@@ -1964,7 +1966,7 @@ case 'wether': {
                     caption: detail
                 }, { quoted: m });
 
-                // 4. QUALITY SELECTION & DOCUMENT MP4 DOWNLOAD
+                // 4. QUALITY SELECTION & LARGE FILE DOWNLOAD HANDLER
                 const qualityHandler = async ({ messages }) => {
                     const qm = messages[0];
                     if (!qm?.message?.extendedTextMessage) return;
@@ -1977,7 +1979,6 @@ case 'wether': {
                     socket.ev.off('messages.upsert', qualityHandler);
                     const selQ = quals[qNum];
 
-                    // Direct Link එක හරියටම ලබා ගැනීම
                     let directUrl = selQ.direct_link || selQ.url || (selQ.links && selQ.links[0] ? selQ.links[0].url : null);
 
                     if (!directUrl) {
@@ -1985,27 +1986,49 @@ case 'wether': {
                     }
 
                     await socket.sendMessage(sender, { 
-                        text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait, sending as Document MP4..._` 
+                        text: `📥 *Downloading Started! (Large files may take a moment)*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait, downloading and sending as Document MP4..._` 
                     }, { quoted: qm });
 
                     try {
-                        // Document MP4 ලෙස යැවීම
+                        // **FIX FOR LARGE FILES:** ඍජුව URL එක යවනවා වෙනුවට Stream එකක් ලෙස Temp ෆයිල් එකකට ඩවුන්ලෝඩ් කර යැවීම මඟින් Size Error එක සම්පූර්ණෙන් ඉවත් වේ.
+                        const fileName = `${movie.title.replace(/[/\\?%*:|"<>]/g, '')} [${selQ.quality}] - CODE X.mp4`;
+                        const filePath = path.join(__dirname, fileName);
+
+                        const writer = fs.createWriteStream(filePath);
+                        const response = await axios({
+                            url: directUrl,
+                            method: 'GET',
+                            responseType: 'stream'
+                        });
+
+                        response.data.pipe(writer);
+
+                        await new Promise((resolve, reject) => {
+                            writer.on('finish', resolve);
+                            writer.on('error', reject);
+                        });
+
+                        // WhatsApp වෙත Document එක ලෙස යැවීම
                         await socket.sendMessage(sender, {
-                            document: { url: directUrl },
+                            document: { url: filePath },
                             mimetype: 'video/mp4',
-                            fileName: `${movie.title} [${selQ.quality}] - CODE X.mp4`,
+                            fileName: fileName,
                             caption: `╔═════════════════════╗
-║   🎬 *CODE X MOVIE BOT*  
-╚═════════════════════╝
+║   🎬 *CODE X MOVIE BOT* ╚═════════════════════╝
 📌 *Title:* ${movie.title}
 🎞️ *Quality:* ${selQ.quality}
 📦 *File Size:* ${selQ.size || 'N/A'}
 ⭐ *Developer:* Code X Game Developer`
                         }, { quoted: qm });
 
+                        // යැවීමෙන් පසු සර්වර් එකෙන් ලෝකල් ෆයිල් එක මකා දැමීම (Space ඉතිරි කර ගැනීමට)
+                        if (fs.existsSync(filePath)) {
+                            fs.unlinkSync(filePath);
+                        }
+
                     } catch (dlErr) {
                         console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (File size එක වැඩි වීම නිසා විය හැක).' }, { quoted: qm });
+                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (লින්ක් එක හෝ සර්වර් සීමාව ඉක්මවා ඇත).' }, { quoted: qm });
                     }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
@@ -2022,6 +2045,7 @@ case 'wether': {
         await socket.sendMessage(sender, { text: '❌ API Error: ' + (err.message || 'Unknown error') }, { quoted: msg });
     }
     break;
+
 // ==========================================
 // SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
 // ==========================================
