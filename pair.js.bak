@@ -1887,25 +1887,30 @@ case 'wether': {
     }
 
     break;
-}case 'movie': 
+}
+               case 'movie':
     if (!args.length) {
         return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name>' }, { quoted: msg });
     }
     const query = args.join(' ');
-    await socket.sendMessage(sender, { text: '🎬 *Searching movies... Please wait!*' }, { quoted: msg });
+    await socket.sendMessage(sender, { text: `🎬 *Searching for "${query}"... Please wait!*` }, { quoted: msg });
 
     try {
-        // 1. SEARCH API CALL (ඕනෑම මූවී නමක් සර්ච් කිරීම සඳහා)
-        const searchRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`);
-        
-        if (!searchRes.data || !searchRes.data.results || searchRes.data.results.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු ප්‍රතිඵලයක් හමු නොවීය!` }, { quoted: msg });
+        // 1. SEARCH API (Query එක encode කර නිවැරදිව සර්ච් කිරීම)
+        const searchUrl = `${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`;
+        const search = await axios.get(searchUrl);
+
+        // API එකෙන් array හෝ වෙනත් key එකකින් ප්‍රතිඵල එනවා නම් ඒවා handle කරගැනීමට
+        const searchResults = search.data.results || search.data.data || search.data;
+
+        if (!search.data.success && !searchResults || searchResults.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු සිනමාපටයක් හමු නොවීය. කරුණාකර වෙනත් නමකින් උත්සාහ කරන්න.` }, { quoted: msg });
         }
 
-        const results = searchRes.data.results.slice(0, 10); // ලැබෙන රිසල්ට්ස් වලින් උපරිම 10ක් ලබා ගනී
+        const results = searchResults.slice(0, 10);
         let list = `🎬 *CODE X - MOVIE SEARCH RESULTS*\n\n`;
         results.forEach((r, i) => {
-            list += `*${i + 1}.* ${r.title}\n`;
+            list += `*${i + 1}.* ${r.title || r.name}\n`;
         });
         list += `\n*Reply with the movie number:*`;
 
@@ -1914,7 +1919,7 @@ case 'wether': {
             caption: list
         }, { quoted: msg });
 
-        // 2. MOVIE NUMBER SELECTION HANDLER
+        // 2. MOVIE NUMBER SELECTION
         const movieHandler = async ({ messages }) => {
             const m = messages[0];
             if (!m?.message?.extendedTextMessage) return;
@@ -1930,29 +1935,32 @@ case 'wether': {
 
             try {
                 // 3. FETCH DETAILS & DOWNLOAD QUALITIES
-                const infoRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
-                const dlRes = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
+                const targetLink = selected.link || selected.url;
+                const targetSlug = selected.slug;
 
-                const movie = infoRes.data.data;
-                const quals = dlRes.data.downloads; // 480p, 720p, 1080p ලැයිස්තුව
+                const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(targetLink)}&slug=${targetSlug}&api_key=${config.API_KEY}`);
+                const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${targetSlug}&api_key=${config.API_KEY}`);
+
+                const movie = info.data.data || info.data;
+                const quals = dl.data.downloads || dl.data;
 
                 if (!quals || quals.length === 0) {
-                    return await socket.sendMessage(sender, { text: '❌ මෙම චිත්‍රපටය සඳහා ඩවුන්ලෝඩ් ලින්ක් නොමැත!' }, { quoted: m });
+                    return await socket.sendMessage(sender, { text: '❌ මෙම මූවී එක සඳහා ඩවුන්ලෝඩ් ලින්ක් කිසිවක් හමු නොවීය!' }, { quoted: m });
                 }
 
                 let detail = `🎥 *${movie.title}*\n\n`;
                 detail += `⭐ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
-                detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 120) + '...' : 'N/A'}\n\n`;
-                detail += `📥 *SELECT QUALITY:*\n\n`;
+                detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 150) + '...' : 'N/A'}\n\n`;
+                detail += `📥 *SELECT QUALITY (480p / 720p / 1080p):*\n\n`;
                 
                 quals.forEach((q, i) => {
-                    detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'N/A'}*\n`;
+                    detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
                 });
                 
-                detail += `\n*Reply with quality number:*`;
+                detail += `\n*Reply with your quality number:*`;
 
                 const detailMsg = await socket.sendMessage(sender, {
-                    image: { url: movie.thumbnail || config.BOT_IMAGE },
+                    image: { url: movie.thumbnail || movie.image || config.BOT_IMAGE },
                     caption: detail
                 }, { quoted: m });
 
@@ -1969,14 +1977,11 @@ case 'wether': {
                     socket.ev.off('messages.upsert', qualityHandler);
                     const selQ = quals[qNum];
 
-                    // Direct Link එක නිවැරදිව ලබා ගැනීම
-                    let directUrl = selQ.link || selQ.direct_link || selQ.url;
-                    if (!directUrl && selQ.links && selQ.links.length > 0) {
-                        directUrl = selQ.links[0].url || selQ.links[0].link;
-                    }
+                    // Direct Link එක හරියටම ලබා ගැනීම
+                    let directUrl = selQ.direct_link || selQ.url || (selQ.links && selQ.links[0] ? selQ.links[0].url : null);
 
                     if (!directUrl) {
-                        return await socket.sendMessage(sender, { text: '❌ අදාළ කොලිටිය සඳහා Direct link එක සොයාගත නොහැකි විය!' }, { quoted: qm });
+                        return await socket.sendMessage(sender, { text: '❌ අදාළ කොලිටිය සඳහා direct download link එක ලබා ගැනීමට නොහැකි විය!' }, { quoted: qm });
                     }
 
                     await socket.sendMessage(sender, { 
@@ -1984,23 +1989,23 @@ case 'wether': {
                     }, { quoted: qm });
 
                     try {
-                        // Document එකක් ලෙස MP4 ෆයිල් එක යැවීම
+                        // Document MP4 ලෙස යැවීම
                         await socket.sendMessage(sender, {
                             document: { url: directUrl },
                             mimetype: 'video/mp4',
                             fileName: `${movie.title} [${selQ.quality}] - CODE X.mp4`,
                             caption: `╔═════════════════════╗
-║   🎬 *CODE X MOVIE BOT* 
+║   🎬 *CODE X MOVIE BOT*  
 ╚═════════════════════╝
 📌 *Title:* ${movie.title}
 🎞️ *Quality:* ${selQ.quality}
 📦 *File Size:* ${selQ.size || 'N/A'}
-⭐ *Powered by:* Code X Game Developer`
+⭐ *Developer:* Code X Game Developer`
                         }, { quoted: qm });
 
                     } catch (dlErr) {
                         console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය.' }, { quoted: qm });
+                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (File size එක වැඩි වීම නිසා විය හැක).' }, { quoted: qm });
                     }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
@@ -2014,7 +2019,7 @@ case 'wether': {
 
     } catch (err) {
         console.log(err);
-        await socket.sendMessage(sender, { text: '❌ API Error: ' + err.message }, { quoted: msg });
+        await socket.sendMessage(sender, { text: '❌ API Error: ' + (err.message || 'Unknown error') }, { quoted: msg });
     }
     break;
 // ==========================================
