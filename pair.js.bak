@@ -1963,7 +1963,8 @@ case 'movie':
 const fs = require('fs');
 const path = require('path');
 
-case 'movie':
+case 'set':
+case 'setting': {
     if (!args.length) {
         return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name> (Ex: .movie avatar)' }, { quoted: msg });
     }
