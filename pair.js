@@ -39,10 +39,10 @@ const config = {
     API_MOVIE_URL: 'https://api-siteh-22e22e4cb068.herokuapp.com',
     API_KEY:'lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e',
     BOT_IMAGE:'https://cdn.phototourl.com/free/2026-09-01-c9fad274-7d07-49ea-9ed1-34832687d820.jpg',
-    BOT_FOOTER:"Fʟɪxᴏʀᴀ ✘ 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
+    BOT_FOOTER:"SHAGGY XMD 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
      MGROUP_LINK: 'https://chat.whatsapp.com/JpFSNrnqtnQIqdM0WlNds1',
-    MOVIE_FOOTER:"​⏤͟͟͞͞★❮ LAKIYA 〽️OVIE ⏤͟͟͞͞★",
-     MOVIE_CAPTION:"LAKIYA MOVIE",
+    MOVIE_FOOTER:"​⏤͟͟͞͞★❮ SHAGGY XMD 〽️OVIE ⏤͟͟͞͞★",
+     MOVIE_CAPTION:"SHAGGY-XMD MOVIE",
     PREFIX: '.',
     OWNER_NUMBERS: ['94703830GGGG990'],
     BOT_NAME: "TEST-BOT",
@@ -257,8 +257,8 @@ async function setupCommandHandlers(socket, number) {
 * 🎤 𝗖ʜᴀɴɴᴇʟ* ➟ _${data.author?.name || 'N/A'}_
 *🔢 𝗥ᴇᴘʟʏ ᴡɪᴛʜ ᴀ 𝗡ᴜᴍʙᴇʀ 👇*
 
-*01 ᴅᴏᴡɴʟᴏᴀᴅ ᴀᴜᴅɪᴏ*
-*02 ᴅᴏᴡɴʟᴏᴀᴅ ᴅᴏᴄᴜᴍᴇɴᴛ*
+*01 ᴅᴏᴡɴʟᴏᴀᴅ ᴀᴜᴅɪᴏ 🌐*
+*02 ᴅᴏᴡɴʟᴏᴀᴅ ᴅᴏᴄᴜᴍᴇɴᴛ 🌐*
 `;
 
         const sentMsg = await socket.sendMessage(sender, {
@@ -1475,6 +1475,12 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 │ 🎡 .menu
 │ 🎡 .alive
 │ 🎡 .sinhalasub
+│ 🎡 .ig
+│ 🎡 .schedule
+│ 🎡 .ai
+│ 🎡 .set
+│ 🎡 .rexporn
+│ 🎡 .animeclub
 *╰────────●●►*   
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1489,228 +1495,771 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
         console.error(e);
     }
 }
-break;  
+break;    
 
-                    // AnimeClub TV Episode Download Command
-    case 'animeclub':
-    case 'animedl': {
-        if (!text) return reply('කරුණාකර ඇනිමේ කථා මාලාවේ ලින්ක් එක දෙන්න!\nඋදා: `.animedl https://animeclub2.com/episodes/chainsaw-man-1x1/`');
+
+     // ==========================================
+// 1. ANIME SEARCH & DOWNLOAD COMMAND (.anime)
+// ==========================================
+case 'anime':
+case 'animedl': {
+    if (!text) return reply('❌ කරුණාකර ඇනිමේ නම දෙන්න!\n✨ උදා: `.anime naruto`');
+    
+    reply('🍥 ඇනිමේ විස්තර සහ ඩවුන්ලෝඩ් ලින්ක් සොයමින් පවතී, රැඳී සිටින්න...');
+
+    try {
+        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+        const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
         
-        reply('🍥 ඇනිමේ ඩවුන්ලෝඩ් ලින්ක් එක සූදානම් කරමින් පවතී, රැඳී සිටින්න...');
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-        try {
-            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
+        if (data && data.status && data.downloads && data.downloads.length > 0) {
+            let message = `📥 *AnimeClub TV Downloads Found!*\n\n`;
             
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            if (data && data.status && data.downloads && data.downloads.length > 0) {
-                let message = `📥 *AnimeClub TV Episode Found!*\n\n`;
-                
-                for (let dl of data.downloads) {
-                    let quality = dl.quality || 'HD';
-                    let link = dl.link || dl.direct_link;
-                    message += `*Quality/Source:* ${quality}\n*Download Link:* ${link}\n\n`;
-                }
-
-                await reply(message.trim());
-            } else {
-                reply('❌ කණගාටුයි, අදාළ ලින්ක් එකෙන් ඩවුන්ලෝඩ් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
+            for (let dl of data.downloads) {
+                let quality = dl.quality || 'HD';
+                let link = dl.link || dl.direct_link;
+                message += `*Quality/Source:* ${quality}\n*Download Link:* ${link}\n\n`;
             }
-        } catch (err) {
-            console.error('AnimeClub DL Error:', err);
-            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+
+            await reply(message.trim());
+        } else {
+            reply('❌ කණගාටුයි, අදාළ නම සඳහා ඩවුන්ලෝඩ් ලින්ක් ලබා ගැනීමට නොහැකි විය.');
         }
-        break;
+    } catch (err) {
+        console.error('Anime DL Error:', err);
+        reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
     }
-// 1. XNXX Video Search Command (.xnxxsearch <query>)
-    case 'xnxxsearch':
-    case 'xnxx': {
-        if (!text) return reply('කරුණාකර සෙවිය යුතු නම හෝ වචනය දෙන්න!\nඋදා: `.xnxx teen`');
+    break;
+}
+// ==========================================
+// XNXX VIDEO DOCUMENT SENDER (.xndl)
+// ==========================================
+case 'xndl':
+case 'xnxxindl': {
+    if (!text) return reply('❌ කරුණාකර XNXX වීඩියෝ අංකය හෝ ලින්ක් එක දෙන්න!\n✨ උදා: `.xndl 1`');
+    
+    let targetUrl = text.trim();
+
+    if (/^\d+$/.test(targetUrl)) {
+        global.xnxxCache = global.xnxxCache || {};
+        const userCache = global.xnxxCache[sender];
         
-        reply('🔍 XNXX වීඩියෝව සොයමින් පවතී, කරුණාකර මොහොතක් රැඳී සිටින්න...');
-
-        try {
-            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const searchUrl = `https://api.chamindu.site/api/adult/xnxx/search?q=${encodeURIComponent(text)}&page=1&api_key=${apiKey}`;
-            
-            const searchRes = await fetch(searchUrl);
-            const searchData = await searchRes.json();
-
-            if (searchData && searchData.success && searchData.results && searchData.results.length > 0) {
-                let message = `🔞 *XNXX Search Results for: "${text}"*\n\n`;
-                
-                // මුල් වීඩියෝ 5 පෙන්වීමට
-                let resultsToShow = searchData.results.slice(0, 5);
-                
-                for (let i = 0; i < resultsToShow.length; i++) {
-                    let vid = resultsToShow[i];
-                    message += `${i + 1}. *${vid.title}*\n🔗 *URL:* ${vid.url}\n\n`;
-                }
-                
-                message += `_ඩවුන්ලෝඩ් කර ගැනීමට:_\n\`.xndl <video_url>\``;
-
-                await reply(message.trim());
-            } else {
-                reply('❌ කණගාටුයි, අදාළ සෙවුමට ප්‍රතිඵල හමු නොවීය.');
-            }
-        } catch (err) {
-            console.error('XNXX Search Error:', err);
-            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        if (!userCache || userCache.length === 0) {
+            return reply('❌ කරුණාකර මුලින්ම `.xnxx <query>` මඟින් සෙවුමක් සිදු කරන්න!');
         }
-        break;
+
+        const index = parseInt(targetUrl) - 1;
+        if (index < 0 || index >= userCache.length) {
+            return reply(`❌ කරුණාකර 1 සහ ${userCache.length} අතර නිවැරදි අංකයක් ලබා දෙන්න!`);
+        }
+
+        targetUrl = userCache[index].url;
     }
 
-    // 2. XNXX Video Stream & DL Command (.xndl <url>)
-    case 'xndl':
-    case 'xnxxindl': {
-        if (!text) return reply('කරුණාකර XNXX වීඩියෝ ලින්ක් එක දෙන්න!\nඋදා: `.xndl https://www.xnxx.com/video-...`');
+    let cleanUrl = targetUrl.replace(/[<>]/g, '').trim();
+    
+    reply('📥 වීඩියෝව ඩොකියුමන්ට් එකක් ලෙස සූදානම් කරමින් පවතී, ටිකක් ඉඳපන්...');
+
+    try {
+        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+        const dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(cleanUrl)}&api_key=${apiKey}`;
         
-        let cleanUrl = text.replace(/[<>]/g, '').trim();
-        
-        reply('📥 XNXX ඩවුන්ලෝඩ් සහ ස්ට්‍රීම් ලින්ක් සූදානම් කරමින් පවතී...');
+        const dlRes = await fetch(dlApiUrl);
+        const dlData = await dlRes.json();
+
+        if (dlData && dlData.success) {
+            let videoFileUrl = dlData.download_url || dlData.direct_link;
+
+            if (!videoFileUrl) {
+                return reply('❌ වීඩියෝ ෆයිල් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
+            }
+
+            // Document එකක් ලෙස 2GB දක්වා ෆයිල් යැවීම (mimetype සහ fileName සමඟ)
+            await conn.sendMessage(sender, {
+                document: { url: videoFileUrl },
+                mimetype: 'video/mp4',
+                fileName: `SHAGGY_XMD_Video.mp4`,
+                caption: `🔞 *SHAGGY XMD - XNXX DOWNLOADER*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            }, { quoted: msg });
+
+        } else {
+            reply('❌ කණගාටුයි, අදාළ වීඩියෝව ඩවුන්ලෝඩ් කිරීමට නොහැකි විය.');
+        }
+    } catch (err) {
+        console.error('XNXX DL Error:', err);
+        reply('❌ දෝෂයක් සිදු විය! සර්වර් එක බිඳ වැටී ඇත හෝ ලින්ක් එක කල් ඉකුත් වී ඇත.');
+    }
+    break;
+}
+case 'schedule':
+case 'remind': {
+    if (!isOwner) {
+        return await socket.sendMessage(sender, {
+            text: "❌ *Only the bot owner can use this command.*"
+        }, { quoted: msg });
+    }
+
+    const input = args.join(' ');
+    const parts = input.split('|');
+
+    if (parts.length < 3) {
+        let helpText = `🎀 *𝗦𝗖𝗛𝗘𝗗𝗨𝗟𝗘𝗥  𝗠𝗔𝗡𝗔𝗚𝗘𝗥*\n\n` +
+            `📝 *𝖴𝗌𝖺𝗀𝖾 :* \`.schedule NUMBER | MESSAGE | TIME\`\n` +
+            `✨ *𝖤𝗑𝖺𝗆𝗉𝗅𝖾 :* \`.schedule 94768069800 | Hello Bro | 30s\`\n` +
+            `🫧 *𝖦𝗋𝗈𝗎𝗉 𝖤𝗑 :* \`.schedule 1203630...g.us | Meeting start! | 5m\`\n\n` +
+            `🐞 *Time Units :* \`s\` (seconds), \`m\` (minutes), \`h\` (hours)\n` +
+            `⚠️ *Note :* Use \`|\` (pipe) to separate parts.`;
+
+        return await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE || config.ERROR },
+            caption: formatMessage(
+                `⏰ 𝗦𝗖𝗛𝗘𝗗𝗨𝗟𝗘  𝗖𝗢𝗠𝗠𝗔𝗡𝗗`,
+                helpText,
+                `${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            )
+        }, { quoted: msg });
+    }
+
+    let target = parts[0].trim();
+    let reminderMsg = parts[1].trim(); // මැසේජ් එක දැන් දෙවනියට තියෙන්නේ
+    let timeArg = parts[2].trim();     // වෙලාව දැන් තුන්වනියට තියෙන්නේ
+
+    // Number එකක් නම් JID එකකට හරවා ගැනීම
+    if (!target.includes('@s.whatsapp.net') && !target.includes('@g.us')) {
+        target = target.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+    }
+
+    // Time එක convert කරගැනීම (s, m, h)
+    const unit = timeArg.slice(-1).toLowerCase();
+    const value = parseInt(timeArg.slice(0, -1));
+
+    if (isNaN(value) || value <= 0 || !['s', 'm', 'h'].includes(unit)) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *Invalid time format!*\nUse like: \`30s\`, \`5m\`, or \`1h\` at the end.`
+        }, { quoted: msg });
+    }
+
+    let delayMs = value * 1000;
+    if (unit === 'm') delayMs = value * 60 * 1000;
+    if (unit === 'h') delayMs = value * 60 * 60 * 1000;
+
+    if (delayMs > 24 * 60 * 60 * 1000) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *Time limit exceeded!* Maximum schedule time is 24 hours.`
+        }, { quoted: msg });
+    }
+
+    await socket.sendMessage(sender, {
+        text: `⏳ *Scheduled successfully!*\nTarget: \`${target}\`\nTime: *${timeArg}*`
+    }, { quoted: msg });
+
+    // නියමිත වෙලාව ආවම වෙනත් අමතර වැකි නැතුව අදාළ මැසේජ් එක විතරක් යැවීම
+    setTimeout(async () => {
+        try {
+            await socket.sendMessage(target, {
+                text: reminderMsg
+            });
+        } catch (err) {
+            console.error("Schedule Send Error:", err);
+        }
+    }, delayMs);
+}
+break;
+
+ case 'ig':
+case 'instagram': {
+    if (!args[0]) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *Please provide an Instagram link!*\n✨ *Example:* \`.ig https://www.instagram.com/reel/...\``
+        }, { quoted: msg });
+    }
+
+    let igUrl = args[0].split("?")[0];
+    try {
+        await socket.sendMessage(sender, { react: { text: "⬇️", key: msg.key } });
+
+        let mediaUrl = null;
+        let isVideo = true;
+
+        // Bypass API 1: Direct SnapInsta / SaveFrom alternative endpoint
+        try {
+            const res1 = await fetch(`https://itzpire.com/download/instagram?url=${encodeURIComponent(igUrl)}`);
+            const data1 = await res1.json();
+            if (data1.status && data1.data) {
+                mediaUrl = data1.data.url || data1.data[0]?.url;
+                isVideo = data1.data.type === 'video' || data1.data[0]?.type === 'video' || true;
+            }
+        } catch (e) {}
+
+        // Bypass API 2: Siputzx Alternate Server
+        if (!mediaUrl) {
+            try {
+                const res2 = await fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(igUrl)}`);
+                const data2 = await res2.json();
+                if (data2.status && data2.data && data2.data.length > 0) {
+                    mediaUrl = data2.data[0].url;
+                    isVideo = data2.data[0].type === 'video';
+                }
+            } catch (e) {}
+        }
+
+        // Bypass API 3: Vyuh / Vkrtechnologies Fallback
+        if (!mediaUrl) {
+            try {
+                const res3 = await fetch(`https://api.vkrtechnologies.com/api/dl/ig?url=${encodeURIComponent(igUrl)}`);
+                const data3 = await res3.json();
+                if (data3.status && (data3.data || data3.url)) {
+                    mediaUrl = data3.data || data3.url;
+                }
+            } catch (e) {}
+        }
+
+        if (!mediaUrl) {
+            return await socket.sendMessage(sender, { 
+                text: `❌ *Instagram security has temporarily rate-limited public downloaders. Please try downloading via another post or try again later!*` 
+            }, { quoted: msg });
+        }
+
+        if (isVideo) {
+            await socket.sendMessage(sender, {
+                video: { url: mediaUrl },
+                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗩𝗜𝗗𝗘𝗢*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            }, { quoted: msg });
+        } else {
+            await socket.sendMessage(sender, {
+                image: { url: mediaUrl },
+                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗜𝗠𝗔𝗚𝗘*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            }, { quoted: msg });
+        }
+
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("IG Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *An error occurred while downloading media. Please try again later.*` }, { quoted: msg });
+    }
+}
+break;
+                    case 'ai':
+case 'codex': {
+    const query = args.join(' ');
+    if (!query && !msg.hasMedia) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *What do you want to ask Codex AI?*\n✨ *Example:* \`\`.ai Quantum computing kiyanne mokakda?\`\``
+        }, { quoted: msg });
+    }
+
+    try {
+        await socket.sendMessage(sender, { react: { text: "🤖", key: msg.key } });
+
+        let imageUrl = null;
+        let videoUrl = null;
+
+        // Image / Media support (කොටස් වලට photo එකක් හෝ caption එකක් එක්ක photo එකක් එව්වොත් handle කරන්න)
+        const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+        const isQuotedImage = quotedMessage?.imageMessage;
+        const isDirectImage = msg.message?.imageMessage;
+
+        if (isDirectImage || isQuotedImage) {
+            // Media download කිරීම සඳහා Baileys වල downloadMediaMessage පාවිච්චි කරයි
+            const stream = await downloadMediaMessage(
+                isDirectImage ? msg : { message: quotedMessage },
+                'buffer',
+                {},
+                { logger: console }
+            );
+            
+            const mimeType = isDirectImage ? msg.message.imageMessage.mimetype : quotedMessage.imageMessage.mimetype;
+            imageUrl = `data:${mimeType};base64,${stream.toString('base64')}`;
+        }
+
+        const CODEX_API_KEY = "cx_live_555l2y4l5a5t0y5z1x5a1i4j221o5h3j";
+        const CODEX_URL = "https://code-x-ai.lovable.app/api/public/v1/chat";
+
+        const apiResponse = await fetch(CODEX_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${CODEX_API_KEY}`
+            },
+            body: JSON.stringify({
+                message: query || "Meke thiyenne mokakda?",
+                session: sender,          // chat id එකම session එක විදිහට දීලා long-term memory active කිරීම
+                image_url: imageUrl       // Vision / Photo support එක
+            })
+        });
+
+        const resData = await apiResponse.json();
+        const aiReply = resData.reply || resData.error || "Sorry, I couldn't process that.";
+
+        await socket.sendMessage(sender, {
+            text: `${aiReply}\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+        }, { quoted: msg });
+
+        await socket.sendMessage(sender, { react: { text: "✨", key: msg.key } });
+
+    } catch (err) {
+        console.error("Codex AI Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *Codex AI service is currently busy.*` }, { quoted: msg });
+    }
+}
+break;
+
+   // ==========================================
+// 1. SYSTEM / PING COMMAND
+// ==========================================
+case 'system':
+case 'ping':
+case 'status': {
+    try {
+        await socket.sendMessage(sender, { react: { text: "⚡", key: msg.key } });
+
+        const os = await import('os');
+        const startTime = process.hrtime();
+        const diff = process.hrtime(startTime);
+        const latency = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(4);
+
+        const totalMem = os.totalmem();
+        const freeMem = os.freemem();
+        const usedMem = totalMem - freeMem;
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        const uptimeSeconds = process.uptime();
+        const days = Math.floor(uptimeSeconds / (3600 * 24));
+        const hours = Math.floor((uptimeSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+        const seconds = Math.floor(uptimeSeconds % 60);
+        const uptimeFormatted = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+        let systemText = `🖥️ *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗  -  𝗦𝗬𝗦𝗧𝗘𝗠  𝗦𝗧𝗔𝗧𝗨𝗦* 📊\n\n` +
+            `⚡ *𝖲ᵵᵃᵗᵘˢ 𝖲ᵖᵉᵉᵈ :* \`${latency} ms\`\n` +
+            `⏳ *𝖴ᵖᵗⁱᵐᵉ :* \`${uptimeFormatted}\`\n` +
+            `🧠 *𝖱𝖠𝖬 𝖴𝗌𝖺𝗀𝖾 :* \`${formatBytes(usedMem)} / ${formatBytes(totalMem)}\`\n` +
+            `🌐 *𝖯𝖑ᵃᵗᶠᵒʳᵐ :* \`${os.platform()} (${os.arch})\`\n\n` +
+            `> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`;
+
+        await socket.sendMessage(sender, { text: systemText }, { quoted: msg });
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("System Cmd Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *Failed to fetch system status.*` }, { quoted: msg });
+    }
+}
+break;
+
+// ==========================================
+// 2. BOTS / SESSIONS COMMAND
+// ==========================================
+case 'sessions':
+case 'connectedbots':
+case 'bots': {
+    if (!isOwner) {
+        return await socket.sendMessage(sender, {
+            text: "❌ *Only the bot owner can use this command.*"
+        }, { quoted: msg });
+    }
+
+    try {
+        await socket.sendMessage(sender, { react: { text: "🔍", key: msg.key } });
+
+        const mongoose = (await import('mongoose')).default;
+        const db = mongoose.connection.db;
+
+        if (!db) {
+            return await socket.sendMessage(sender, { text: `❌ *MongoDB connection is not active!*` }, { quoted: msg });
+        }
+
+        const collections = await db.listCollections().toArray();
+        let sessionData = [];
+        let foundCollectionName = '';
+
+        const targetColl = collections.find(c => 
+            c.name.toLowerCase().includes('session') || 
+            c.name.toLowerCase().includes('auth') || 
+            c.name.toLowerCase().includes('bot') ||
+            c.name.toLowerCase().includes('baileys')
+        );
+
+        if (targetColl) {
+            foundCollectionName = targetColl.name;
+            const collection = db.collection(foundCollectionName);
+            sessionData = await collection.find({}).limit(15).toArray();
+        }
+
+        let sessionText = `🤖 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗  -  𝗖𝗢𝗡𝗡𝗘𝗖𝗧𝗘𝗗  𝗕𝗢𝗧𝗦 / 𝗦𝗘𝗦𝗦𝗜𝗢𝗡𝗦* 🌐\n\n` +
+            `📂 *Collection :* \`${foundCollectionName || 'None'}\`\n` +
+            `📊 *Active Count :* \`${sessionData.length} Records\`\n\n`;
+
+        if (sessionData.length > 0) {
+            sessionData.forEach((ses, index) => {
+                const num = index + 1;
+                const idStr = JSON.stringify(ses._id || ses.id || 'Unknown');
+                sessionText += `*${num}.* \`${idStr.replace(/["']/g, '')}\`\n`;
+            });
+        } else {
+            sessionText += `_No active session keys found in MongoDB collections._\n`;
+        }
+
+        sessionText += `\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`;
+
+        await socket.sendMessage(sender, { text: sessionText }, { quoted: msg });
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+
+    } catch (err) {
+        console.error("Sessions Cmd Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *Failed to fetch connected bots: ${err.message}*` }, { quoted: msg });
+    }
+}
+break;
+
+// ==========================================
+// 3. INSTAGRAM DOWNLOADER (.ig)
+// ==========================================
+case 'ig':
+case 'instagram': {
+    if (!args[0]) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *Please provide an Instagram link!*\n✨ *Example:* \`.ig https://www.instagram.com/reel/...\``
+        }, { quoted: msg });
+    }
+
+    let igUrl = args[0].split("?")[0];
+    try {
+        await socket.sendMessage(sender, { react: { text: "⬇️", key: msg.key } });
+
+        let mediaUrl = null;
+        let isVideo = true;
 
         try {
-            const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-            const dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(cleanUrl)}&api_key=${apiKey}`;
-            
-            const dlRes = await fetch(dlApiUrl);
-            const dlData = await dlRes.json();
-
-            if (dlData && dlData.success) {
-                let message = `📥 *XNXX Video Links Found!*\n\n`;
-                
-                if (dlData.direct_link) {
-                    message += `🔗 *Direct Stream Link:* ${dlData.direct_link}\n\n`;
-                }
-                if (dlData.download_url) {
-                    message += `💾 *Download Link:* ${dlData.download_url}\n\n`;
-                }
-                if (dlData.note) {
-                    message += `ℹ️ _${dlData.note}_`;
-                }
-
-                await reply(message.trim());
-            } else {
-                reply('❌ කණගාටුයි, අදාළ වීඩියෝව සඳහා ලින්ක් ලබා ගැනීමට නොහැකි විය.');
+            const res1 = await fetch(`https://itzpire.com/download/instagram?url=${encodeURIComponent(igUrl)}`);
+            const data1 = await res1.json();
+            if (data1.status && data1.data) {
+                mediaUrl = data1.data.url || data1.data[0]?.url;
+                isVideo = data1.data.type === 'video' || data1.data[0]?.type === 'video' || true;
             }
-        } catch (err) {
-            console.error('XNXX DL Error:', err);
-            reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
+        } catch (e) {}
+
+        if (!mediaUrl) {
+            try {
+                const res2 = await fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(igUrl)}`);
+                const data2 = await res2.json();
+                if (data2.status && data2.data && data2.data.length > 0) {
+                    mediaUrl = data2.data[0].url;
+                    isVideo = data2.data[0].type === 'video';
+                }
+            } catch (e) {}
         }
-        break;
+
+        if (!mediaUrl) {
+            return await socket.sendMessage(sender, { 
+                text: `❌ *Instagram security has temporarily rate-limited downloaders. Please try a different link!*` 
+            }, { quoted: msg });
+        }
+
+        if (isVideo) {
+            await socket.sendMessage(sender, {
+                video: { url: mediaUrl },
+                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗩𝗜𝗗𝗘𝗢*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            }, { quoted: msg });
+        } else {
+            await socket.sendMessage(sender, {
+                image: { url: mediaUrl },
+                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗜𝗠𝗔𝗚𝗘*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            }, { quoted: msg });
+        }
+
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("IG Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *An error occurred while downloading media.*` }, { quoted: msg });
     }
-                case 'set':
-                case 'setting': {
-                    if (!isOwner) {
-                        return await socket.sendMessage(sender, {
-                            text: "❌ *Only the bot owner can use this command.*"
-                        }, { quoted: msg });
-                    }
+}
+break;
 
-                    if (!args.length) {
-                        let helpText = `🎀 *𝗦𝗬𝗦𝗧𝗘𝗠  𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗧𝗜𝗢𝗡  𝗣𝗔𝗡𝗘𝗟*\n\n` +
-                            `📝 *𝖴𝗌𝖺𝗀𝖾 :* \`.set KEY:VALUE\`\n` +
-                            `✨ *𝖤𝗑𝖺𝗆𝗉𝗅𝖾 :* \`.set MODE:public\`\n` +
-                            `🫧 *𝖬𝗎𝗅𝗍𝗂 :* \`.set PREFIX:!\`\n\n` +
-                            `🐞 *𝖠𝗏𝖺𝗂𝗅𝖺𝖻𝗅𝖾  \𝖲𝗒𝗌𝗍𝖾𝗆  𝖪𝖾𝗒𝗌 :*\n` +
-                            `🐞 \`AUTO_RECORDING\`\n` +
-                            `🐞 \`AUTO_TYPING\`\n` +
-                            `🐞 \`PREFIX\`\n` +
-                            `🐞 \`MODE\` (public/private)\n` +
-                            `🐞 \`BOT_IMAGE\`\n` +
-                            `🐞 \`AIR_FOOTER\`\n` +
-                            `🐞 \`BOT_NAME\`\n`;
+// ==========================================
+// 1. STICKER COMMAND (.sticker)
+// ==========================================
+case 'sticker':
+case 's': {
+    try {
+        await socket.sendMessage(sender, { react: { text: "🎨", key: msg.key } });
 
-                        return await socket.sendMessage(sender, {
-                            image: { url: config.BOT_IMAGE || config.ERROR },
-                            caption: formatMessage(
-                                `𝗖𝗢𝗡𝗙𝗜𝗚  𝗠𝗔𝗡𝗔𝗚𝗘𝗥  ⚙️`,
-                                helpText,
-                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-                            )
-                        }, { quoted: msg });
-                    }
+        const q = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage || msg.message;
+        const mime = q?.imageMessage || q?.videoMessage;
+        
+        if (!mime) {
+            return await socket.sendMessage(sender, {
+                text: `❌ *Please send or reply to an image/video to make a sticker!*`
+            }, { quoted: msg });
+        }
 
-                    const input = args.join(' ');
-                    const updates = {};
-                    const validKeys = [
-                        'PREFIX', 'AUTO_RECORDING', 'AUTO_TYPING',
-                        'BOT_NAME', 'AIR_FOOTER', 'JID', 'MODE'
-                    ];
+        const { downloadMediaMessage } = await import('@whiskeysockets/baileys');
+        const mediaStream = await downloadMediaMessage(
+            msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ? { message: msg.message.extendedTextMessage.contextInfo.quotedMessage } : msg,
+            'buffer',
+            {},
+            { logger: console }
+        );
 
-                    const pairs = input.split(',');
-                    let hasInvalidKey = false;
-                    let invalidKeyName = '';
+        await socket.sendMessage(sender, { sticker: mediaStream }, { quoted: msg });
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("Sticker Error:", err);
+        await socket.sendMessage(sender, { text: `❌ *Sticker Error: Could not process media.*` }, { quoted: msg });
+    }
+}
+break;
 
-                    pairs.forEach(pair => {
-                        let [key, ...valueParts] = pair.split(':');
-                        if (!key || valueParts.length === 0) return;
+// ==========================================
+// 2. IMAGE / PINTEREST SEARCH (.image)
+// ==========================================
+case 'image':
+case 'img':
+case 'pinterest': {
+    const query = args.join(' ');
+    if (!query) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *What image do you want to search for?*\n✨ *Example:* \`.image Anime Neon\``
+        }, { quoted: msg });
+    }
 
-                        key = key.trim().toUpperCase();
-                        let value = valueParts.join(':').trim();
+    try {
+        await socket.sendMessage(sender, { react: { text: "🔍", key: msg.key } });
 
-                        if (validKeys.includes(key)) {
-                            if (value.toLowerCase() === 'true') {
-                                updates[key] = 'true';
-                            } else if (value.toLowerCase() === 'false') {
-                                updates[key] = 'false';
-                            } else {
-                                updates[key] = value;
-                            }
-                        } else {
-                            hasInvalidKey = true;
-                            invalidKeyName = key;
-                        }
-                    });
+        // Fetch with timeout safety
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // තත්පර 5 කින් cancel වේ
 
-                    if (hasInvalidKey) {
-                        return await socket.sendMessage(sender, {
-                            text: `Invalid system key: \`${invalidKeyName}\`\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-                        }, { quoted: msg });
-                    }
+        const response = await fetch(`https://itzpire.com/search/pinterest?query=${encodeURIComponent(query)}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
-                    if (Object.keys(updates).length === 0) {
-                        return await socket.sendMessage(sender, { text: "🎀 *𝗙𝗢𝗥𝗠𝗔𝗧  𝗘𝗥𝗥𝗢𝗥:* Please use `Key:Value` structure." });
-                    }
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            return await socket.sendMessage(sender, { text: `❌ *Image servers are temporarily offline (HTML/Cloudflare response).*` }, { quoted: msg });
+        }
 
-                    try {
-                        await socket.sendMessage(sender, { react: { text: "⚙️", key: msg.key } });
+        if (!result.status || !result.result || result.result.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *No images found for your query!*` }, { quoted: msg });
+        }
 
-                        sessionConfig = { ...sessionConfig, ...updates };
-                        await updateUserConfig(sanitizedNumber, sessionConfig);
-                        activeSockets.set(sanitizedNumber, { socket, config: sessionConfig });
+        const imageUrl = result.result[Math.floor(Math.random() * result.result.length)];
 
-                        let updateSummary = Object.entries(updates).map(([k, v]) => {
-                            let displayVal = Array.isArray(v) ? v.join(' ') : v;
-                            return `🎀 *${k}* ──❯ \`${displayVal}\``;
-                        }).join('\n');
+        await socket.sendMessage(sender, {
+            image: { url: imageUrl },
+            caption: `🖼️ *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗠𝗔𝗚𝗘  𝗦𝗘𝗔𝗥𝗖𝗛*\n\n> \`${query}\`\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+        }, { quoted: msg });
 
-                        const successMsg = `🎀 *𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗧𝗜𝗢𝗡  𝗨𝗣𝗗𝗔𝗧𝗘𝗗*\n\n` +
-                            `${updateSummary}\n\n` +
-                            `🫧 _System cloud changes applied successfully._`;
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("Image Fetch Failed:", err.message);
+        await socket.sendMessage(sender, { text: `❌ *Fetch failed: External image API is blocked or offline.*` }, { quoted: msg });
+    }
+}
+break;
+// ==========================================
+// REXPORN SEARCH COMMAND (.rexporn)
+// ==========================================
+case 'rexporn':
+case 'pornsearch':
+case 'xvideos': {
+    const query = args.join(' ');
+    if (!query) {
+        return await socket.sendMessage(sender, {
+            text: `❌ *Please provide a search query!*\n✨ *Example:* \`.rexporn japanese\``
+        }, { quoted: msg });
+    }
 
-                        await socket.sendMessage(sender, {
-                            image: { url: config.BOT_IMAGE },
-                            caption: formatMessage(
-                                `✅ 𝗨𝗣𝗗𝗔𝗧𝗘  𝗦𝗨𝗖𝗖𝗘𝗦𝗦  ✅`,
-                                successMsg,
-                                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-                            )
-                        }, { quoted: msg });
+    try {
+        await socket.sendMessage(sender, { react: { text: "🔥", key: msg.key } });
 
-                        await socket.sendMessage(sender, { react: { text: "✨", key: msg.key } });
+        // Network block හෝ slow connection වලදී bot crash වීම වැළැක්වීමට timeout එකක් සැකසීම
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000); // තත්පර 7 කින් timeout වේ
 
-                    } catch (error) {
-                        console.error("Update Error:", error);
-                        await socket.sendMessage(sender, { text: "🎀 " + error.message });
-                    }
-                }
-                break;
+        const response = await fetch(`https://itzpire.com/search/xnxx?query=${encodeURIComponent(query)}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
-                
+        const textRes = await response.text();
+        let resData;
+        
+        try {
+            resData = JSON.parse(textRes);
+        } catch (e) {
+            return await socket.sendMessage(sender, { 
+                text: `❌ *Rexporn API returned non-JSON data (Cloudflare/Server block).*` 
+            }, { quoted: msg });
+        }
+
+        if (!resData.status || !resData.result || resData.result.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *No results found for your query!*` }, { quoted: msg });
+        }
+
+        let resultText = `🔞 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗  -  𝗥𝗘𝗫𝗣𝗢𝗥𝗡  𝗦𝗘𝗔𝗥𝗖𝗛* 🔥\n\n` +
+            `🔎 *𝖰𝗎𝖾𝗋𝗒 :* \`${query}\`\n\n`;
+
+        const limit = Math.min(resData.result.length, 5);
+        for (let i = 0; i < limit; i++) {
+            const item = resData.result[i];
+            const num = i + 1;
+            resultText += `✨ *${num}.* \`${item.title}\`\n`;
+            resultText += `⏱️ *Duration:* \`${item.duration || 'N/A'}\`\n`;
+            resultText += `🔗 *Link:* ${item.link}\n\n`;
+        }
+
+        resultText += `> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`;
+
+        await socket.sendMessage(sender, { text: resultText }, { quoted: msg });
+        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
+    } catch (err) {
+        console.error("Rexporn Fetch Error:", err.message);
+        await socket.sendMessage(sender, { 
+            text: `❌ *Rexporn Error: Fetch failed or request timed out.*` 
+        }, { quoted: msg });
+    }
+}
+break;
+// ==========================================
+// SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
+// ==========================================
+case 'set':
+case 'setting': {
+    if (!isOwner) {
+        return await socket.sendMessage(sender, {
+            text: "❌ *Only the bot owner can use this command.*"
+        }, { quoted: msg });
+    }
+
+    if (!args.length) {
+        let helpText = `🎀 *𝗦𝗬𝗦𝗧𝗘𝗠  𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗧𝗜𝗢𝗡  𝗣𝗔𝗡𝗘𝗟*\n\n` +
+            `📝 *𝖴𝗌𝖺𝗀𝖾 :* \`.set KEY:VALUE\`\n` +
+            `✨ *𝖤𝗑𝖺𝗆𝗉𝗅𝖾 :* \`.set ALWAYS_ONLINE:true\`\n` +
+            `🫧 *𝖬𝗎𝗅𝗍𝗂 :* \`.set ALWAYS_ONLINE:true,AUTO_RECORDING:true\`\n\n` +
+            `🐞 *𝖠𝗏𝖺𝗂𝗅𝖺𝖻𝗅ե  𝖲𝗒𝗌𝗍𝖾𝗆  𝖪𝖾𝗒𝗌 :*\n` +
+            `🐞 \`ALWAYS_ONLINE\` (true/false)\n` +
+            `🐞 \`ALWAYS_MSG_SEEN\` (true/false)\n` +
+            `🐞 \`AUTO_RECORDING\` (true/false)\n` +
+            `🐞 \`AUTO_TYPING\` (true/false)\n` +
+            `🐞 \`STATUS_VIEW\` (true/false)\n` +
+            `🐞 \`AUTO_LIKE\` (true/false)\n` +
+            `🐞 \`PREFIX\`\n` +
+            `🐞 \`MODE\` (public/private)\n`;
+
+        return await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE || config.ERROR },
+            caption: formatMessage(
+                `𝗖𝗢𝗡𝗙𝗜𝗚  𝗠𝗔𝗡𝗔𝗚𝗘𝗥  ⚙️`,
+                helpText,
+                `${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            )
+        }, { quoted: msg });
+    }
+
+    const input = args.join(' ');
+    const updates = {};
+    const validKeys = [
+        'PREFIX', 'AUTO_RECORDING', 'AUTO_TYPING', 'MODE', 'JID',
+        'ALWAYS_ONLINE', 'ALWAYS_MSG_SEEN', 'STATUS_VIEW', 'AUTO_LIKE'
+    ];
+
+    const pairs = input.split(',');
+    let hasInvalidKey = false;
+    let invalidKeyName = '';
+
+    pairs.forEach(pair => {
+        let [key, ...valueParts] = pair.split(':');
+        if (!key || valueParts.length === 0) return;
+
+        key = key.trim().toUpperCase();
+        let value = valueParts.join(':').trim();
+
+        if (validKeys.includes(key)) {
+            if (value.toLowerCase() === 'true') {
+                updates[key] = 'true';
+            } else if (value.toLowerCase() === 'false') {
+                updates[key] = 'false';
+            } else {
+                updates[key] = value;
             }
+        } else {
+            hasInvalidKey = true;
+            invalidKeyName = key;
+        }
+    });
+
+    if (hasInvalidKey) {
+        return await socket.sendMessage(sender, {
+            text: `Invalid system key: \`${invalidKeyName}\`\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+        }, { quoted: msg });
+    }
+
+    if (Object.keys(updates).length === 0) {
+        return await socket.sendMessage(sender, { text: "🎀 *𝗙𝗢𝗥𝗠𝗔𝗧  𝗘𝗥𝗥𝗢𝗥:* Please use `Key:Value` structure." });
+    }
+
+    try {
+        await socket.sendMessage(sender, { react: { text: "⚙️", key: msg.key } });
+
+        // 1. Session සහ Database එක රියල්-ටයිම් අප්ඩේට් කිරීම
+        sessionConfig = { ...sessionConfig, ...updates };
+
+        // MongoDB වෙත ඩේටා නිවැරදිව සේව් වීම සඳහා updateUserConfig හෝ Mongoose Model එක හරහා ස්ථිරවම Save කරයි
+        if (typeof updateUserConfig === 'function') {
+            await updateUserConfig(sanitizedNumber, sessionConfig);
+        } else {
+            // ද බෝට්ගේ වෙනත් කෝඩ් එකක Model එක හරහා Save වන ආකාරය (მაგ: BotModel.findOneAndUpdate)
+            const BotModel = require('./database/model'); // උඹේ ප්‍රොජෙක්ට් එකේ හැටියට මොඩල් පේජ් එක මෙතැනට සෙට් කරගන්න පුළුවන්
+            await BotModel.findOneAndUpdate(
+                { id: sanitizedNumber },
+                { $set: sessionConfig },
+                { upsert: true, new: true }
+            );
+        }
+
+        // Active Sockets වලට අලුත් කොන්ෆිග් එක රියල්-ටයිම් ලෝඩ් කිරීම
+        activeSockets.set(sanitizedNumber, { socket, config: sessionConfig });
+
+        let updateSummary = Object.entries(updates).map(([k, v]) => {
+            let displayVal = Array.isArray(v) ? v.join(' ') : v;
+            return `🎀 *${k}* ──❯ \`${displayVal}\``;
+        }).join('\n');
+
+        const successMsg = `🎀 *𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗧𝗜𝗢𝗡  𝗨𝗣𝗗𝗔𝗧𝗘𝗗*\n\n` +
+            `${updateSummary}\n\n` +
+            `🫧 _System cloud & MongoDB changes applied successfully._`;
+
+        await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE || config.ERROR },
+            caption: formatMessage(
+                `✅ 𝗨𝗣𝗗𝗔𝗧𝗘  𝗦𝗨𝗖𝗖𝗘𝗦𝗦  ✅`,
+                successMsg,
+                `${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
+            )
+        }, { quoted: msg });
+
+        await socket.sendMessage(sender, { react: { text: "✨", key: msg.key } });
+
+    } catch (error) {
+        console.error("Update Error:", error);
+        await socket.sendMessage(sender, { text: "🎀 " + error.message });
+    }
+}
+break;
+        }
         } catch (error) {
             console.error('Command handler error:', error);
             await socket.sendMessage(sender, {
@@ -1719,6 +2268,7 @@ break;
         }
     });
 }
+
 async function setupMessageHandlers(socket) {
     const messageHandler = async ({ messages }) => {
         const msg = messages[0];
