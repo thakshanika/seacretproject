@@ -38,13 +38,13 @@ const config = {
     API_CINESUBZ_URL:'https://api-siteh-22e22e4cb068.herokuapp.com',
     API_MOVIE_URL: 'https://api-siteh-22e22e4cb068.herokuapp.com',
     API_KEY:'lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e',
-    BOT_IMAGE:'https://cdn.phototourl.com/free/2026-09-01-c9fad274-7d07-49ea-9ed1-34832687d820.jpg',
+    BOT_IMAGE:'https://kommodo.ai/i/9bpZoWdbSuXqntKeJ3W5',
     BOT_FOOTER:"SHAGGY XMD 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
      MGROUP_LINK: 'https://chat.whatsapp.com/JpFSNrnqtnQIqdM0WlNds1',
     MOVIE_FOOTER:"​⏤͟͟͞͞★❮ SHAGGY XMD 〽️OVIE ⏤͟͟͞͞★",
      MOVIE_CAPTION:"SHAGGY-XMD MOVIE",
     PREFIX: '.',
-    OWNER_NUMBERS: ['94703830GGGG990'],
+    OWNER_NUMBERS: ['94784224161'],
     BOT_NAME: "TEST-BOT",
     AIR_FOOTER: "Bᴏᴛ ᴠ2.0.0",
     MODE: 'public',
@@ -1467,21 +1467,28 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 *┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
-*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-│ 🎡 .cinesubz
-│ 🎡 .ping
-│ 🎡 .song
-│ 🎡 .tiktok
-│ 🎡 .menu
-│ 🎡 .alive
-│ 🎡 .sinhalasub
-│ 🎡 .ig
-│ 🎡 .schedule
-│ 🎡 .ai
-│ 🎡 .set
-│ 🎡 .xnxx
-│ 🎡 .system
-*╰────────●●►*   
+*╭───❖ 「 🎬 𝕄𝕆𝕍𝕀𝔼 & 𝔻𝕆𝕎ℕ𝕃𝕆𝔸𝔻 」❖───╮*
+*│*
+*│* 🎥 \`『.cinesubz』\`     ➤ _🎞️ Movie Search_
+*│* 🎭 \`『.dubzone』\`      ➤ _🔊 Dubbed Movies_
+*│* 📝 \`『.sinhalasub』\`   ➤ _🇱🇰 Sinhala Subtitles_
+*│* 🎵 \`『.song』\`         ➤ _🎧 Song Download_
+*│* 🎶 \`『.tiktok』\`       ➤ _📱 TikTok Downloader_
+*│* 📸 \`『.ig』\`           ➤ _📷 Instagram Downloader_
+*│*
+*╰─────⚡●►*
+
+*╭───❖ 「 ⚙️ 𝔾𝔼ℕ𝔼ℝ𝔸𝕃 & 𝕋𝕆𝕃𝕊 」❖───╮*
+*│*
+*│* ⚡ \`『.ping』\`         ➤ _🚀 Check Bot Speed_
+*│* 💚 \`『.alive』\`        ➤ _✅ Bot Status_
+*│* 📜 \`『.menu』\`         ➤ _📖 Show Menu_
+*│* 📅 \`『.schedule』\`     ➤ _🗓️ Movie Schedule_
+*│* 🤖 \`『.ai』\`           ➤ _🧠 AI Chat_
+*│* 🔧 \`『.set』\`          ➤ _⚙️ Bot Settings_
+*│* 🖥️ \`『.system』\`       ➤ _💻 System Info_
+*│*
+*╰─────🔥●►*
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
         await socket.sendMessage(sender, {
@@ -1498,41 +1505,7 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 break;    
 
 
-     // ==========================================
-// 1. ANIME SEARCH & DOWNLOAD COMMAND (.anime)
-// ==========================================
-case 'anime':
-case 'animedl': {
-    if (!text) return reply('❌ කරුණාකර ඇනිමේ නම දෙන්න!\n✨ උදා: `.anime naruto`');
-    
-    reply('🍥 ඇනිමේ විස්තර සහ ඩවුන්ලෝඩ් ලින්ක් සොයමින් පවතී, රැඳී සිටින්න...');
-
-    try {
-        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-        const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (data && data.status && data.downloads && data.downloads.length > 0) {
-            let message = `📥 *AnimeClub TV Downloads Found!*\n\n`;
-            
-            for (let dl of data.downloads) {
-                let quality = dl.quality || 'HD';
-                let link = dl.link || dl.direct_link;
-                message += `*Quality/Source:* ${quality}\n*Download Link:* ${link}\n\n`;
-            }
-
-            await reply(message.trim());
-        } else {
-            reply('❌ කණගාටුයි, අදාළ නම සඳහා ඩවුන්ලෝඩ් ලින්ක් ලබා ගැනීමට නොහැකි විය.');
-        }
-    } catch (err) {
-        console.error('Anime DL Error:', err);
-        reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
-    }
-    break;
-}
+  
 case 'schedule':
 case 'remind': {
     if (!isOwner) {
@@ -1608,79 +1581,7 @@ case 'remind': {
 }
 break;
 
- case 'ig':
-case 'instagram': {
-    if (!args[0]) {
-        return await socket.sendMessage(sender, {
-            text: `❌ *Please provide an Instagram link!*\n✨ *Example:* \`.ig https://www.instagram.com/reel/...\``
-        }, { quoted: msg });
-    }
 
-    let igUrl = args[0].split("?")[0];
-    try {
-        await socket.sendMessage(sender, { react: { text: "⬇️", key: msg.key } });
-
-        let mediaUrl = null;
-        let isVideo = true;
-
-        // Bypass API 1: Direct SnapInsta / SaveFrom alternative endpoint
-        try {
-            const res1 = await fetch(`https://itzpire.com/download/instagram?url=${encodeURIComponent(igUrl)}`);
-            const data1 = await res1.json();
-            if (data1.status && data1.data) {
-                mediaUrl = data1.data.url || data1.data[0]?.url;
-                isVideo = data1.data.type === 'video' || data1.data[0]?.type === 'video' || true;
-            }
-        } catch (e) {}
-
-        // Bypass API 2: Siputzx Alternate Server
-        if (!mediaUrl) {
-            try {
-                const res2 = await fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(igUrl)}`);
-                const data2 = await res2.json();
-                if (data2.status && data2.data && data2.data.length > 0) {
-                    mediaUrl = data2.data[0].url;
-                    isVideo = data2.data[0].type === 'video';
-                }
-            } catch (e) {}
-        }
-
-        // Bypass API 3: Vyuh / Vkrtechnologies Fallback
-        if (!mediaUrl) {
-            try {
-                const res3 = await fetch(`https://api.vkrtechnologies.com/api/dl/ig?url=${encodeURIComponent(igUrl)}`);
-                const data3 = await res3.json();
-                if (data3.status && (data3.data || data3.url)) {
-                    mediaUrl = data3.data || data3.url;
-                }
-            } catch (e) {}
-        }
-
-        if (!mediaUrl) {
-            return await socket.sendMessage(sender, { 
-                text: `❌ *Instagram security has temporarily rate-limited public downloaders. Please try downloading via another post or try again later!*` 
-            }, { quoted: msg });
-        }
-
-        if (isVideo) {
-            await socket.sendMessage(sender, {
-                video: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗩𝗜𝗗𝗘𝗢*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        } else {
-            await socket.sendMessage(sender, {
-                image: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗜𝗠𝗔𝗚𝗘*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        }
-
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("IG Error:", err);
-        await socket.sendMessage(sender, { text: `❌ *An error occurred while downloading media. Please try again later.*` }, { quoted: msg });
-    }
-}
-break;
                     case 'ai':
 case 'codex': {
     const query = args.join(' ');
@@ -1750,7 +1651,6 @@ break;
 // 1. SYSTEM / PING COMMAND
 // ==========================================
 case 'system':
-case 'ping':
 case 'status': {
     try {
         await socket.sendMessage(sender, { react: { text: "⚡", key: msg.key } });
@@ -1860,69 +1760,6 @@ case 'bots': {
 }
 break;
 
-// ==========================================
-// 3. INSTAGRAM DOWNLOADER (.ig)
-// ==========================================
-case 'ig':
-case 'instagram': {
-    if (!args[0]) {
-        return await socket.sendMessage(sender, {
-            text: `❌ *Please provide an Instagram link!*\n✨ *Example:* \`.ig https://www.instagram.com/reel/...\``
-        }, { quoted: msg });
-    }
-
-    let igUrl = args[0].split("?")[0];
-    try {
-        await socket.sendMessage(sender, { react: { text: "⬇️", key: msg.key } });
-
-        let mediaUrl = null;
-        let isVideo = true;
-
-        try {
-            const res1 = await fetch(`https://itzpire.com/download/instagram?url=${encodeURIComponent(igUrl)}`);
-            const data1 = await res1.json();
-            if (data1.status && data1.data) {
-                mediaUrl = data1.data.url || data1.data[0]?.url;
-                isVideo = data1.data.type === 'video' || data1.data[0]?.type === 'video' || true;
-            }
-        } catch (e) {}
-
-        if (!mediaUrl) {
-            try {
-                const res2 = await fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(igUrl)}`);
-                const data2 = await res2.json();
-                if (data2.status && data2.data && data2.data.length > 0) {
-                    mediaUrl = data2.data[0].url;
-                    isVideo = data2.data[0].type === 'video';
-                }
-            } catch (e) {}
-        }
-
-        if (!mediaUrl) {
-            return await socket.sendMessage(sender, { 
-                text: `❌ *Instagram security has temporarily rate-limited downloaders. Please try a different link!*` 
-            }, { quoted: msg });
-        }
-
-        if (isVideo) {
-            await socket.sendMessage(sender, {
-                video: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗩𝗜𝗗𝗘𝗢*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        } else {
-            await socket.sendMessage(sender, {
-                image: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗜𝗠𝗔𝗚𝗘*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        }
-
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("IG Error:", err);
-        await socket.sendMessage(sender, { text: `❌ *An error occurred while downloading media.*` }, { quoted: msg });
-    }
-}
-break;
 case 'news': {
     try {
         const apiKey = 'lakiya_2f3b6c382d1236ad7a08d56331fb679935d51dfc846df2c254093fd1fff9494e';
@@ -1962,7 +1799,7 @@ case 'news': {
 ${news.link || 'N/A'}
 
 ━━━━━━━━━━━━━━━━
-⚡ *Powered by Shaggy XMD*
+⚡ *POWRED BY SHAGGY-XMD*
         `.trim();
 
         if (news.image) {
@@ -1989,154 +1826,6 @@ ${news.link || 'N/A'}
     break;
 }
 
-// ==========================================
-// 1. STICKER COMMAND (.sticker)
-// ==========================================
-case 'sticker':
-case 's': {
-    try {
-        await socket.sendMessage(sender, { react: { text: "🎨", key: msg.key } });
-
-        const q = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage || msg.message;
-        const mime = q?.imageMessage || q?.videoMessage;
-        
-        if (!mime) {
-            return await socket.sendMessage(sender, {
-                text: `❌ *Please send or reply to an image/video to make a sticker!*`
-            }, { quoted: msg });
-        }
-
-        const { downloadMediaMessage } = await import('@whiskeysockets/baileys');
-        const mediaStream = await downloadMediaMessage(
-            msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ? { message: msg.message.extendedTextMessage.contextInfo.quotedMessage } : msg,
-            'buffer',
-            {},
-            { logger: console }
-        );
-
-        await socket.sendMessage(sender, { sticker: mediaStream }, { quoted: msg });
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("Sticker Error:", err);
-        await socket.sendMessage(sender, { text: `❌ *Sticker Error: Could not process media.*` }, { quoted: msg });
-    }
-}
-break;
-
-// ==========================================
-// 2. IMAGE / PINTEREST SEARCH (.image)
-// ==========================================
-case 'image':
-case 'img':
-case 'pinterest': {
-    const query = args.join(' ');
-    if (!query) {
-        return await socket.sendMessage(sender, {
-            text: `❌ *What image do you want to search for?*\n✨ *Example:* \`.image Anime Neon\``
-        }, { quoted: msg });
-    }
-
-    try {
-        await socket.sendMessage(sender, { react: { text: "🔍", key: msg.key } });
-
-        // Fetch with timeout safety
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // තත්පර 5 කින් cancel වේ
-
-        const response = await fetch(`https://itzpire.com/search/pinterest?query=${encodeURIComponent(query)}`, {
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        const text = await response.text();
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch (e) {
-            return await socket.sendMessage(sender, { text: `❌ *Image servers are temporarily offline (HTML/Cloudflare response).*` }, { quoted: msg });
-        }
-
-        if (!result.status || !result.result || result.result.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *No images found for your query!*` }, { quoted: msg });
-        }
-
-        const imageUrl = result.result[Math.floor(Math.random() * result.result.length)];
-
-        await socket.sendMessage(sender, {
-            image: { url: imageUrl },
-            caption: `🖼️ *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗠𝗔𝗚𝗘  𝗦𝗘𝗔𝗥𝗖𝗛*\n\n> \`${query}\`\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-        }, { quoted: msg });
-
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("Image Fetch Failed:", err.message);
-        await socket.sendMessage(sender, { text: `❌ *Fetch failed: External image API is blocked or offline.*` }, { quoted: msg });
-    }
-}
-break;
-// ==========================================
-// REXPORN SEARCH COMMAND (.rexporn)
-// ==========================================
-case 'rexporn':
-case 'pornsearch':
-case 'xvideos': {
-    const query = args.join(' ');
-    if (!query) {
-        return await socket.sendMessage(sender, {
-            text: `❌ *Please provide a search query!*\n✨ *Example:* \`.rexporn japanese\``
-        }, { quoted: msg });
-    }
-
-    try {
-        await socket.sendMessage(sender, { react: { text: "🔥", key: msg.key } });
-
-        // Network block හෝ slow connection වලදී bot crash වීම වැළැක්වීමට timeout එකක් සැකසීම
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000); // තත්පර 7 කින් timeout වේ
-
-        const response = await fetch(`https://itzpire.com/search/xnxx?query=${encodeURIComponent(query)}`, {
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        const textRes = await response.text();
-        let resData;
-        
-        try {
-            resData = JSON.parse(textRes);
-        } catch (e) {
-            return await socket.sendMessage(sender, { 
-                text: `❌ *Rexporn API returned non-JSON data (Cloudflare/Server block).*` 
-            }, { quoted: msg });
-        }
-
-        if (!resData.status || !resData.result || resData.result.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *No results found for your query!*` }, { quoted: msg });
-        }
-
-        let resultText = `🔞 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗  -  𝗥𝗘𝗫𝗣𝗢𝗥𝗡  𝗦𝗘𝗔𝗥𝗖𝗛* 🔥\n\n` +
-            `🔎 *𝖰𝗎𝖾𝗋𝗒 :* \`${query}\`\n\n`;
-
-        const limit = Math.min(resData.result.length, 5);
-        for (let i = 0; i < limit; i++) {
-            const item = resData.result[i];
-            const num = i + 1;
-            resultText += `✨ *${num}.* \`${item.title}\`\n`;
-            resultText += `⏱️ *Duration:* \`${item.duration || 'N/A'}\`\n`;
-            resultText += `🔗 *Link:* ${item.link}\n\n`;
-        }
-
-        resultText += `> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`;
-
-        await socket.sendMessage(sender, { text: resultText }, { quoted: msg });
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("Rexporn Fetch Error:", err.message);
-        await socket.sendMessage(sender, { 
-            text: `❌ *Rexporn Error: Fetch failed or request timed out.*` 
-        }, { quoted: msg });
-    }
-} 
 
 case 'weather':
 case 'wether': {
@@ -2185,7 +1874,7 @@ case 'wether': {
 ☀️ *UV Index:* ${w.uv_index}
 
 ━━━━━━━━━━━━━━━━
-⚡ *Powered by Shaggy XMD*
+⚡ *POWRED BY SHAGGY-XMD*
         `.trim();
 
         await socket.sendMessage(sender, {
@@ -2204,70 +1893,79 @@ case 'wether': {
 }
 case 'dubzone':
     if (!args.length) {
-        return await socket.sendMessage(sender, { text: '❌ *Usage:*.dubzone movie name' }, { quoted: msg });
+        return await socket.sendMessage(sender, { text: '❌ *Usage:* .dubzone movie name' }, { quoted: msg });
     }
     const query = args.join(' ');
-    await socket.sendMessage(sender, { text: '🎬 *Dubzone search karanawa...*' }, { quoted: msg });
+    await socket.sendMessage(sender, { text: '🎬 *Dubzone search karanawa... Poddak inna!*' }, { quoted: msg });
 
     try {
-        // 1. SEARCH
+        // 1. SEARCH MOVIES
         const search = await axios.get(`${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`);
 
-        if (!search.data.success ||!search.data.results || search.data.results.length === 0) {
-            return await socket.sendMessage(sender, { text: `❌ *"${query}"* walata results nathi` }, { quoted: msg });
+        if (!search.data.success || !search.data.results || search.data.results.length === 0) {
+            return await socket.sendMessage(sender, { text: `❌ *"${query}"* walata matching movies mokuth hamba une na!` }, { quoted: msg });
         }
 
         const results = search.data.results.slice(0, 10);
-        let list = `🎬 *DUBZONE RESULTS*\n\n`;
+        let list = `🎬 *SHAGGY XMD - DUBZONE SEARCH RESULTS*\n\n`;
         results.forEach((r, i) => {
             list += `*${i + 1}.* ${r.title}\n`;
         });
-        list += `\n*Reply with number*`;
+        list += `\n*Reply with the movie number you want:*`;
 
         const searchMsg = await socket.sendMessage(sender, {
             image: { url: config.BOT_IMAGE },
             caption: list
         }, { quoted: msg });
 
-        // 2. MOVIE SELECT
+        // 2. MOVIE NUMBER SELECT
         const movieHandler = async ({ messages }) => {
             const m = messages[0];
             if (!m?.message?.extendedTextMessage) return;
-            if (m.message.extendedTextMessage.contextInfo.stanzaId!== searchMsg.key.id) return;
-            if (m.key.remoteJid!== sender) return;
+            if (m.message.extendedTextMessage.contextInfo.stanzaId !== searchMsg.key.id) return;
+            if (m.key.remoteJid !== sender) return;
 
             const num = parseInt(m.message.extendedTextMessage.text) - 1;
             if (isNaN(num) || num < 0 || num >= results.length) return;
 
             socket.ev.off('messages.upsert', movieHandler);
             const selected = results[num];
-            await socket.sendMessage(sender, { text: '⏳ *Details gannawa...*' }, { quoted: m });
+            await socket.sendMessage(sender, { text: '⏳ *Movie details and download links gannawa...*' }, { quoted: m });
 
             try {
-                // 3. INFO + DOWNLOADS
+                // 3. FETCH INFO & DOWNLOAD QUALITIES
                 const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(selected.link)}&slug=${selected.slug}&api_key=${config.API_KEY}`);
                 const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${selected.slug}&api_key=${config.API_KEY}`);
 
                 const movie = info.data.data;
-                const quals = dl.data.downloads;
+                const quals = dl.data.downloads; // මෙහි 480p, 720p, 1080p ආදී ලැයිස්තුව අඩංගු වේ
 
-                let detail = `☘️ *${movie.title}*\n\n`;
-                detail += `▫️ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
-                detail += `▫️ *Story:* ${movie.description?.substring(0, 200)}...\n\n`;
-                detail += `*⬇️ SELECT QUALITY*\n\n`;
-                quals.forEach((q, i) => detail += `*${i + 1}.* ${q.quality} - ${q.size}\n`);
+                if (!quals || quals.length === 0) {
+                    return await socket.sendMessage(sender, { text: '❌ Me movie ekata download links kisiwak natha!' }, { quoted: m });
+                }
+
+                let detail = `🎥 *${movie.title}*\n\n`;
+                detail += `⭐ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
+                detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 180) + '...' : 'N/A'}\n\n`;
+                detail += `📥 *SELECT YOUR PREFERRED QUALITY:*\n\n`;
+                
+                quals.forEach((q, i) => {
+                    detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
+                });
+                
+                detail += `\n*Reply with quality number (Ex: 1 for 480p):*`;
 
                 const detailMsg = await socket.sendMessage(sender, {
                     image: { url: movie.thumbnail },
                     caption: detail
                 }, { quoted: m });
 
-                // 4. QUALITY SELECT
+                // 4. QUALITY SELECT & DOCUMENT MP4 DOWNLOAD
                 const qualityHandler = async ({ messages }) => {
                     const qm = messages[0];
                     if (!qm?.message?.extendedTextMessage) return;
-                    if (qm.message.extendedTextMessage.contextInfo.stanzaId!== detailMsg.key.id) return;
-                    if (qm.key.remoteJid!== sender) return;
+                    if (qm.message.extendedTextMessage.contextInfo.stanzaId !== detailMsg.key.id) return;
+                    if (qm.key.remoteJid !== sender) return;
 
                     const qNum = parseInt(qm.message.extendedTextMessage.text) - 1;
                     if (isNaN(qNum) || qNum < 0 || qNum >= quals.length) return;
@@ -2275,15 +1973,43 @@ case 'dubzone':
                     socket.ev.off('messages.upsert', qualityHandler);
                     const selQ = quals[qNum];
 
-                    let links = `*📥 ${movie.title} - ${selQ.quality}*\n*Size: ${selQ.size}*\n\n`;
-                    selQ.links.forEach(l => links += `*${l.provider}:* ${l.url}\n\n`);
+                    // 480p හෝ තෝරාගත් කොලිටියට අදාළ Direct Link එක ලබා ගැනීම
+                    const directUrl = selQ.direct_link || (selQ.links && selQ.links[0] ? selQ.links[0].url : null);
 
-                    await socket.sendMessage(sender, { text: links }, { quoted: qm });
+                    if (!directUrl) {
+                        return await socket.sendMessage(sender, { text: '❌ Direct download link eka hoya ganna bari una!' }, { quoted: qm });
+                    }
+
+                    // ලස්සනට පෙනීමට Downloading status එක යැවීම
+                    await socket.sendMessage(sender, { 
+                        text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait a moment, sending as Document MP4..._` 
+                    }, { quoted: qm });
+
+                    try {
+                        // Document එකක් ලෙස MP4 ෆයිල් එක යැවීම (ඔබ ඉල්ලූ පරිදි)
+                        await socket.sendMessage(sender, {
+                            document: { url: directUrl },
+                            mimetype: 'video/mp4',
+                            fileName: `${movie.title} [${selQ.quality}] - SHAGGY XMD.mp4`,
+                            caption: `╔═════════════════════╗
+║   🎬 *SHAGGY XMD MOVIE*   
+╚═════════════════════╝
+📌 *Title:* ${movie.title}
+🎞️ *Quality:* ${selQ.quality}
+📦 *File Size:* ${selQ.size || 'N/A'}
+⭐ *Powered by:* Code X Game Developer`
+                        }, { quoted: qm });
+
+                    } catch (dlErr) {
+                        console.log(dlErr);
+                        await socket.sendMessage(sender, { text: '❌ Video එක ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය. (File size එක වැඩි වැඩි නිසා වන්නට පුළුවන්).' }, { quoted: qm });
+                    }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
 
             } catch(e) {
-                await socket.sendMessage(sender, { text: '❌ Movie details ganna bari' }, { quoted: m });
+                console.log(e);
+                await socket.sendMessage(sender, { text: '❌ Movie details ganna bari una. Try again later!' }, { quoted: m });
             }
         };
         socket.ev.on('messages.upsert', movieHandler);
