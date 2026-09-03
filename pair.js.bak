@@ -1961,12 +1961,85 @@ case 'movie':
                 
                 detail += `\n*Reply with your quality number:*`;
 
+const fs = require('fs');
+const path = require('path');
+
+case 'movie':
+    if (!args.length) {
+        return await socket.sendMessage(sender, { text: '❌ *Usage:* .movie <movie name> (Ex: .movie avatar)' }, { quoted: msg });
+    }
+    const query = args.join(' ');
+    await socket.sendMessage(sender, { text: `🎬 *Searching for "${query}"... Please wait!*` }, { quoted: msg });
+
+    try {
+        // 1. SEARCH API (Safe Encoding)
+        const searchUrl = `${config.API_MAIN_URL}/api/dubzone/search?q=${encodeURIComponent(query)}&api_key=${config.API_KEY}`;
+        const search = await axios.get(searchUrl).catch(() => null);
+
+        const searchResults = search?.data?.results || search?.data?.data || search?.data;
+
+        if (!searchResults || (Array.isArray(searchResults) && searchResults.length === 0)) {
+            return await socket.sendMessage(sender, { text: `❌ *"${query}"* සඳහා කිසිදු සිනමාපටයක් හමු නොවීය. කරුණාකර වෙනත් නමකින් උත්සාහ කරන්න.` }, { quoted: msg });
+        }
+
+        const results = searchResults.slice(0, 10);
+        let list = `🎬 *CODE X - MOVIE SEARCH RESULTS*\n\n`;
+        results.forEach((r, i) => {
+            list += `*${i + 1}.* ${r.title || r.name}\n`;
+        });
+        list += `\n*Reply with the movie number:*`;
+
+        const searchMsg = await socket.sendMessage(sender, {
+            image: { url: config.BOT_IMAGE },
+            caption: list
+        }, { quoted: msg });
+
+        // 2. MOVIE NUMBER SELECTION
+        const movieHandler = async ({ messages }) => {
+            const m = messages[0];
+            if (!m?.message?.extendedTextMessage) return;
+            if (m.message.extendedTextMessage.contextInfo.stanzaId !== searchMsg.key.id) return;
+            if (m.key.remoteJid !== sender) return;
+
+            const num = parseInt(m.message.extendedTextMessage.text) - 1;
+            if (isNaN(num) || num < 0 || num >= results.length) return;
+
+            socket.ev.off('messages.upsert', movieHandler);
+            const selected = results[num];
+            await socket.sendMessage(sender, { text: '⏳ *Fetching movie details & qualities...*' }, { quoted: m });
+
+            try {
+                // 3. FETCH DETAILS & DOWNLOAD QUALITIES
+                const targetLink = selected.link || selected.url;
+                const targetSlug = selected.slug;
+
+                const info = await axios.get(`${config.API_MAIN_URL}/api/dubzone/movie?url=${encodeURIComponent(targetLink)}&slug=${targetSlug}&api_key=${config.API_KEY}`);
+                const dl = await axios.get(`${config.API_MAIN_URL}/api/dubzone/downloads?slug=${targetSlug}&api_key=${config.API_KEY}`);
+
+                const movie = info.data.data || info.data;
+                const quals = dl.data.downloads || dl.data;
+
+                if (!quals || quals.length === 0) {
+                    return await socket.sendMessage(sender, { text: '❌ මෙම මූවී එක සඳහා ඩවුන්ලෝඩ් ලින්ක් කිසිවක් හමු නොවීය!' }, { quoted: m });
+                }
+
+                let detail = `🎥 *${movie.title}*\n\n`;
+                detail += `⭐ *IMDB:* ${movie.imdb?.rating || 'N/A'}\n`;
+                detail += `📖 *Story:* ${movie.description ? movie.description.substring(0, 150) + '...' : 'N/A'}\n\n`;
+                detail += `📥 *SELECT QUALITY (480p / 720p / 1080p):*\n\n`;
+                
+                quals.forEach((q, i) => {
+                    detail += `*${i + 1}.* Quality: *${q.quality}* | Size: *${q.size || 'Unknown'}*\n`;
+                });
+                
+                detail += `\n*Reply with your quality number:*`;
+
                 const detailMsg = await socket.sendMessage(sender, {
                     image: { url: movie.thumbnail || movie.image || config.BOT_IMAGE },
                     caption: detail
                 }, { quoted: m });
 
-                // 4. QUALITY SELECTION & LARGE FILE DOWNLOAD HANDLER
+                // 4. QUALITY SELECTION & DOWNLOAD HANDLER
                 const qualityHandler = async ({ messages }) => {
                     const qm = messages[0];
                     if (!qm?.message?.extendedTextMessage) return;
@@ -1986,27 +2059,26 @@ case 'movie':
                     }
 
                     await socket.sendMessage(sender, { 
-                        text: `📥 *Downloading Started! (Large files may take a moment)*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait, downloading and sending as Document MP4..._` 
+                        text: `📥 *Downloading Started!*\n\n🎬 *Title:* ${movie.title}\n⚙️ *Quality:* ${selQ.quality}\n📦 *Size:* ${selQ.size || 'N/A'}\n\n_Please wait, downloading and sending as Document MP4..._` 
                     }, { quoted: qm });
 
                     try {
-                        // **FIX FOR LARGE FILES:** ඍජුව URL එක යවනවා වෙනුවට Stream එකක් ලෙස Temp ෆයිල් එකකට ඩවුන්ලෝඩ් කර යැවීම මඟින් Size Error එක සම්පූර්ණෙන් ඉවත් වේ.
                         const fileName = `${movie.title.replace(/[/\\?%*:|"<>]/g, '')} [${selQ.quality}] - CODE X.mp4`;
                         const filePath = path.join(__dirname, fileName);
 
-                        const writer = fs.createWriteStream(filePath);
+                        // **FIX FOR LARGE FILES:** Buffer හරහා Direct Download කර ෆයිල් එක Save කරගැනීම (Timeout වීම වැළැක්වීමට Headers එකතු කර ඇත)
                         const response = await axios({
-                            url: directUrl,
                             method: 'GET',
-                            responseType: 'stream'
+                            url: directUrl,
+                            responseType: 'arraybuffer',
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                            },
+                            maxContentLength: Infinity,
+                            maxBodyLength: Infinity
                         });
 
-                        response.data.pipe(writer);
-
-                        await new Promise((resolve, reject) => {
-                            writer.on('finish', resolve);
-                            writer.on('error', reject);
-                        });
+                        fs.writeFileSync(filePath, Buffer.from(response.data));
 
                         // WhatsApp වෙත Document එක ලෙස යැවීම
                         await socket.sendMessage(sender, {
@@ -2021,14 +2093,14 @@ case 'movie':
 ⭐ *Developer:* Code X Game Developer`
                         }, { quoted: qm });
 
-                        // යැවීමෙන් පසු සර්වර් එකෙන් ලෝකල් ෆයිල් එක මකා දැමීම (Space ඉතිරි කර ගැනීමට)
+                        // ඉන්පසු ලෝකල් ෆයිල් එක මකා දැමීම
                         if (fs.existsSync(filePath)) {
                             fs.unlinkSync(filePath);
                         }
 
                     } catch (dlErr) {
                         console.log(dlErr);
-                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (লින්ක් එක හෝ සර්වර් සීමාව ඉක්මවා ඇත).' }, { quoted: qm });
+                        await socket.sendMessage(sender, { text: '❌ වීඩියෝව ඩවුන්ලෝඩ් කිරීමේදී දෝෂයක් ඇති විය (File size එක ඉතා වැඩි වැඩි වීම හෝ Link එක expired වී ඇත).' }, { quoted: qm });
                     }
                 };
                 socket.ev.on('messages.upsert', qualityHandler);
