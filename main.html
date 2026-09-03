@@ -12,13 +12,13 @@
         }
 
         :root {
-            --bg: #030705;
-            --card: rgba(6, 15, 11, 0.94);
-            --green: #00ff9d;
-            --green2: #00c878;
-            --text: #f1fff8;
-            --muted: #789087;
-            --border: rgba(0, 255, 157, 0.25);
+            --bg: #03050d;
+            --card: rgba(6, 9, 20, 0.94);
+            --blue: #00aaff;
+            --blue2: #0077ff;
+            --text: #f1f5ff;
+            --muted: #788599;
+            --border: rgba(0, 170, 255, 0.25);
         }
 
         html, body {
@@ -28,7 +28,7 @@
             min-height: 100vh;
             font-family: Arial, sans-serif;
             color: var(--text);
-            background: #010302;
+            background: #010207;
             overflow-x: hidden;
         }
 
@@ -42,14 +42,24 @@
             z-index: 0;
         }
 
-        /* Modern Spinner Loading Screen */
+        #sakuraCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
         #introScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, #071c12 0%, #010302 100%);
+            background: radial-gradient(circle at center, #071224 0%, #010207 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -71,15 +81,15 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 3px solid rgba(0, 255, 157, 0.1);
-            border-top: 3px solid var(--green);
+            border: 3px solid rgba(0, 170, 255, 0.1);
+            border-top: 3px solid var(--blue);
             border-radius: 50%;
             animation: spinRing 1s linear infinite;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
         }
 
         .spinner-icon {
-            color: var(--green);
+            color: var(--blue);
             font-size: 28px;
             animation: pulseIcon 1.2s ease-in-out infinite alternate;
         }
@@ -90,7 +100,7 @@
             font-weight: 800;
             letter-spacing: 3px;
             color: #ffffff;
-            text-shadow: 0 0 20px var(--green);
+            text-shadow: 0 0 20px var(--blue);
         }
 
         .intro-sub {
@@ -110,7 +120,6 @@
             100% { opacity: 1; transform: scale(1.1); }
         }
 
-        /* Main Container */
         .wrapper {
             position: relative;
             z-index: 10;
@@ -133,22 +142,23 @@
             position: relative;
             width: 100%;
             max-width: 520px;
-            min-height: 380px;
+            min-height: 340px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 25px 20px;
-            background-image: url('https://cdn.phototourl.com/free/2026-09-01-b959ea45-2b09-463d-af11-be53dde760ee.jpg');
-            background-size: cover;
+            padding: 30px 20px;
+            background-image: url('https://cdn.phototourl.com/free/2026-09-03-d66a750c-2912-4ad2-b380-ddaac7b57351.jpg');
+            background-size: 100% 100%;
             background-position: center;
+            background-repeat: no-repeat;
             border-bottom: 1.5px solid var(--border);
         }
 
         .hero-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(3,7,5,0.75) 0%, rgba(3,7,5,0.92) 80%, #030705 100%);
+            background: rgba(3, 5, 13, 0.75);
             z-index: 1;
         }
 
@@ -165,38 +175,45 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(0, 255, 157, 0.1);
+            background: rgba(0, 170, 255, 0.15);
             border: 1px solid var(--border);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 1px;
-            color: var(--green);
-            margin-bottom: 18px;
+            color: var(--blue);
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
-            background: var(--green);
+            background: var(--blue);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--green);
+            box-shadow: 0 0 10px var(--blue);
             animation: pulseDot 1.5s infinite;
         }
 
         @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
         .logo-box {
-            width: 90px;
-            height: 90px;
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
-            border: 2.5px solid var(--green);
+            border: 2.5px solid var(--blue);
             background: #000;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(0,255,157,0.4);
-            margin-bottom: 15px;
+            box-shadow: 0 0 25px rgba(0,170,255,0.5);
+            margin-bottom: 12px;
             position: relative;
+            animation: floatLogo 3s ease-in-out infinite;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
 
         .logo-box img {
@@ -209,68 +226,72 @@
             position: absolute;
             bottom: 4px;
             right: 4px;
-            width: 14px;
-            height: 14px;
-            background: var(--green);
-            border: 2px solid #030705;
+            width: 12px;
+            height: 12px;
+            background: var(--blue);
+            border: 2px solid #03050d;
             border-radius: 50%;
         }
 
         .hero-content h1 {
-            margin: 0 0 10px 0;
-            font-size: 26px;
+            margin: 0 0 8px 0;
+            font-size: 24px;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             color: #ffffff;
-            text-shadow: 0 0 15px rgba(0,255,157,0.4);
+            text-shadow: 0 0 15px rgba(0,170,255,0.6);
         }
 
         .hero-content h1 span {
-            color: var(--green);
+            color: var(--blue);
         }
 
         .verified-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(0, 255, 157, 0.12);
-            border: 1px solid var(--green);
-            padding: 5px 14px;
+            background: rgba(0, 170, 255, 0.2);
+            border: 1px solid var(--blue);
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
-            color: var(--green);
-            margin-bottom: 12px;
+            color: var(--blue);
+            margin-bottom: 10px;
         }
 
         .hero-desc {
-            margin: 0 0 20px 0;
-            font-size: 13px;
-            color: #b5c8bf;
+            margin: 0 0 15px 0;
+            font-size: 12px;
+            color: #d0e4ff;
             line-height: 1.4;
-            max-width: 400px;
+            max-width: 380px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .stats-row {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             flex-wrap: wrap;
-            margin-top: 5px;
         }
 
         .stat-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: #9cb5ab;
-            font-weight: 600;
+            gap: 5px;
+            font-size: 10px;
+            color: #c0d7df;
+            font-weight: 700;
+            background: rgba(0,0,0,0.4);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,170,255,0.2);
         }
 
         .stat-item i {
-            color: var(--green);
+            color: var(--blue);
         }
 
         .form-card-container {
@@ -282,13 +303,19 @@
             z-index: 5;
         }
 
+        @keyframes borderGlow {
+            0% { border-color: rgba(0, 170, 255, 0.3); box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 15px rgba(0,170,255,0.15); }
+            50% { border-color: rgba(0, 170, 255, 0.9); box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(0,170,255,0.4); }
+            100% { border-color: rgba(0, 170, 255, 0.3); box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 15px rgba(0,170,255,0.15); }
+        }
+
         .card-box {
             background: var(--card);
             border: 1.5px solid var(--border);
             border-radius: 22px;
             padding: 24px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0,255,157,0.15);
             backdrop-filter: blur(20px);
+            animation: borderGlow 4s infinite;
         }
 
         .tab-switcher {
@@ -319,10 +346,10 @@
         }
 
         .tab-btn.active {
-            background: rgba(0, 255, 157, 0.15);
-            color: var(--green);
+            background: rgba(0, 170, 255, 0.15);
+            color: var(--blue);
             border: 1px solid var(--border);
-            box-shadow: 0 0 15px rgba(0,255,157,0.2);
+            box-shadow: 0 0 15px rgba(0,170,255,0.2);
         }
 
         .input-group {
@@ -336,7 +363,7 @@
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 1px;
-            color: #8fa89e;
+            color: #8fa8bc;
             text-transform: uppercase;
         }
 
@@ -344,19 +371,19 @@
             display: flex;
             align-items: center;
             background: rgba(0, 0, 0, 0.6);
-            border: 1.5px solid rgba(0, 255, 157, 0.3);
+            border: 1.5px solid rgba(0, 170, 255, 0.3);
             border-radius: 14px;
             padding: 4px 6px 4px 14px;
             transition: 0.3s;
         }
 
         .phone-input-box:focus-within {
-            border-color: var(--green);
-            box-shadow: 0 0 20px rgba(0,255,157,0.25);
+            border-color: var(--blue);
+            box-shadow: 0 0 20px rgba(0,170,255,0.25);
         }
 
         .phone-input-box span {
-            color: var(--green);
+            color: var(--blue);
             font-weight: 800;
             font-size: 15px;
             padding-right: 10px;
@@ -375,13 +402,13 @@
         }
 
         #phoneInput::placeholder {
-            color: #4a6358;
+            color: #4a5c73;
         }
 
         #clearBtn {
             background: rgba(255,255,255,0.06);
             border: none;
-            color: #8fa89e;
+            color: #8fa8bc;
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -398,12 +425,12 @@
             margin-bottom: 20px;
             text-align: left;
             font-size: 12px;
-            color: #9cb5ab;
+            color: #9cb5cb;
             cursor: pointer;
         }
 
         .terms-row input[type="checkbox"] {
-            accent-color: var(--green);
+            accent-color: var(--blue);
             width: 16px;
             height: 16px;
             margin-top: 1px;
@@ -411,21 +438,21 @@
         }
 
         .terms-row a {
-            color: var(--green);
+            color: var(--blue);
             text-decoration: none;
         }
 
         #pairBtn {
             width: 100%;
             min-height: 52px;
-            background: linear-gradient(135deg, #00d985, #009e65);
-            border: 1px solid rgba(0,255,157,0.6);
+            background: linear-gradient(135deg, #00bfff, #0066ff);
+            border: 1px solid rgba(0,170,255,0.6);
             border-radius: 14px;
-            color: #001a10;
+            color: #001122;
             font-size: 16px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,255,157,0.3);
+            box-shadow: 0 10px 25px rgba(0,170,255,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -434,8 +461,8 @@
         }
 
         #pairBtn:hover {
-            background: linear-gradient(135deg, #18f39c, #00b875);
-            box-shadow: 0 14px 30px rgba(0,255,157,0.45);
+            background: linear-gradient(135deg, #18ccff, #0052cc);
+            box-shadow: 0 14px 30px rgba(0,170,255,0.45);
             transform: translateY(-2px);
         }
 
@@ -449,8 +476,8 @@
             display: none;
             margin-top: 18px;
             padding: 16px;
-            background: rgba(0,255,157,0.06);
-            border: 1.5px solid var(--green);
+            background: rgba(0,170,255,0.06);
+            border: 1.5px solid var(--blue);
             border-radius: 14px;
             text-align: left;
         }
@@ -466,9 +493,9 @@
         }
 
         #copyBtn {
-            background: rgba(0,255,157,0.2);
-            border: 1px solid var(--green);
-            color: var(--green);
+            background: rgba(0,170,255,0.2);
+            border: 1px solid var(--blue);
+            color: var(--blue);
             padding: 5px 12px;
             border-radius: 8px;
             font-size: 12px;
@@ -476,11 +503,87 @@
             cursor: pointer;
         }
 
+        .live-speed-box {
+            width: 100%;
+            max-width: 520px;
+            padding: 0 16px;
+            margin-top: 15px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .speed-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+        }
+
+        .speed-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .speed-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,170,255,0.1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue);
+            font-size: 18px;
+        }
+
+        .speed-details .title {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .speed-details .value {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        .ping-badge {
+            background: rgba(0,170,255,0.15);
+            border: 1px solid var(--blue);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ping-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--blue);
+            border-radius: 50%;
+            animation: pulseDot 1s infinite;
+        }
+
         .info-container {
             width: 100%;
             max-width: 520px;
             padding: 0 16px;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .info-card {
@@ -496,7 +599,7 @@
             font-size: 13px;
             font-weight: 800;
             letter-spacing: 1px;
-            color: var(--green);
+            color: var(--blue);
             margin-bottom: 16px;
             display: flex;
             align-items: center;
@@ -514,16 +617,16 @@
             font-family: monospace;
             font-size: 13px;
             font-weight: 800;
-            color: var(--green);
-            background: rgba(0,255,157,0.1);
+            color: var(--blue);
+            background: rgba(0,170,255,0.1);
             padding: 3px 6px;
             border-radius: 6px;
-            border: 1px solid rgba(0,255,157,0.3);
+            border: 1px solid rgba(0,170,255,0.3);
         }
 
         .step-text {
             font-size: 12px;
-            color: #b5c8bf;
+            color: #b5c8db;
             line-height: 1.4;
         }
 
@@ -550,11 +653,11 @@
             border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
-            color: #d0e8df;
+            color: #d0e4ff;
         }
 
         .feature-row i {
-            color: var(--green);
+            color: var(--blue);
             font-size: 16px;
             width: 20px;
             text-align: center;
@@ -597,13 +700,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #030705;
+            border: 2px solid #03050d;
         }
     </style>
 </head>
 <body>
 
     <canvas id="bgCanvas"></canvas>
+    <canvas id="sakuraCanvas"></canvas>
 
     <div id="introScreen">
         <div class="spinner-box">
@@ -635,7 +739,7 @@
                 </div>
 
                 <p class="hero-desc">
-                    Connect your WhatsApp in 30 seconds. Pair code or QR scan — 100% free with fast movie download support.
+                    Connect your WhatsApp in 30 seconds. Pair code or QR scan — 100% free with fast download support.
                 </p>
 
                 <div class="stats-row">
@@ -676,28 +780,45 @@
                     </label>
 
                     <button id="pairBtn" onclick="getPairCode()">
-                        <span id="loader" style="display:none; border:2px solid rgba(0,26,16,0.3); border-top:2px solid #001a10; border-radius:50%; width:20px; height:20px; animation:spin .8s linear infinite;"></span>
+                        <span id="loader" style="display:none; border:2px solid rgba(0,17,34,0.3); border-top:2px solid #001122; border-radius:50%; width:20px; height:20px; animation:spin .8s linear infinite;"></span>
                         <span id="btnText"><i class="fas fa-link"></i> Get Pair Code</span>
                     </button>
 
                     <div id="responseBox">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                             <div>
-                                <div style="font-size:10px; font-weight:800; color:var(--green); letter-spacing:1px; text-transform:uppercase;">Pairing Code Ready</div>
+                                <div style="font-size:10px; font-weight:800; color:var(--blue); letter-spacing:1px; text-transform:uppercase;">Pairing Code Ready</div>
                                 <div id="rCode" onclick="copyCode()" title="Click to copy">——</div>
                             </div>
                             <button id="copyBtn" onclick="copyCode()"><i class="fas fa-copy"></i> Copy</button>
                         </div>
-                        <div id="rMessage" style="font-size:11px; color:#8fa89e; margin-top:6px;">Tap code to copy instantly</div>
+                        <div id="rMessage" style="font-size:11px; color:#8fa8bc; margin-top:6px;">Tap code to copy instantly</div>
                     </div>
                 </div>
 
                 <div id="qrSection" style="display:none; text-align:center; padding:10px 0;">
-                    <div style="background:rgba(0,0,0,0.4); border:1px dashed var(--green); padding:20px; border-radius:14px; margin-bottom:15px;">
-                        <i class="fas fa-qrcode" style="font-size:60px; color:var(--green); margin-bottom:10px;"></i>
+                    <div style="background:rgba(0,0,0,0.4); border:1px dashed var(--blue); padding:20px; border-radius:14px; margin-bottom:15px;">
+                        <i class="fas fa-qrcode" style="font-size:60px; color:var(--blue); margin-bottom:10px;"></i>
                         <div style="font-size:13px; font-weight:700; color:#fff;">QR Code Scanning</div>
                         <div style="font-size:11px; color:var(--muted); margin-top:4px;">Coming soon / Use Pair Code for instant connection.</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="live-speed-box">
+            <div class="speed-card">
+                <div class="speed-info">
+                    <div class="speed-icon">
+                        <i class="fas fa-gauge-high"></i>
+                    </div>
+                    <div class="speed-details">
+                        <div class="title">Bot Speed & Performance</div>
+                        <div class="value" id="speedStatusText">Optimal (99.9% Uptime)</div>
+                    </div>
+                </div>
+                <div class="ping-badge">
+                    <span class="ping-dot"></span> <span id="pingValue">18ms</span>
                 </div>
             </div>
         </div>
@@ -739,16 +860,18 @@
 
             <div class="info-card">
                 <div class="section-title">
-                    <i class="fas fa-star"></i> 127+ BOT FEATURES
+                    <i class="fas fa-star"></i> BOT FEATURES
                 </div>
                 <div class="features-list">
-                    <div class="feature-row"><i class="fas fa-film"></i> Cinesubz movie dl</div>
-                    <div class="feature-row"><i class="fas fa-video"></i> Sinhalasub movie dl</div>
-                    <div class="feature-row"><i class="fas fa-tv"></i> Anime dl</div>
-                    <div class="feature-row"><i class="fas fa-child"></i> Cartoon dl</div>
-                    <div class="feature-row"><i class="fab fa-tiktok"></i> Tiktok dl</div>
-                    <div class="feature-row"><i class="fas fa-music"></i> Song dl</div>
+                    <div class="feature-row"><i class="fas fa-film"></i> .movie</div>
+                    <div class="feature-row"><i class="fab fa-tiktok"></i> .tiktok</div>
+                    <div class="feature-row"><i class="fas fa-music"></i> .song</div>
+                    <div class="feature-row"><i class="fas fa-heart-broken"></i> .xnxx</div>
                 </div>
+            </div>
+
+            <div style="text-align: center; font-size: 11px; color: var(--muted); margin-top: 15px; letter-spacing: 1px;">
+                POWERED BY <span style="color: var(--blue); font-weight: bold;">SHAGGY TECH</span>
             </div>
         </div>
     </div>
@@ -775,7 +898,7 @@
                 x: Math.random() * width,
                 y: Math.random() * height,
                 radius: Math.random() * 5 + 2,
-                color: Math.random() > 0.4 ? '#00ff9d' : '#00c878',
+                color: Math.random() > 0.4 ? '#00aaff' : '#0077ff',
                 vx: (Math.random() - 0.5) * 0.5,
                 vy: -Math.random() * 1 - 0.3,
                 alpha: Math.random() * 0.4 + 0.1
@@ -802,10 +925,103 @@
         }
         animate();
 
+        const sakuraCanvas = document.getElementById('sakuraCanvas');
+        const sCtx = sakuraCanvas.getContext('2d');
+        let sWidth = sakuraCanvas.width = window.innerWidth;
+        let sHeight = sakuraCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            sWidth = sakuraCanvas.width = window.innerWidth;
+            sHeight = sakuraCanvas.height = window.innerHeight;
+        });
+
+        let petals = [];
+        let isSakuraActive = false;
+
+        function startSakuraShower() {
+            sakuraCanvas.style.display = 'block';
+            petals = [];
+            for (let i = 0; i < 70; i++) {
+                petals.push({
+                    x: Math.random() * sWidth,
+                    y: Math.random() * sHeight - sHeight,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * 50,
+                    color: Math.random() > 0.3 ? '#00aaff' : '#0077ff',
+                    tilt: Math.random() * 10 - 10,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+                    tiltAngle: 0
+                });
+            }
+            isSakuraActive = true;
+            renderSakura();
+
+            setTimeout(() => {
+                isSakuraActive = false;
+                sakuraCanvas.style.display = 'none';
+                sCtx.clearRect(0, 0, sWidth, sHeight);
+            }, 6000);
+        }
+
+        function renderSakura() {
+            if (!isSakuraActive) return;
+            sCtx.clearRect(0, 0, sWidth, sHeight);
+            petals.forEach(p => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 2 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle) * 2;
+
+                if (p.y > sHeight) {
+                    p.y = -20;
+                    p.x = Math.random() * sWidth;
+                }
+
+                sCtx.beginPath();
+                sCtx.lineWidth = p.r / 2;
+                sCtx.strokeStyle = p.color;
+                sCtx.fillStyle = p.color;
+                sCtx.save();
+                sCtx.translate(p.x, p.y);
+                sCtx.rotate(p.tiltAngle);
+                sCtx.globalAlpha = 0.8;
+                sCtx.shadowBlur = 8;
+                sCtx.shadowColor = p.color;
+                sCtx.fillRect(0, 0, p.r, p.r * 1.5);
+                sCtx.restore();
+            });
+            requestAnimationFrame(renderSakura);
+        }
+
+        function playWelcomeVoice() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Welcome to Shaggy XMD WhatsApp bot project");
+                utterance.rate = 0.95;
+                utterance.pitch = 1.4;
+                utterance.volume = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('susan') || v.name.toLowerCase().includes('google uk english female') || v.name.toLowerCase().includes('google en-us'));
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const intro = document.getElementById('introScreen');
                 const wrapper = document.getElementById('mainWrapper');
+                
+                playWelcomeVoice();
+
                 intro.style.opacity = '0';
                 setTimeout(() => {
                     intro.style.display = 'none';
@@ -852,7 +1068,7 @@
             const code = rCode.textContent.trim();
             if (!code || code === '——') return;
             navigator.clipboard.writeText(code).then(() => {
-                rCode.innerHTML = '<span style="color:#00ff9d;">COPIED!</span>';
+                rCode.innerHTML = '<span style="color:#00aaff;">COPIED!</span>';
                 setTimeout(() => { rCode.textContent = code; }, 1500);
             });
         }
@@ -882,6 +1098,7 @@
                 if (response.ok && data.code) {
                     rCode.textContent = data.code;
                     copyCode();
+                    startSakuraShower();
                 } else {
                     rCode.textContent = data.error || 'Failed to get code';
                 }
@@ -895,4 +1112,4 @@
         }
     </script>
 </body>
-                                    </html>
+</html>
