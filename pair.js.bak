@@ -2176,9 +2176,6 @@ switch (command) { // මෙතැන command වෙනුවට ඔයා ප�
         break; // අනිවාර්යයෙන්ම case එක අවසානයේ break තියෙන්න ඕනේ
 
 }
-// ==========================================
-// SYSTEM CONFIGURATION & MONGODB SETTING COMMAND (.set)
-// ==========================================
 case 'set':
 case 'setting': {
     if (!isOwner) {
