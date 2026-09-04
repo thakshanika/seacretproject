@@ -42,7 +42,7 @@ const config = {
     BOT_FOOTER:"SHAGGY XMD 〽️ᴏᴠɪᴇ Bᴏᴛ ᴠ1.1",
      MGROUP_LINK: 'https://chat.whatsapp.com/JpFSNrnqtnQIqdM0WlNds1',
     MOVIE_FOOTER:"​⏤͟͟͞͞★❮ SHAGGY XMD 〽️OVIE ⏤͟͟͞͞★",
-     MOVIE_CAPTION:"SHAGGY-XMD MOVIE",
+     MOVIE_CAPTION:"🇸‌ʜᴀɢɢY-xᴍᴅ ᴍᴏᴠɪᴇ 🔥🌈",
     PREFIX: '.',
     OWNER_NUMBERS: ['94703830GGGG990'],
     BOT_NAME: "TEST-BOT",
@@ -1467,21 +1467,24 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 *┃ \`🤡 𝙱𝚘𝚝 𝙽𝚊𝚖𝚎:\` ɢʜᴏsᴛ*
 *┃ \`🐞 𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:\` Linux*
 *╰────────●●►*    
-*╭─「 ᴄᴏᴍᴍᴀɴᴅꜱ ᴘᴀɴᴇʟ」*
-│ 🎡 .cinesubz
-│ 🎡 .ping
-│ 🎡 .song
-│ 🎡 .tiktok
-│ 🎡 .menu
-│ 🎡 .alive
-│ 🎡 .sinhalasub
-│ 🎡 .ig
-│ 🎡 .schedule
-│ 🎡 .ai
-│ 🎡 .set
-│ 🎡 .rexporn
-│ 🎡 .animeclub
-*╰────────●●►*   
+╭─  ♡  ᴄᴏᴍᴍᴀɴᴅꜱ  ♡  ─╮
+
+🎬  𝗠𝗼𝘃𝗶𝗲 & 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱
+  • .cinesubz    — Movie dl
+  • .dubzone     — Movie dl
+  • .sinhalasub — Movie dl
+  • .song            — Music dl
+  • .tiktok           —Tiktok dl
+
+⚙️  𝗚𝗲𝗻𝗲𝗿𝗮𝗹
+  • .alive       — status
+  • .menu        — menu
+  • .schedule    — custom masej
+  • .ai          — discussing with ai
+  • .set         — settings
+  • .system      — info
+
+╰─  © 𝚂ʜᴀɢY-xᴍᴅ  ─╯
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
         await socket.sendMessage(sender, {
@@ -1499,100 +1502,7 @@ break;
 
 
      // ==========================================
-// 1. ANIME SEARCH & DOWNLOAD COMMAND (.anime)
-// ==========================================
-case 'anime':
-case 'animedl': {
-    if (!text) return reply('❌ කරුණාකර ඇනිමේ නම දෙන්න!\n✨ උදා: `.anime naruto`');
-    
-    reply('🍥 ඇනිමේ විස්තර සහ ඩවුන්ලෝඩ් ලින්ක් සොයමින් පවතී, රැඳී සිටින්න...');
 
-    try {
-        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-        const apiUrl = `https://api.chamindu.site/api/v1/cartoons/animeclub/tv/dl?q=${encodeURIComponent(text)}&api_key=${apiKey}`;
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (data && data.status && data.downloads && data.downloads.length > 0) {
-            let message = `📥 *AnimeClub TV Downloads Found!*\n\n`;
-            
-            for (let dl of data.downloads) {
-                let quality = dl.quality || 'HD';
-                let link = dl.link || dl.direct_link;
-                message += `*Quality/Source:* ${quality}\n*Download Link:* ${link}\n\n`;
-            }
-
-            await reply(message.trim());
-        } else {
-            reply('❌ කණගාටුයි, අදාළ නම සඳහා ඩවුන්ලෝඩ් ලින්ක් ලබා ගැනීමට නොහැකි විය.');
-        }
-    } catch (err) {
-        console.error('Anime DL Error:', err);
-        reply('❌ දෝෂයක් සිදු විය! කරුණාකර නැවත උත්සාහ කරන්න.');
-    }
-    break;
-}
-// ==========================================
-// XNXX VIDEO DOCUMENT SENDER (.xndl)
-// ==========================================
-case 'xndl':
-case 'xnxxindl': {
-    if (!text) return reply('❌ කරුණාකර XNXX වීඩියෝ අංකය හෝ ලින්ක් එක දෙන්න!\n✨ උදා: `.xndl 1`');
-    
-    let targetUrl = text.trim();
-
-    if (/^\d+$/.test(targetUrl)) {
-        global.xnxxCache = global.xnxxCache || {};
-        const userCache = global.xnxxCache[sender];
-        
-        if (!userCache || userCache.length === 0) {
-            return reply('❌ කරුණාකර මුලින්ම `.xnxx <query>` මඟින් සෙවුමක් සිදු කරන්න!');
-        }
-
-        const index = parseInt(targetUrl) - 1;
-        if (index < 0 || index >= userCache.length) {
-            return reply(`❌ කරුණාකර 1 සහ ${userCache.length} අතර නිවැරදි අංකයක් ලබා දෙන්න!`);
-        }
-
-        targetUrl = userCache[index].url;
-    }
-
-    let cleanUrl = targetUrl.replace(/[<>]/g, '').trim();
-    
-    reply('📥 වීඩියෝව ඩොකියුමන්ට් එකක් ලෙස සූදානම් කරමින් පවතී, ටිකක් ඉඳපන්...');
-
-    try {
-        const apiKey = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-        const dlApiUrl = `https://api.chamindu.site/api/adult/xnxx/dl?url=${encodeURIComponent(cleanUrl)}&api_key=${apiKey}`;
-        
-        const dlRes = await fetch(dlApiUrl);
-        const dlData = await dlRes.json();
-
-        if (dlData && dlData.success) {
-            let videoFileUrl = dlData.download_url || dlData.direct_link;
-
-            if (!videoFileUrl) {
-                return reply('❌ වීඩියෝ ෆයිල් ලින්ක් එක ලබා ගැනීමට නොහැකි විය.');
-            }
-
-            // Document එකක් ලෙස 2GB දක්වා ෆයිල් යැවීම (mimetype සහ fileName සමඟ)
-            await conn.sendMessage(sender, {
-                document: { url: videoFileUrl },
-                mimetype: 'video/mp4',
-                fileName: `SHAGGY_XMD_Video.mp4`,
-                caption: `🔞 *SHAGGY XMD - XNXX DOWNLOADER*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-
-        } else {
-            reply('❌ කණගාටුයි, අදාළ වීඩියෝව ඩවුන්ලෝඩ් කිරීමට නොහැකි විය.');
-        }
-    } catch (err) {
-        console.error('XNXX DL Error:', err);
-        reply('❌ දෝෂයක් සිදු විය! සර්වර් එක බිඳ වැටී ඇත හෝ ලින්ක් එක කල් ඉකුත් වී ඇත.');
-    }
-    break;
-}
 case 'schedule':
 case 'remind': {
     if (!isOwner) {
@@ -1668,79 +1578,7 @@ case 'remind': {
 }
 break;
 
- case 'ig':
-case 'instagram': {
-    if (!args[0]) {
-        return await socket.sendMessage(sender, {
-            text: `❌ *Please provide an Instagram link!*\n✨ *Example:* \`.ig https://www.instagram.com/reel/...\``
-        }, { quoted: msg });
-    }
 
-    let igUrl = args[0].split("?")[0];
-    try {
-        await socket.sendMessage(sender, { react: { text: "⬇️", key: msg.key } });
-
-        let mediaUrl = null;
-        let isVideo = true;
-
-        // Bypass API 1: Direct SnapInsta / SaveFrom alternative endpoint
-        try {
-            const res1 = await fetch(`https://itzpire.com/download/instagram?url=${encodeURIComponent(igUrl)}`);
-            const data1 = await res1.json();
-            if (data1.status && data1.data) {
-                mediaUrl = data1.data.url || data1.data[0]?.url;
-                isVideo = data1.data.type === 'video' || data1.data[0]?.type === 'video' || true;
-            }
-        } catch (e) {}
-
-        // Bypass API 2: Siputzx Alternate Server
-        if (!mediaUrl) {
-            try {
-                const res2 = await fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(igUrl)}`);
-                const data2 = await res2.json();
-                if (data2.status && data2.data && data2.data.length > 0) {
-                    mediaUrl = data2.data[0].url;
-                    isVideo = data2.data[0].type === 'video';
-                }
-            } catch (e) {}
-        }
-
-        // Bypass API 3: Vyuh / Vkrtechnologies Fallback
-        if (!mediaUrl) {
-            try {
-                const res3 = await fetch(`https://api.vkrtechnologies.com/api/dl/ig?url=${encodeURIComponent(igUrl)}`);
-                const data3 = await res3.json();
-                if (data3.status && (data3.data || data3.url)) {
-                    mediaUrl = data3.data || data3.url;
-                }
-            } catch (e) {}
-        }
-
-        if (!mediaUrl) {
-            return await socket.sendMessage(sender, { 
-                text: `❌ *Instagram security has temporarily rate-limited public downloaders. Please try downloading via another post or try again later!*` 
-            }, { quoted: msg });
-        }
-
-        if (isVideo) {
-            await socket.sendMessage(sender, {
-                video: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗩𝗜𝗗𝗘𝗢*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        } else {
-            await socket.sendMessage(sender, {
-                image: { url: mediaUrl },
-                caption: `📥 *𝗦𝗛𝗔𝗚𝗚𝗬  𝗫𝗠𝗗 - 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠  𝗜𝗠𝗔𝗚𝗘*\n\n> ${sessionConfig.AIR_FOOTER || config.AIR_FOOTER}`
-            }, { quoted: msg });
-        }
-
-        await socket.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-    } catch (err) {
-        console.error("IG Error:", err);
-        await socket.sendMessage(sender, { text: `❌ *An error occurred while downloading media. Please try again later.*` }, { quoted: msg });
-    }
-}
-break;
                     case 'ai':
 case 'codex': {
     const query = args.join(' ');
