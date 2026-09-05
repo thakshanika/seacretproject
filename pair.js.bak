@@ -2040,8 +2040,10 @@ case 'teledrama': {
                 )
             }, { quoted: msg });
             break;
-case 'sinama':
-case 'sinamalka': {
+        }
+        
+        case 'sinama':
+case'sinamalka': {
     if (!args.length) {
         await socket.sendMessage(sender, {
             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
