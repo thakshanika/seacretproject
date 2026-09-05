@@ -2040,8 +2040,6 @@ case 'teledrama': {
                 )
             }, { quoted: msg });
             break;
-        }
-
 case 'sinama':
 case 'sinamalka': {
     if (!args.length) {
