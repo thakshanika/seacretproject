@@ -1507,15 +1507,19 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
         console.error(e);
     }
 }
-                                        
- case 'baiscopes':
-case 'movie': {
-    if (!args.length) {
+case 'baiscopes':
+case 'movie':
+case 'moviesublk':
+case 'latestmovies': {
+    const isLatest = msg.body.includes('latest') || msg.body.includes('moviesublk');
+    const args = body.trim().split(/ +/).slice(1);
+
+    if (!isLatest && !args.length) {
         await socket.sendMessage(sender, {
             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
             caption: formatMessage(
                 '❌ ERROR',
-                '*please movie name! ex: .baiscopes Batman*',
+                '*Please provide a movie name! ex: .baiscopes Batman*',
                 `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
             )
         }, { quoted: msg });
@@ -1523,7 +1527,7 @@ case 'movie': {
     }
 
     const baiscopeQuery = args.join(' ');
-    const API_BASE = 'https://api.chamindu.site/api/v1/movies/baiscopes';
+    const API_BASE = 'https://api.chamindu.site/api/v1/movies/moviesublkcom';
     const API_KEY = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
 
     let baiscopesSelectionListener = null;
@@ -1546,20 +1550,28 @@ case 'movie': {
     };
 
     try {
-        await socket.sendMessage(sender, { text: '🔍 Searching movies on baiscopes.lk...' }, { quoted: msg });
+        let endpoint = `${API_BASE}/search`;
+        let params = { api_key: API_KEY };
 
-        const searchRes = await axios.get(`${API_BASE}/search`, {
-            params: { q: baiscopeQuery, api_key: API_KEY },
-            timeout: 20000
-        });
+        if (isLatest) {
+            endpoint = `${API_BASE}/latest`;
+            params.page = 1;
+            await socket.sendMessage(sender, { text: '⏳ Fetching latest movies from MovieSubLK.com...' }, { quoted: msg });
+        } else {
+            endpoint = `${API_BASE}/search`;
+            params.q = baiscopeQuery;
+            await socket.sendMessage(sender, { text: '🔍 Searching movies on MovieSubLK.com...' }, { quoted: msg });
+        }
 
+        const searchRes = await axios.get(endpoint, { params, timeout: 20000 });
         const searchData = searchRes.data;
+
         if (!searchData.status || !searchData.data || searchData.data.length === 0) {
             await socket.sendMessage(sender, {
                 image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
                 caption: formatMessage(
                     '❌ NO RESULTS',
-                    '*Not Found To Movie!*',
+                    '*No Movies Found!*',
                     `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
                 )
             }, { quoted: msg });
@@ -1567,10 +1579,10 @@ case 'movie': {
         }
 
         const baiscopesList = searchData.data.slice(0, 20);
-        let listText = `🧸 *baiscopes.lk : _${baiscopeQuery}_*\n╭──────●➤\n*🔢 ʀᴇ𝗽𝗹ʏ ʙᴇʟ𝗼𝘄 ɴᴜᴍʙᴇ🇷*\n╰──────────●➤\n╭──────●➤\n`;
+        let listText = `🔥 *MovieSubLK.com Movies*\n╭──────●➤\n*🔢 ʀᴇ𝗽𝗹ʏ ʙᴇ𝗹𝗼𝘄 ɴᴜᴍʙᴇ🇷*\n╰──────────●➤\n╭──────●➤\n`;
 
         baiscopesList.forEach((item, index) => {
-            listText += `*🧩 ${index + 1} ┃❭❭ ${item.title}*\n    ↳ (${item.quality || 'HD'} | ⭐ ${item.rating || 'N/A'})\n`;
+            listText += `*🧩 ${index + 1} ┃❭❭ ${item.title}*\n    ↳ (${item.type || 'movie'})\n`;
         });
         listText += `╰──────────●➤\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1615,29 +1627,29 @@ case 'movie': {
                         timeout: 20000
                     });
 
-                    const baiscopesData = infoRes.data?.data;
-                    const allDownloads = baiscopesData?.downloads || [];
+                    const movieData = infoRes.data?.data;
+                    const allDownloads = movieData?.downloads || [];
 
-                    if (!baiscopesData || allDownloads.length === 0) {
+                    if (!movieData || allDownloads.length === 0) {
                         throw new Error('බාගත කිරීමේ links හෝ episodes හමු නොවීය.');
                     }
 
-                    const directDownloads = allDownloads.filter(d => d.link?.endsWith('.mp4') || !d.name?.includes('Telegram'));
+                    const directDownloads = allDownloads.filter(d => d.link?.endsWith('.mp4') || !d.title?.includes('Telegram'));
                     const finalDownloads = directDownloads.length > 0 ? directDownloads : allDownloads;
 
-                    let infoText = `🍀 *${baiscopesData.title}*\n\n`;
-                    infoText += `⭐ *IMDb:* ${baiscopesData.imdb || 'N/A'}\n`;
-                    infoText += `🗣️ *Language:* ${baiscopesData.language || 'Sinhala sub'}\n`;
-                    infoText += `🎭 *Genres:* ${baiscopesData.genres?.join(', ') || 'baiscopes'}\n\n`;
+                    let infoText = `🍀 *${movieData.title || chosenbaiscopes.title}*\n\n`;
+                    infoText += `⭐ *IMDb:* ${movieData.imdb_rating || 'N/A'}\n`;
+                    infoText += `🗣️ *Language:* Sinhala Sub/Dub\n`;
+                    infoText += `🎭 *Genres:* ${movieData.genre || 'movie'}\n\n`;
                     infoText += `*Available Episodes / Links:*\n`;
 
                     finalDownloads.forEach((dl, i) => {
-                        infoText += `*${i + 1}.* ${dl.name}\n`;
+                        infoText += `*${i + 1}.* ${dl.title}\n`;
                     });
-                    infoText += `\n👉 *බාගත කිරීමට අදාළ Episode අංකය Reply කරන්න.*`;
+                    infoText += `\n👉 *බාගත කිරීමට අදාළ Episode/Link අංකය Reply කරන්න.*`;
 
                     const infoMsg = await socket.sendMessage(sender, {
-                        image: { url: chosenbaiscopes.image || sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
+                        image: { url: movieData.image || chosenbaiscopes.image || sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
                         caption: infoText
                     }, { quoted: replyMek });
 
@@ -1654,7 +1666,7 @@ case 'movie': {
                             const epIdx = parseInt(epChoiceText) - 1;
                             if (isNaN(epIdx) || epIdx < 0 || epIdx >= finalDownloads.length) {
                                 await socket.sendMessage(sender, { 
-                                    text: `❌ කරුණාකර 1 - ${finalDownloads.length} අතර Episode අංකයක් ලබාදෙන්න!` 
+                                    text: `❌ කරුණාකර 1 - ${finalDownloads.length} අතර අංකයක් ලබාදෙන්න!` 
                                 }, { quoted: epMek });
                                 return;
                             }
@@ -1665,15 +1677,15 @@ case 'movie': {
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
                             await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading Episode:* ${selectedEpisode.name}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
+                                text: `⏳ *Downloading:* ${selectedEpisode.title}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
                             }, { quoted: epMek });
 
                             try {
                                 await socket.sendMessage(sender, {
                                     document: { url: selectedEpisode.link },
                                     mimetype: 'video/mp4',
-                                    fileName: `${baiscopesData.title} - ${selectedEpisode.name}.mp4`,
-                                    caption: `✅ *MOVIE DOWNLOADED*\n\n🎬 *Series:* ${baiscopesData.title}\n📌 *Episode:* ${selectedEpisode.name}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                    fileName: `${movieData.title || chosenbaiscopes.title} - ${selectedEpisode.title}.mp4`,
+                                    caption: `✅ *MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenbaiscopes.title}\n📌 *Quality:* ${selectedEpisode.quality || 'N/A'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
                                 }, { quoted: epMek });
 
                                 await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
@@ -1705,7 +1717,7 @@ case 'movie': {
         }, { quoted: msg });
     }
     break;
-}     
+}
 case 'mflix': {
     if (!args.length) {
         await socket.sendMessage(sender, {
