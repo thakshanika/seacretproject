@@ -476,7 +476,6 @@ Failed to process TikTok request: ${error.message}`
         });
     }
     break;
-}
 case 'cinesubz':
     if (!args.length) {
         await socket.sendMessage(sender, {
