@@ -1634,7 +1634,7 @@ case 'latestmovies': {
                         throw new Error('බාගත කිරීමේ links හෝ episodes හමු නොවීය.');
                     }
 
-                    const directDownloads = allDownloads.filter(d => d.link?.endsWith('.mp4') || !d.title?.includes('Telegram'));
+                    const directDownloads = allDownloads.filter(d => d.link?.endsWith('.mp4') || !(d.title || '').includes('Telegram'));
                     const finalDownloads = directDownloads.length > 0 ? directDownloads : allDownloads;
 
                     let infoText = `🍀 *${movieData.title || chosenbaiscopes.title}*\n\n`;
@@ -1644,7 +1644,7 @@ case 'latestmovies': {
                     infoText += `*Available Episodes / Links:*\n`;
 
                     finalDownloads.forEach((dl, i) => {
-                        infoText += `*${i + 1}.* ${dl.title}\n`;
+                        infoText += `*${i + 1}.* ${dl.title || 'Download Link'}\n`;
                     });
                     infoText += `\n👉 *බාගත කිරීමට අදාළ Episode/Link අංකය Reply කරන්න.*`;
 
@@ -1677,14 +1677,14 @@ case 'latestmovies': {
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
                             await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading:* ${selectedEpisode.title}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
+                                text: `⏳ *Downloading:* ${selectedEpisode.title || 'Video'}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
                             }, { quoted: epMek });
 
                             try {
                                 await socket.sendMessage(sender, {
-                                    document: { url: selectedEpisode.link },
+                                    video: { url: selectedEpisode.link },
                                     mimetype: 'video/mp4',
-                                    fileName: `${movieData.title || chosenbaiscopes.title} - ${selectedEpisode.title}.mp4`,
+                                    fileName: `${movieData.title || chosenbaiscopes.title} - ${selectedEpisode.title || 'Video'}.mp4`,
                                     caption: `✅ *MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenbaiscopes.title}\n📌 *Quality:* ${selectedEpisode.quality || 'N/A'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
                                 }, { quoted: epMek });
 
