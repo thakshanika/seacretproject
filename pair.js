@@ -476,6 +476,7 @@ Failed to process TikTok request: ${error.message}`
         });
     }
     break;
+}
 case 'cinesubz':
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1471,15 +1472,12 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
 🎬  𝗠𝗼𝘃𝗶𝗲 & 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱
   • .cinesubz    — Movie dl
-  • .dubzone     — Movie dl
+  • .baiscope     — Movie dl
   • .sinhalasub  — Movie dl
-  • .anime       — Anime dl
-  • .scartoon    — Cartoon dl
+  • .cartoon    — Cartoon dl
   • .song        — Music dl
   • .tiktok      — Tiktok dl
-  • .ig          — Insta video dl
-  • .fb          — Fb video dl
-
+  
 ⚙️  𝗚𝗲𝗻𝗲𝗿𝗮𝗹
   • .alive       — status
   • .menu        — menu
@@ -1493,6 +1491,7 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 • .ai           — Conversation 
 • .schedule    — custom masej
 
+
 ╰─  © 𝚂ʜᴀɢY-xᴍᴅ  ─╯
 > ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
@@ -1500,9 +1499,6 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE},
             caption: mainMenuMsg
         }, { quoted: msg });
-
-       
-
     } catch (e) {
         console.error(e);
     }
