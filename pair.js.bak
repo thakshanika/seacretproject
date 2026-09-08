@@ -1751,8 +1751,7 @@ case 'bs': {
                 }
             }
         };
-
-            case 'cinemx':             
+    case 'cinemx':             
 case 'cmx': {
     const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴄʜᴀᴍᴀ ᴛᴇᴄʜ`;
 
