@@ -1506,8 +1506,8 @@ ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
     }
 }
 break;    
-case 'film':
-case 'movie': {
+case 'movie':
+case 'film': {
     if (!args.length) {
         await socket.sendMessage(sender, {
             image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
@@ -1658,21 +1658,36 @@ case 'movie': {
                             clearListeners();
                             const selectedDL = downloads[qIdx];
 
-                            await socket.sendMessage(sender, { react: { text: '📥', key: qMek.key } });
+                            await socket.sendMessage(sender, { react: { text: '⏳', key: qMek.key } });
+                            await socket.sendMessage(sender, { text: `📥 Downloading and sending *${selectedDL.quality || 'Video'}* as document, please wait...` }, { quoted: qMek });
 
-                            let finalLink = selectedDL.link;
-                            let replyText = `✅ *SINHALASUB DOWNLOAD LINK*\n\n`;
-                            replyText += `🎬 *Title:* ${chosenItem.title}\n`;
-                            replyText += `📌 *Option:* ${selectedDL.name || selectedDL.quality}\n`;
-                            replyText += `📦 *Size:* ${selectedDL.size || 'N/A'}\n\n`;
-                            replyText += `🔗 *Direct/Telegram Link:*\n${finalLink}\n\n`;
-                            replyText += `> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
+                            try {
+                                const response = await axios({
+                                    method: 'get',
+                                    url: selectedDL.link,
+                                    responseType: 'stream',
+                                    headers: {
+                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                                    },
+                                    timeout: 60000
+                                });
 
-                            await socket.sendMessage(sender, { 
-                                text: replyText 
-                            }, { quoted: qMek });
+                                await socket.sendMessage(sender, {
+                                    document: response.data,
+                                    mimetype: 'video/mp4',
+                                    fileName: `${chosenItem.title} [${selectedDL.quality || 'Video'}].mp4`,
+                                    caption: `🎬 *${chosenItem.title}*\n📌 *Quality:* ${selectedDL.quality || 'N/A'}\n📦 *Size:* ${selectedDL.size || 'N/A'}\n\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                }, { quoted: qMek });
 
-                            await socket.sendMessage(sender, { react: { text: '✅', key: qMek.key } });
+                                await socket.sendMessage(sender, { react: { text: '✅', key: qMek.key } });
+
+                            } catch (err) {
+                                console.error('Video Send Error:', err);
+                                await socket.sendMessage(sender, { 
+                                    text: `❌ වීඩියෝව යැවීමේදී දෝෂයක් ඇති විය: ${err.message}\n\nමෙම ලින්ක් එක ඩිරෙක්ට් බ්‍රව්සරයෙන් ඩවුන්ලෝඩ් කරගන්න:\n${selectedDL.link}` 
+                                }, { quoted: qMek });
+                                await socket.sendMessage(sender, { react: { text: '❌', key: qMek.key } });
+                            }
                         }
                     };
 
@@ -1694,6 +1709,9 @@ case 'movie': {
     }
     break;
 }
+         
+
+
      
 case 'movie': {
     const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀེᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
