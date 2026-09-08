@@ -1981,7 +1981,7 @@ case 'lak': {
                                 // Prevent sending tiny html/embed files as documents by checking link types or forcing safe stream links view
                                 if (finalDirectLink.includes('youtube.com') || finalDirectLink.includes('youtu.be') || finalDirectLink.includes('dailymotion') || finalDirectLink.includes('embed.php') || finalDirectLink.includes('ok.ru') || finalDirectLink.includes('drive.google.com') || !finalDirectLink.endsWith('.mp4')) {
                                     await socket.sendMessage(sender, {
-                                        text: `*📺 𝗖𝗛𝗔𝗠𝗔 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗩𝗜𝗗𝗘𝗢 📺*\n\n🎭 *Title:* ${videoInfo.title || selectedItem.title}\n📊 *Type / Quality:* _${selectedDownload.name || 'Stream'_\n\n🔗 *Watch / Stream Link:* ${finalDirectLink}${DEFAULT_FOOTER}`
+                                        text: `*📺 𝗦𝗛𝗔𝗚𝗚𝗬 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗩𝗜𝗗𝗘𝗢 📺*\n\n🎭 *Title:* ${videoInfo.title || selectedItem.title}\n📊 *Type / Quality:* _${selectedDownload.name || 'Stream'}_\n\n🔗 *Watch / Stream Link:* ${finalDirectLink}${DEFAULT_FOOTER}`
                                     }, { quoted: downloadMek });
                                 } else {
                                     await socket.sendMessage(sender, {
