@@ -1752,265 +1752,507 @@ case 'bs': {
             }
         };
 
-        socket.ev.on('messages.upsert', handleSelection);
+            case 'cinemx':             
+case 'cmx': {
+    const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴄʜᴀᴍᴀ ᴛᴇᴄʜ`;
 
-    } catch (error) {
-        console.error('Baiscope command error:', error);
-        await socket.sendMessage(sender, {
-            text: `*❪ SYSTEM ERROR ❫*\n\n❌ *System Error!*\n🚫 _${error.message || 'Unknown error'}_\n\n🔄 _Please try again later..._${DEFAULT_FOOTER}`
-        }, { quoted: msg });
-    }
-};
-    case 'mv':
-case 'mv2': {
     if (!args.length) {
         await socket.sendMessage(sender, {
-            image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
-            caption: formatMessage(
-                '❌ ERROR',
-                '*කරුණාකර කාටූනයේ නම ලබාදෙන්න! උදා: .cartoon Ben 10*',
-                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-            )
+            text: `*❪ ERROR ❫*\n\n⚠️ *Invalid Usage!*\n\n🎬 *Example:*
+• .cinemx johnny english
+• .cmx peddi\n\n📝 _Please provide the Movie_ _or TV Series name!_${DEFAULT_FOOTER}`
         }, { quoted: msg });
         break;
     }
 
-    const mvQuery = args.join(' ');
-    const API_BASE = 'https://api.chamindu.site/api/v1/movies/subzlk';
-    const API_KEY = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
+    const query = args.join(' ');
+    await socket.sendMessage(sender, { 
+        text: `*❪ SEARCHING ❫*\n\n🔍 *Searching CineMX...*\n⚡ _Please wait a moment._`
+    });
 
-    let mvSelectionListener = null;
-    let mvEpisodeListener = null;
-    let mvMasterTimeout = null;
-
-    const clearAllmvListeners = () => {
-        if (mvSelectionListener) {
-            socket.ev.off('messages.upsert', mvSelectionListener);
-            mvSelectionListener = null;
-        }
-        if (mvEpisodeListener) {
-            socket.ev.off('messages.upsert', mvEpisodeListener);
-            mvEpisodeListener = null;
-        }
-        if (mvMasterTimeout) {
-            clearTimeout(mvMasterTimeout);
-            mvMasterTimeout = null;
-        }
-    };
+    const API_BASE = "https://api.chamindu.site";
+    const API_KEY = "chama_api_11230a80e5eed3c1b80bfcc5d1773ec9"; // ඔබේ API Key එක දාන්න
+    const DEFAULT_IMAGE = "https://api.chamindu.site/logo.png";
 
     try {
-        await socket.sendMessage(sender, { text: '🔍 Searching cartoons on SinhalaCartoons...' }, { quoted: msg });
+        const searchResponse = await axios.get(`${API_BASE}/api/v1/movie/cinemx/search?q=${encodeURIComponent(query)}&api_key=${API_KEY}`);
+        const searchData = searchResponse.data;
 
-        const searchRes = await axios.get(`${API_BASE}/search`, {
-            params: { q: mvQuery, api_key: API_KEY },
-            timeout: 20000
-        });
-
-        const searchData = searchRes.data;
         if (!searchData.status || !searchData.data || searchData.data.length === 0) {
             await socket.sendMessage(sender, {
-                image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
-                caption: formatMessage(
-                    '❌ NO RESULTS',
-                    '*කිසිදු කාටූනයක් හමු නොවීය!*',
-                    `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-                )
+                text: `*❪ NO RESULTS ❫*\n\n😞 *No Results Found!*\n\n🎬 *Query:* _${query}_\n💡 *Tip:* _Please check the spelling and try again!_${DEFAULT_FOOTER}`
             }, { quoted: msg });
             break;
         }
 
-        const mvList = searchData.data.slice(0, 20);
-        let listText = `🧸 *𝗦𝗜𝗡𝗛𝗔𝗟𝗔 𝗖𝗔𝗥𝗧𝗢𝗢𝗡 𝗦𝗘𝗔𝗥𝗖𝗛 : _${cartoonQuery}_*\n╭──────●➤\n*🔢 ʀᴇ𝗽𝗹ʏ ʙᴇʟ𝗼ᴡ ɴᴜᴍʙᴇʀ*\n╰──────────●➤\n╭──────●➤\n`;
+        const results = searchData.data.slice(0, 25);
+        let listText = `*❪ SEARCH RESULTS ❫*\n\n🎯 *Query:* _${query}_\n📊 *Results:* _${results.length} Items_\n\n*👇 SELECT A NUMBER 👇*\n\n`;
 
-        mvList.forEach((item, index) => {
-            listText += `*🧩 ${index + 1} ┃❭❭ ${item.title}*\n    ↳ (${item.quality || 'HD'} | ⭐ ${item.rating || 'N/A'})\n`;
+        results.forEach((item, index) => {
+            const typeIcon = item.type === 'tvshows' ? '📺' : '🎥';
+            const num = (index + 1) < 10 ? `0${index + 1}` : `${index + 1}`;
+            listText += `*${num}* ➜ ${typeIcon} _${item.title.substring(0, 30)}_\n`;
         });
-        listText += `╰──────────●➤\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`;
 
-        const searchMsg = await socket.sendMessage(sender, {
-            image: { url: cartoonList[0].image || sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
-            caption: listText
-        }, { quoted: msg });
+        listText += `${DEFAULT_FOOTER}`;
+        
+        const sentMsg = await socket.sendMessage(sender, { text: listText }, { quoted: msg });
+        const messageID = sentMsg.key.id;
 
-        const searchMsgID = searchMsg.key.id;
+        const handleSelection = async ({ messages: replyMessages }) => {
+            const replyMek = replyMessages[0];
+            if (!replyMek?.message) return;
 
-        mvMasterTimeout = setTimeout(() => {
-            clearAllmvListeners();
-        }, 120000);
+            const messageType = replyMek.message.conversation || replyMek.message.extendedTextMessage?.text;
+            const isReplyToSentMsg = replyMek.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-        const handlemvSelection = async ({ messages }) => {
-            const replyMek = messages?.[0];
-            if (!replyMek?.message || replyMek.key.remoteJid !== sender) return;
-
-            const text = (replyMek.message.conversation || replyMek.message.extendedTextMessage?.text || '').trim();
-            const isReply = replyMek.message.extendedTextMessage?.contextInfo?.stanzaId === searchMsgID;
-
-            if (isReply) {
-                const choice = parseInt(text) - 1;
-                if (isNaN(choice) || choice < 0 || choice >= cartoonList.length) {
+            if (isReplyToSentMsg && sender === replyMek.key.remoteJid) {
+                const choice = parseInt(messageType) - 1;
+                if (isNaN(choice) || choice < 0 || choice >= results.length) {
                     await socket.sendMessage(sender, {
-                        text: `❌ කරුණාකර 1 - ${mvList.length} අතර අංකයක් ලබාදෙන්න!`
+                        text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - ${results.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
                     }, { quoted: replyMek });
                     return;
                 }
 
-                if (mvSelectionListener) {
-                    socket.ev.off('messages.upsert', mvSelectionListener);
-                    mvSelectionListener = null;
-                }
-
-                const chosenmv = mvList[choice];
-                await socket.sendMessage(sender, { text: '⏳ Fetching cartoon details & episodes...' }, { quoted: replyMek });
+                const selectedItem = results[choice];
+                
+                await socket.sendMessage(sender, { 
+                    text: `*❪ FETCHING ❫*\n\n🎬 *Fetching Movie...*\n⚡ _Please wait..._`
+                }, { quoted: replyMek });
 
                 try {
-                    const infoRes = await axios.get(`${API_BASE}/infodl`, {
-                        params: { q: chosenmv.link, api_key: API_KEY },
-                        timeout: 20000
-                    });
+                    const detailsResponse = await axios.get(`${API_BASE}/api/v1/movie/cinemx/infodl?q=${encodeURIComponent(selectedItem.link)}&api_key=${API_KEY}`);
+                    const detailsData = detailsResponse.data;
 
-                    const mvData = infoRes.data?.data;
-                    const allDownloads = mvData?.downloads || [];
-
-                    if (!mvData || allDownloads.length === 0) {
-                        throw new Error('බාගත කිරීමේ links හෝ episodes හමු නොවීය.');
+                    if (!detailsData.status || !detailsData.data) {
+                        throw new Error('Failed to fetch details');
                     }
 
-                    const directDownloads = allDownloads.filter(d => d.link?.endsWith('.mp4') || !d.name?.includes('Telegram'));
-                    const finalDownloads = directDownloads.length > 0 ? directDownloads : allDownloads;
+                    const movieInfo = detailsData.data;
+                    const validDownloads = movieInfo.downloads || [];
+                    
+                    if (validDownloads.length === 0) {
+                        await socket.sendMessage(sender, {
+                            text: `*❪ NO DOWNLOADS ❫*\n\n⚠️ *No Downloads Found!*\n😞 _There are no downloads available for this movie!_${DEFAULT_FOOTER}`
+                        }, { quoted: replyMek });
+                        return;
+                    }
+                    
+                    const movieDetailsText = `*❪ MOVIE DETAILS ❫*\n\n🎬 *${movieInfo.title}*\n⭐ 𝗜𝗠𝗗𝗕 ➜ ★ ${movieInfo.imdb || 'N/A'}\n📅 𝗬𝗲𝗮𝗿 ➜ ${movieInfo.year || 'N/A'}\n⏳ 𝗗𝘂𝗿𝗮𝘁𝗶𝗼𝗻 ➜ ${movieInfo.duration || 'N/A'}\n🌍 𝗖ᴏᴜɴ𝘁𝗿ʏ ➜ ${movieInfo.country || 'N/A'}\n🎭 𝗚𝗲𝗻 Genres ➜ ${movieInfo.genres ? movieInfo.genres.join(', ') : 'N/A'}\n🏷️ 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲 ➜ ${movieInfo.language || 'N/A'}\n🎬 𝗗𝗶𝗿𝗲𝗰𝘁ᴏʀ ➜ ${movieInfo.director || 'N/A'}\n📝 𝗦𝘁𝗼𝗿𝘆 ➜ ${movieInfo.story ? (movieInfo.story.length > 250 ? movieInfo.story.substring(0, 250) + '...' : movieInfo.story) : 'N/A'}\n🗿 𝗪ᴇʙ ➜ cinemx.lk\n${DEFAULT_FOOTER}`;
 
-                    let infoText = `🍀 *${mv.title}*\n\n`;
-                    infoText += `⭐ *IMDb:* ${mvData.imdb || 'N/A'}\n`;
-                    infoText += `🗣️ *Language:* ${mvnData.language || 'Sinhala'}\n`;
-                    infoText += `🎭 *Genres:* ${mvData.genres?.join(', ') || 'mv'}\n\n`;
-                    infoText += `*Available Episodes / Links:*\n`;
-
-                    finalDownloads.forEach((dl, i) => {
-                        infoText += `*${i + 1}.* ${dl.name}\n`;
-                    });
-                    infoText += `\n👉 *බාගත කිරීමට අදාළ Episode අංකය Reply කරන්න.*`;
-
-                    const infoMsg = await socket.sendMessage(sender, {
-                        image: { url: mvData.image || chosenmv.image },
-                        caption: infoText
+                    const moviePosterUrl = movieInfo.image || selectedItem.image || DEFAULT_IMAGE;
+                    await socket.sendMessage(sender, {
+                        image: { url: moviePosterUrl },
+                        caption: movieDetailsText
                     }, { quoted: replyMek });
 
-                    const infoMsgID = infoMsg.key.id;
+                    const downloadOptionsText = `*❪ DOWNLOADS ❫*\n\n📥 *Select Option:*\n\n${validDownloads.map((dl, i) => {
+    const num = (i + 1) < 10 ? `0${i + 1}` : `${i + 1}`;
+    const dlIcon = dl.name.includes('SUBTITLE') ? '📝' : dl.name.includes('FHD') ? '🔥' : '💎';
+    return `*${num}* ➜ ${dlIcon} _${dl.name.replace('📥', '').trim()}_`;
+}).join('\n')}\n\n*💬 REPLY TO DOWNLOAD 💬*\n📌 _Reply with the number_${DEFAULT_FOOTER}`;
 
-                    const handleEpisodeSelection = async ({ messages: epMessages }) => {
-                        const epMek = epMessages?.[0];
-                        if (!epMek?.message || epMek.key.remoteJid !== sender) return;
+                    const downloadOptionsMsg = await socket.sendMessage(sender, { text: downloadOptionsText }, { quoted: replyMek });
+                    const optionsMsgID = downloadOptionsMsg.key.id;
 
-                        const epChoiceText = (epMek.message.conversation || epMek.message.extendedTextMessage?.text || '').trim();
-                        const isEpReply = epMek.message.extendedTextMessage?.contextInfo?.stanzaId === infoMsgID;
+                    const handleDownload = async ({ messages: downloadMessages }) => {
+                        const downloadMek = downloadMessages[0];
+                        if (!downloadMek?.message) return;
 
-                        if (isEpReply) {
-                            const epIdx = parseInt(epChoiceText) - 1;
-                            if (isNaN(epIdx) || epIdx < 0 || epIdx >= finalDownloads.length) {
-                                await socket.sendMessage(sender, { 
-                                    text: `❌ කරුණාකර 1 - ${finalDownloads.length} අතර Episode අංකයක් ලබාදෙන්න!` 
-                                }, { quoted: epMek });
-                                return;
+                        const downloadChoice = downloadMek.message.conversation || downloadMek.message.extendedTextMessage?.text;
+                        const isReplyToOptionsMsg = downloadMek.message.extendedTextMessage?.contextInfo?.stanzaId === optionsMsgID;
+
+                        if (isReplyToOptionsMsg && sender === downloadMek.key.remoteJid) {
+                            const choiceNum = parseInt(downloadChoice) - 1;
+                            
+                            if (isNaN(choiceNum) || choiceNum < 0 || choiceNum >= validDownloads.length) {
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - ${validDownloads.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
+                                }, { quoted: downloadMek });
+                                    return;
                             }
 
-                            clearAllmvListeners();
-                            const selectedEpisode = finalDownloads[epIdx];
-
-                            await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
-
-                            await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading Episode:* ${selectedEpisode.name}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
-                            }, { quoted: epMek });
+                            const selectedDownload = validDownloads[choiceNum];
+                            await socket.sendMessage(sender, { react: { text: '📥', key: downloadMek.key } });
 
                             try {
-                                // Direct Link එක වෙනුවට Document MP4 එකක් ලෙස යැවීම
-                                await socket.sendMessage(sender, {
-                                    document: { url: selectedEpisode.link },
-                                    mimetype: 'video/mp4',
-                                    fileName: `${mvData.title} - ${selectedEpisode.name}.mp4`,
-                                    caption: `✅ *CARTOON DOWNLOADED*\n\n🎬 *Series:* ${cartoonData.title}\n📌 *Episode:* ${selectedEpisode.name}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-                                }, { quoted: epMek });
+                                const finalDirectLink = selectedDownload.link;
+                                const isSub = selectedDownload.name.includes('SUBTITLE');
 
-                                await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
-                            } catch (uploadErr) {
-                                await socket.sendMessage(sender, { 
-                                    text: `❌ වීඩියෝව යැවීමේදී දෝෂයක් ඇති විය: ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedEpisode.link}` 
-                                }, { quoted: epMek });
+                                await socket.sendMessage(sender, {
+                                    document: { url: finalDirectLink },
+                                    mimetype: isSub ? 'text/plain' : 'video/mp4',
+                                    fileName: isSub ? `${movieInfo.title}.srt` : `${movieInfo.title} - Video.mp4`,
+                                    caption: `*❪ DOWNLOAD ❫*\n\n🎭 *${movieInfo.title}*\n📌 *Item:* _${selectedDownload.name.replace('📥', '').trim()}_
+${DEFAULT_FOOTER}`
+                                }, { quoted: downloadMek });
+
+                                await socket.sendMessage(sender, { react: { text: '✅', key: downloadMek.key } });
+
+                            } catch (downloadError) {
+                                console.error('Download link error:', downloadError);
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ ERROR ❫*\n\n❌ *Download Failed!*\n🚫 _${downloadError.message}_${DEFAULT_FOOTER}`
+                                }, { quoted: downloadMek });
+                            } finally {
+                                socket.ev.off('messages.upsert', handleDownload);
+                                socket.ev.off('messages.upsert', handleSelection);
                             }
                         }
                     };
 
-                    cartoonEpisodeListener = handleEpisodeSelection;
-                    socket.ev.on('messages.upsert', handleEpisodeSelection);
+                    socket.ev.on('messages.upsert', handleDownload);
 
-                } catch (infoErr) {
-                    clearAllmvListeners();
-                    await socket.sendMessage(sender, { text: `❌ Cartoon Info Error: ${infoErr.message}` }, { quoted: replyMek });
+                } catch (detailsError) {
+                    console.error('Details error:', detailsError);
+                    await socket.sendMessage(sender, {
+                        text: `*❪ ERROR ❫*\n\n❌ *Movie Details Error!*\n🚫 _${detailsError.message}_${DEFAULT_FOOTER}`
+                    }, { quoted: replyMek });
+                    socket.ev.off('messages.upsert', handleSelection);
                 }
             }
         };
 
-        mvSelectionListener = handlemvSelection;
-        socket.ev.on('messages.upsert', handlemvSelection);
+        socket.ev.on('messages.upsert', handleSelection);
 
-    } catch (err) {
-        clearAllmvListeners();
+    } catch (error) {
+        console.error('Cinemx command error:', error);
         await socket.sendMessage(sender, {
-            text: `❌ Error: ${err.message}`
+            text: `*❪ SYSTEM ERROR ❫*\n\n❌ *System Error!*\n🚫 _${error.message || 'Unknown error'}_\n\n🔄 _Please try again later..._${DEFAULT_FOOTER}`
         }, { quoted: msg });
     }
+    
     break;
-}      
-          
-                    case 'chatgpt':
-case 'CHAT': {
+}
+case 'lksub': {
+    const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
+
     if (!args.length) {
         await socket.sendMessage(sender, {
-            image: { url: sessionConfig.BOT_IMAGE || config.BOT_IMAGE },
-            caption: formatMessage(
-                '❌ ERROR',
-                '*කරුණාකර ChatGPT වෙත ඇසිය යුතු ප්‍රශ්නය ලබාදෙන්න! උදා: .chatgpt Who are you?*',
-                `${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-            )
+            text: `*❪ ERROR ❫*\n\n⚠️ *Invalid Usage!*\n\n🎬 *Example:*\n• .lksub spider man\n\n📝 _Please provide the Movie name!_${DEFAULT_FOOTER}`
         }, { quoted: msg });
         break;
     }
 
-    const promptText = args.join(' ');
-    const API_KEY = 'chama_api_11230a80e5eed3c1b80bfcc5d1773ec9';
-    const API_URL = 'https://api.chamindu.site/api/v1/media/ai/chatgpt';
+    const query = args.join(' ');
+    await socket.sendMessage(sender, { 
+        text: `*❪ SEARCHING ❫*\n\n🔍 *Searching LKSub.org...*\n⚡ _Please wait a moment._`
+    });
 
-    await socket.sendMessage(sender, { react: { text: '🤖', key: msg.key } });
+    const API_BASE = "https://api.chamindu.site";
+    const API_KEY = "chama_api_11230a80e5eed3c1b80bfcc5d1773ec9"; // ඔබේ API Key එක දාන්න
+    const DEFAULT_IMAGE = "https://api.chamindu.site/logo.png";
 
     try {
-        const response = await axios.get(API_URL, {
-            params: { 
-                q: promptText, 
-                api_key: API_KEY 
-            },
-            timeout: 45000,
-            headers: { 'User-Agent': 'Mozilla/5.0' }
+        const searchResponse = await axios.get(`${API_BASE}/api/v1/movie/lksub/search?q=${encodeURIComponent(query)}&api_key=${API_KEY}`);
+        const searchData = searchResponse.data;
+
+        if (!searchData.status || !searchData.data || searchData.data.length === 0) {
+            await socket.sendMessage(sender, {
+                text: `*❪ NO RESULTS ❫*\n\n😞 *No Results Found!*\n\n🎬 *Query:* _${query}_\n💡 *Tip:* _Please check the spelling and try again!_${DEFAULT_FOOTER}`
+            }, { quoted: msg });
+            break;
+        }
+
+        const results = searchData.data.slice(0, 25);
+        let listText = `*❪ SEARCH RESULTS ❫*\n\n🎯 *Query:* _${query}_\n📊 *Results:* _${results.length} Items_\n\n*👇 SELECT A NUMBER 👇*\n\n`;
+
+        results.forEach((item, index) => {
+            const num = (index + 1) < 10 ? `0${index + 1}` : `${index + 1}`;
+            listText += `*${num}* ➜ 🎥 _${item.title.substring(0, 30)}_
+`;
         });
 
-        const apiData = response.data;
+        listText += `${DEFAULT_FOOTER}`;
+        
+        const sentMsg = await socket.sendMessage(sender, { text: listText }, { quoted: msg });
+        const messageID = sentMsg.key.id;
 
-        if (apiData && apiData.status && apiData.response) {
-            const aiReply = apiData.response;
+        const handleSelection = async ({ messages: replyMessages }) => {
+            const replyMek = replyMessages[0];
+            if (!replyMek?.message) return;
 
-            await socket.sendMessage(sender, {
-                text: `💬 *ChatGPT Response*\n\n${aiReply}\n\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
-            }, { quoted: msg });
+            const messageType = replyMek.message.conversation || replyMek.message.extendedTextMessage?.text;
+            const isReplyToSentMsg = replyMek.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-            await socket.sendMessage(sender, { react: { text: '✅', key: msg.key } });
-        } else {
-            await socket.sendMessage(sender, {
-                text: `❌ දෝෂයක් සිදු විය: API එකෙන් නිවැරදි ප්‍රතිචාරයක් ලැබී නැත.`
-            }, { quoted: msg });
-        }
+            if (isReplyToSentMsg && sender === replyMek.key.remoteJid) {
+                const choice = parseInt(messageType) - 1;
+                if (isNaN(choice) || choice < 0 || choice >= results.length) {
+                    await socket.sendMessage(sender, {
+                        text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - 	ext ${results.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
+                    }, { quoted: replyMek });
+                    return;
+                }
+
+                const selectedItem = results[choice];
+                
+                await socket.sendMessage(sender, { 
+                    text: `*❪ FETCHING ❫*\n\n🎬 *Fetching Movie...*\n⚡ _Please wait..._`
+                }, { quoted: replyMek });
+
+                try {
+                    const detailsResponse = await axios.get(`${API_BASE}/api/v1/movie/lksub/infodl?q=${encodeURIComponent(selectedItem.link)}&api_key=${API_KEY}`);
+                    const detailsData = detailsResponse.data;
+
+                    if (!detailsData.status || !detailsData.data) {
+                        throw new Error('Failed to fetch details');
+                    }
+
+                    const movieInfo = detailsData.data;
+                    const validDownloads = movieInfo.downloads || [];
+                    
+                    if (validDownloads.length === 0) {
+                        await socket.sendMessage(sender, {
+                            text: `*❪ NO DOWNLOADS ❫*\n\n⚠️ *No Downloads Found!*\n😞 _There are no downloads available for this movie!_${DEFAULT_FOOTER}`
+                        }, { quoted: replyMek });
+                        return;
+                    }
+                    
+                    const movieDetailsText = `*❪ MOVIE DETAILS ❫*\n\n🎬 *${movieInfo.title}*\n⭐ 𝗜𝗠𝗗𝗕 ➜ ★ ${movieInfo.imdb || movieInfo.rating || 'N/A'}\n📅 𝗬𝗲𝗮𝗿 ➜ ${movieInfo.year || 'N/A'}\n⏳ 𝗗𝘂𝗿𝗮𝘁𝗶𝗼𝗻 ➜ ${movieInfo.duration || 'N/A'}\n🌍 🇨🇴🇺🇳🇹🇷🇾 ➜ ${movieInfo.country || 'N/A'}\n🎭 𝗚𝗲𝗻 genres ➜ ${movieInfo.genres ? movieInfo.genres.join(', ') : 'N/A'}\n🏷️  ➜ ${movieInfo.language || movieInfo.tag || 'N/A'}\n🎬  ➜ ${movieInfo.directors || movieInfo.director || 'N/A'}\n⭐  ➜ ${movieInfo.stars || 'N/A'}\n📝  ➜ ${movieInfo.story ? (movieInfo.story.length > 250 ? movieInfo.story.substring(0, 250) + '...' : movieInfo.story) : 'N/A'}\n🗿 𝗪ᴇʙ ➜ lksub.org\n ${DEFAULT_FOOTER}`;
+
+                    const moviePosterUrl = movieInfo.image || selectedItem.image || DEFAULT_IMAGE;
+                    await socket.sendMessage(sender, {
+                        image: { url: moviePosterUrl },
+                        caption: movieDetailsText
+                    }, { quoted: replyMek });
+
+                    const downloadOptionsText = `*❪ DOWNLOADS ❫*\n\n📥 *Select Quality:*\n\n${validDownloads.map((dl, i) => {
+    const num = (i + 1) < 10 ? `0${i + 1}` : `${i + 1}`;
+    const qualityIcon = (dl.quality || '').includes('1080') ? '🔥' : (dl.quality || '').includes('720') ? '💎' : '📱';
+    return `*${num}* ➜ ${qualityIcon} _${dl.quality}_ 💾 _${dl.size || 'N/A'}_`;
+}).join('\n')}\n\n*💬 REPLY TO DOWNLOAD 💬*\n📌 _Reply with the number_${DEFAULT_FOOTER}`;
+
+                    const dlSentMsg = await socket.sendMessage(sender, { text: downloadOptionsText }, { quoted: replyMek });
+                    const dlMessageID = dlSentMsg.key.id;
+
+                    const handleDownloadSelection = async ({ messages: dlReplyMessages }) => {
+                        const dlReplyMek = dlReplyMessages[0];
+                        if (!dlReplyMek?.message) return;
+
+                        const dlChoiceText = dlReplyMek.message.conversation || dlReplyMek.message.extendedTextMessage?.text;
+                        const isReplyToDlMsg = dlReplyMek.message.extendedTextMessage?.contextInfo?.stanzaId === dlMessageID;
+
+                        if (isReplyToDlMsg && sender === dlReplyMek.key.remoteJid) {
+                            const dlChoice = parseInt(dlChoiceText) - 1;
+                            if (isNaN(dlChoice) || dlChoice < 0 || dlChoice >= validDownloads.length) {
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - 	ext ${validDownloads.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                                return;
+                            }
+
+                            const selectedDownload = validDownloads[dlChoice];
+                            
+                            await socket.sendMessage(sender, { 
+                                text: `*❪ SENDING MOVIE ❫*\n\n📥 *Sending:* _${movieInfo.title}_\n📊 *Quality:* _${selectedDownload.quality}_\n💾 *Size:* _${selectedDownload.size || 'N/A'}_
+⚡ _Uploading file to WhatsApp..._`
+                            }, { quoted: dlReplyMek });
+
+                            try {
+                                await socket.sendMessage(sender, {
+                                    document: { url: selectedDownload.link },
+                                    mimetype: 'video/mp4',
+                                    fileName: `${movieInfo.title} (${selectedDownload.quality}).mp4`,
+                                    caption: `*🎬 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗠𝗢𝗩𝗜𝗘 🎬*\n\n🎭 *Title:* ${movieInfo.title}\n🌟 *IMDB:* ${movieInfo.imdb || movieInfo.rating || 'N/A'}\n📅 *Year:* ${movieInfo.year || 'N/A'}\n📊 *Quality:* ${selectedDownload.quality}\n💾 *Size:* ${selectedDownload.size || 'N/A'}\n\n${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                            } catch (uploadErr) {
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ UPLOAD FAILED ❫*\n\n❌ *Failed to upload file directly!*\n🔗 *Direct Link:* ${selectedDownload.link}${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                            }
+
+                            socket.ev.off('messages.upsert', handleDownloadSelection);
+                        }
+                    };
+
+                    socket.ev.on('messages.upsert', handleDownloadSelection);
+                    socket.ev.off('messages.upsert', handleSelection);
+
+                } catch (movieDetailsError) {
+                    console.error('Movie Details error:', movieDetailsError);
+                    await socket.sendMessage(sender, {
+                        text: `*❪ ERROR ❫*\n\n❌ *Movie Details Error!*\n🚫 _${movieDetailsError.message}_	ext ${DEFAULT_FOOTER}`
+                    }, { quoted: replyMek });
+                    socket.ev.off('messages.upsert', handleSelection);
+                }
+            }
+        };
+
+        socket.ev.on('messages.upsert', handleSelection);
+
     } catch (error) {
+        console.error('LKSub.org command error:', error);
         await socket.sendMessage(sender, {
-            text: `❌ ChatGPT API Error: ${error.message}`
+            text: `*❪ SYSTEM ERROR ❫*\n\n❌ *System Error!*\n🚫 _${error.message || 'Unknown error'}_\n\n🔄 _Please try again later..._${DEFAULT_FOOTER}`
         }, { quoted: msg });
     }
+    
+    break;
+}
+case 'animeheaven': {
+    const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
+
+    if (!args.length) {
+        await socket.sendMessage(sender, {
+            text: `*❪ ERROR ❫*\n\n⚠️ *Invalid Usage!*\n\n🎬 *Example:*\n• .animeheaven spider man\n\n📝 _Please provide the Movie name!_${DEFAULT_FOOTER}`
+        }, { quoted: msg });
+        break;
+    }
+
+    const query = args.join(' ');
+    await socket.sendMessage(sender, { 
+        text: `*❪ SEARCHING ❫*\n\n🔍 *Searching AnimeHeaven.me...*\n⚡ _Please wait a moment._`
+    });
+
+    const API_BASE = "https://api.chamindu.site";
+    const API_KEY = "chama_api_11230a80e5eed3c1b80bfcc5d1773ec9"; // ඔබේ API Key එක දාන්න
+    const DEFAULT_IMAGE = "https://api.chamindu.site/logo.png";
+
+    try {
+        const searchResponse = await axios.get(`${API_BASE}/api/v1/movie/animeheaven/search?q=${encodeURIComponent(query)}&api_key=${API_KEY}`);
+        const searchData = searchResponse.data;
+
+        if (!searchData.status || !searchData.data || searchData.data.length === 0) {
+            await socket.sendMessage(sender, {
+                text: `*❪ NO RESULTS ❫*\n\n😞 *No Results Found!*\n\n🎬 *Query:* _${query}_\n💡 *Tip:* _Please check the spelling and try again!_${DEFAULT_FOOTER}`
+            }, { quoted: msg });
+            break;
+        }
+
+        const results = searchData.data.slice(0, 25);
+        let listText = `*❪ SEARCH RESULTS ❫*\n\n🎯 *Query:* _${query}_\n📊 *Results:* _${results.length} Items_\n\n*👇 SELECT A NUMBER 👇*\n\n`;
+
+        results.forEach((item, index) => {
+            const num = (index + 1) < 10 ? `0${index + 1}` : `${index + 1}`;
+            listText += `*${num}* ➜ 🎥 _${item.title.substring(0, 30)}_
+`;
+        });
+
+        listText += `${DEFAULT_FOOTER}`;
+        
+        const sentMsg = await socket.sendMessage(sender, { text: listText }, { quoted: msg });
+        const messageID = sentMsg.key.id;
+
+        const handleSelection = async ({ messages: replyMessages }) => {
+            const replyMek = replyMessages[0];
+            if (!replyMek?.message) return;
+
+            const messageType = replyMek.message.conversation || replyMek.message.extendedTextMessage?.text;
+            const isReplyToSentMsg = replyMek.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+
+            if (isReplyToSentMsg && sender === replyMek.key.remoteJid) {
+                const choice = parseInt(messageType) - 1;
+                if (isNaN(choice) || choice < 0 || choice >= results.length) {
+                    await socket.sendMessage(sender, {
+                        text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - 	ext ${results.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
+                    }, { quoted: replyMek });
+                    return;
+                }
+
+                const selectedItem = results[choice];
+                
+                await socket.sendMessage(sender, { 
+                    text: `*❪ FETCHING ❫*\n\n🎬 *Fetching Movie...*\n⚡ _Please wait..._`
+                }, { quoted: replyMek });
+
+                try {
+                    const detailsResponse = await axios.get(`${API_BASE}/api/v1/movie/animeheaven/infodl?q=${encodeURIComponent(selectedItem.link)}&api_key=${API_KEY}`);
+                    const detailsData = detailsResponse.data;
+
+                    if (!detailsData.status || !detailsData.data) {
+                        throw new Error('Failed to fetch details');
+                    }
+
+                    const movieInfo = detailsData.data;
+                    const validDownloads = movieInfo.downloads || [];
+                    
+                    if (validDownloads.length === 0) {
+                        await socket.sendMessage(sender, {
+                            text: `*❪ NO DOWNLOADS ❫*\n\n⚠️ *No Downloads Found!*\n😞 _There are no downloads available for this movie!_${DEFAULT_FOOTER}`
+                        }, { quoted: replyMek });
+                        return;
+                    }
+                    
+                    const movieDetailsText = `*❪ MOVIE DETAILS ❫*\n\n🎬 *${movieInfo.title}*\n⭐ 𝗜𝗠𝗗𝗕 ➜ ★ ${movieInfo.imdb || movieInfo.rating || 'N/A'}\n📅 𝗬𝗲𝗮𝗿 ➜ ${movieInfo.year || 'N/A'}\n⏳ 𝗗𝘂𝗿𝗮𝘁𝗶𝗼𝗻 ➜ ${movieInfo.duration || 'N/A'}\n🌍 🇨🇴🇺🇳🇹🇷🇾 ➜ ${movieInfo.country || 'N/A'}\n🎭 𝗚𝗲𝗻 genres ➜ ${movieInfo.genres ? movieInfo.genres.join(', ') : 'N/A'}\n🏷️  ➜ ${movieInfo.language || movieInfo.tag || 'N/A'}\n🎬  ➜ ${movieInfo.directors || movieInfo.director || 'N/A'}\n⭐  ➜ ${movieInfo.stars || 'N/A'}\n📝  ➜ ${movieInfo.story ? (movieInfo.story.length > 250 ? movieInfo.story.substring(0, 250) + '...' : movieInfo.story) : 'N/A'}\n🗿 𝗪ᴇʙ ➜ animeheaven.me\n ${DEFAULT_FOOTER}`;
+
+                    const moviePosterUrl = movieInfo.image || selectedItem.image || DEFAULT_IMAGE;
+                    await socket.sendMessage(sender, {
+                        image: { url: moviePosterUrl },
+                        caption: movieDetailsText
+                    }, { quoted: replyMek });
+
+                    const downloadOptionsText = `*❪ DOWNLOADS ❫*\n\n📥 *Select Quality:*\n\n${validDownloads.map((dl, i) => {
+    const num = (i + 1) < 10 ? `0${i + 1}` : `${i + 1}`;
+    const qualityIcon = (dl.quality || '').includes('1080') ? '🔥' : (dl.quality || '').includes('720') ? '💎' : '📱';
+    return `*${num}* ➜ ${qualityIcon} _${dl.quality}_ 💾 _${dl.size || 'N/A'}_`;
+}).join('\n')}\n\n*💬 REPLY TO DOWNLOAD 💬*\n📌 _Reply with the number_${DEFAULT_FOOTER}`;
+
+                    const dlSentMsg = await socket.sendMessage(sender, { text: downloadOptionsText }, { quoted: replyMek });
+                    const dlMessageID = dlSentMsg.key.id;
+
+                    const handleDownloadSelection = async ({ messages: dlReplyMessages }) => {
+                        const dlReplyMek = dlReplyMessages[0];
+                        if (!dlReplyMek?.message) return;
+
+                        const dlChoiceText = dlReplyMek.message.conversation || dlReplyMek.message.extendedTextMessage?.text;
+                        const isReplyToDlMsg = dlReplyMek.message.extendedTextMessage?.contextInfo?.stanzaId === dlMessageID;
+
+                        if (isReplyToDlMsg && sender === dlReplyMek.key.remoteJid) {
+                            const dlChoice = parseInt(dlChoiceText) - 1;
+                            if (isNaN(dlChoice) || dlChoice < 0 || dlChoice >= validDownloads.length) {
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ INVALID ❫*\n\n⚠️ *Wrong Number!*\n🎯 *Range:* _01 - 	ext ${validDownloads.length}_\n📝 _Please reply with a valid number!_${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                                return;
+                            }
+
+                            const selectedDownload = validDownloads[dlChoice];
+                            
+                            await socket.sendMessage(sender, { 
+                                text: `*❪ SENDING MOVIE ❫*\n\n📥 *Sending:* _${movieInfo.title}_\n📊 *Quality:* _${selectedDownload.quality}_\n💾 *Size:* _${selectedDownload.size || 'N/A'}_
+⚡ _Uploading file to WhatsApp..._`
+                            }, { quoted: dlReplyMek });
+
+                            try {
+                                await socket.sendMessage(sender, {
+                                    document: { url: selectedDownload.link },
+                                    mimetype: 'video/mp4',
+                                    fileName: `${movieInfo.title} (${selectedDownload.quality}).mp4`,
+                                    caption: `*🎬 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗠𝗢𝗩𝗜𝗘 🎬*\n\n🎭 *Title:* ${movieInfo.title}\n🌟 *IMDB:* ${movieInfo.imdb || movieInfo.rating || 'N/A'}\n📅 *Year:* ${movieInfo.year || 'N/A'}\n📊 *Quality:* ${selectedDownload.quality}\n💾 *Size:* ${selectedDownload.size || 'N/A'}\n\n${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                            } catch (uploadErr) {
+                                await socket.sendMessage(sender, {
+                                    text: `*❪ UPLOAD FAILED ❫*\n\n❌ *Failed to upload file directly!*\n🔗 *Direct Link:* ${selectedDownload.link}${DEFAULT_FOOTER}`
+                                }, { quoted: dlReplyMek });
+                            }
+
+                            socket.ev.off('messages.upsert', handleDownloadSelection);
+                        }
+                    };
+
+                    socket.ev.on('messages.upsert', handleDownloadSelection);
+                    socket.ev.off('messages.upsert', handleSelection);
+
+                } catch (movieDetailsError) {
+                    console.error('Movie Details error:', movieDetailsError);
+                    await socket.sendMessage(sender, {
+                        text: `*❪ ERROR ❫*\n\n❌ *Movie Details Error!*\n🚫 _${movieDetailsError.message}_	ext ${DEFAULT_FOOTER}`
+                    }, { quoted: replyMek });
+                    socket.ev.off('messages.upsert', handleSelection);
+                }
+            }
+        };
+
+        socket.ev.on('messages.upsert', handleSelection);
+
+    } catch (error) {
+        console.error('AnimeHeaven.me command error:', error);
+        await socket.sendMessage(sender, {
+            text: `*❪ SYSTEM ERROR ❫*\n\n❌ *System Error!*\n🚫 _${error.message || 'Unknown error'}_\n\n🔄 _Please try again later..._${DEFAULT_FOOTER}`
+        }, { quoted: msg });
+    }
+    
     break;
 }
      // ==========================================
