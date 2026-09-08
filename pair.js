@@ -1674,9 +1674,7 @@ case 'movie': {
     
     break;
 }
-                    
-                                                             socket.ev.on('messages.upsert', handleDinkaSelection);
-case 'dinka':
+   case 'dinka':
 case 'dinkamovies': {
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1795,11 +1793,13 @@ case 'dinkamovies': {
                     infoText += `📖 *Synopsis:* ${movieData.synopsis || movieData.description || 'විස්තරයක් නොමැත'}\n\n`;
                     
                     if (allDownloads.length > 0) {
-                        infoText += `*Available Quality / Episodes (480p, 720p, 1080p):*\n`;
+                        infoText += `*Available Quality Options:*\n`;
                         allDownloads.forEach((dl, i) => {
-                            infoText += `*${i + 1}.* ${dl.name || dl.quality || 'Download Link ' + (i + 1)}\n`;
+                            let label = dl.name || dl.quality || `Download Link ${i + 1}`;
+                            // අංක 1, 2, 3 විදිහට පෙන්වන ගමන් ලේබල් එක පැහැදිලිව දැක්වීම
+                            infoText += `*${i + 1}.* ${label}\n`;
                         });
-                        infoText += `\n👉 *බාගත කිරීමට අදාළ අංකය Reply කරන්න.*`;
+                        infoText += `\n👉 *බාගත කිරීමට අදාළ අංකය (1, 2, හෝ 3) Reply කරන්න.*`;
                     } else {
                         infoText += `⚠️ *මෙම මූවී එක සඳහා ඩවුන්ලෝඩ් ලින්ක් හමු නොවීය.*`;
                     }
@@ -1827,7 +1827,7 @@ case 'dinkamovies': {
                             const epIdx = parseInt(epChoiceText) - 1;
                             if (isNaN(epIdx) || epIdx < 0 || epIdx >= allDownloads.length) {
                                 await socket.sendMessage(sender, { 
-                                    text: `❌ කරුණාකර 1 - ${allDownloads.length} අතර අංකයක් ලබාදෙන්න!` 
+                                    text: `❌ කරුණාකර 1 - ${allDownloads.length} අතර නිවැරදි අංකයක් ලබාදෙන්න!` 
                                 }, { quoted: epMek });
                                 return;
                             }
@@ -1838,19 +1838,27 @@ case 'dinkamovies': {
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
                             await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading:* ${selectedDownload.name || 'File'}\n_වීඩියෝ ප්‍රමාණය විශාල විය හැකි බැවින් මිනිත්තු 2ක් පමණ ගත විය හැක. කරුණාකර රැඳී සිටින්න..._` 
+                                text: `⏳ *Downloading (${selectedDownload.name || selectedDownload.quality || 'Selected Quality'}):*\n_වීඩියෝ ප්‍රමාණය විශාල විය හැකි බැවින් මිනිත්තු 2ක් පමණ ගත විය හැක. කරුණාකර රැඳී සිටින්න..._` 
                             }, { quoted: epMek });
 
                             try {
-                                const fileLink = selectedDownload.link || selectedDownload.url;
-                                
-                                // Redirects සහ File size එක හරියටම අල්ලා ගැනීම සඳහා axios configurations යාවත්කාලීන කිරීම
+                                let fileLink = selectedDownload.link || selectedDownload.url;
+
+                                // Google Drive ලින්ක්ස් සඳහා Direct Download Bypass එක
+                                if (fileLink.includes('drive.google.com')) {
+                                    const match = fileLink.match(/\/d\/([a-zA-Z0-9_-]+)/) || fileLink.match(/id=([a-zA-Z0-9_-]+)/);
+                                    if (match && match[1]) {
+                                        const fileId = match[1];
+                                        fileLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                                    }
+                                }
+
                                 const videoStream = await axios({
                                     method: 'get',
                                     url: fileLink,
                                     responseType: 'arraybuffer',
-                                    timeout: 300000, // විනාඩි 5ක උපරිම කාලයක්
-                                    maxRedirects: 10, // Redirects හරහා නිවැරදි සර්වර් එකට යාමට
+                                    timeout: 300000,
+                                    maxRedirects: 15,
                                     headers: {
                                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                                         'Accept': '*/*'
@@ -1862,16 +1870,15 @@ case 'dinkamovies': {
                                 const videoBuffer = Buffer.from(videoStream.data);
                                 console.log('Final Downloaded File Size (Bytes):', videoBuffer.length);
 
-                                // 500KB ට වඩා අඩු නම් (HTML page එකක් හෝ ඩමි රෙස්පොන්ස් එකක් නම්) Error එකක් විසි කිරීම
                                 if (videoBuffer.length < 500000) {
-                                    throw new Error(`ලැබුණු ගොනුව ඉතා කුඩායි (${videoBuffer.length} bytes). මෙය වීඩියෝවක් නොවිය හැක.`);
+                                    throw new Error(`ලැබුණු ගොනුව ඉතා කුඩායි (${videoBuffer.length} bytes). මෙය වීඩියෝවක් නොවිය හැක (Google Drive Virus Warning හෝ ඩීඩීඕඑස් පේජ් එකක් වන්නට ඇත).`);
                                 }
 
                                 await socket.sendMessage(sender, {
                                     document: videoBuffer,
                                     mimetype: 'video/mp4',
-                                    fileName: `${movieData.title || chosenMovie.title} - ${selectedDownload.name || 'Video'}.mp4`,
-                                    caption: `✅ *DINKA MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenMovie.title}\n📌 *Option:* ${selectedDownload.name || 'HD'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
+                                    fileName: `${movieData.title || chosenMovie.title} - (${selectedDownload.name || selectedDownload.quality || 'Video'}).mp4`,
+                                    caption: `✅ *DINKA MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenMovie.title}\n📌 *Quality:* ${selectedDownload.name || selectedDownload.quality || 'Selected'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
                                 }, { quoted: epMek });
 
                                 await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
@@ -1902,7 +1909,9 @@ case 'dinkamovies': {
         }, { quoted: msg });
     }
     break;
-}
+}                 
+ 
+
                                 
             
 
