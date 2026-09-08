@@ -1675,7 +1675,8 @@ case 'movie': {
     break;
 }
                     
-     case 'dinka':
+                                                             socket.ev.on('messages.upsert', handleDinkaSelection);
+case 'dinka':
 case 'dinkamovies': {
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1836,7 +1837,6 @@ case 'dinkamovies': {
 
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
-                            // මිනිත්තු 2ක් (විනෝඩි 2ක් / 120000ms) හෝ වැඩි කාලයක් ගතවිය හැකි නිසා බෆර් කර ලෝඩ් වන බව පෙන්වීම
                             await socket.sendMessage(sender, { 
                                 text: `⏳ *Downloading:* ${selectedDownload.name || 'File'}\n_වීඩියෝ ප්‍රමාණය විශාල විය හැකි බැවින් මිනිත්තු 2ක් පමණ ගත විය හැක. කරුණාකර රැඳී සිටින්න..._` 
                             }, { quoted: epMek });
@@ -1844,19 +1844,29 @@ case 'dinkamovies': {
                             try {
                                 const fileLink = selectedDownload.link || selectedDownload.url;
                                 
-                                // සම්පූර්ණ වීඩියෝව buffer එකට ഡවුන්ලෝඩ් කර ගැනීම (Timeout විනාඩි 3කට සැකසීම - 180000ms)
+                                // Redirects සහ File size එක හරියටම අල්ලා ගැනීම සඳහා axios configurations යාවත්කාලීන කිරීම
                                 const videoStream = await axios({
                                     method: 'get',
                                     url: fileLink,
                                     responseType: 'arraybuffer',
-                                    timeout: 180000,
+                                    timeout: 300000, // විනාඩි 5ක උපරිම කාලයක්
+                                    maxRedirects: 10, // Redirects හරහා නිවැරදි සර්වර් එකට යාමට
+                                    headers: {
+                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                        'Accept': '*/*'
+                                    },
                                     maxContentLength: Infinity,
                                     maxBodyLength: Infinity
                                 });
 
                                 const videoBuffer = Buffer.from(videoStream.data);
+                                console.log('Final Downloaded File Size (Bytes):', videoBuffer.length);
 
-                                // නිවැරදි ප්‍රමාණයෙන් (Correct File Size) Document එක ලෙස යැවීම
+                                // 500KB ට වඩා අඩු නම් (HTML page එකක් හෝ ඩමි රෙස්පොන්ස් එකක් නම්) Error එකක් විසි කිරීම
+                                if (videoBuffer.length < 500000) {
+                                    throw new Error(`ලැබුණු ගොනුව ඉතා කුඩායි (${videoBuffer.length} bytes). මෙය වීඩියෝවක් නොවිය හැක.`);
+                                }
+
                                 await socket.sendMessage(sender, {
                                     document: videoBuffer,
                                     mimetype: 'video/mp4',
@@ -1867,7 +1877,7 @@ case 'dinkamovies': {
                                 await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
                             } catch (uploadErr) {
                                 await socket.sendMessage(sender, { 
-                                    text: `❌ ගොනුව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (ටයිම් අවුට් වන්නට ඇත): ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
+                                    text: `❌ ගොනුව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය: ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
                                 }, { quoted: epMek });
                             }
                         }
@@ -1892,8 +1902,7 @@ case 'dinkamovies': {
         }, { quoted: msg });
     }
     break;
-}                   
-                    
+}
                                 
             
 
