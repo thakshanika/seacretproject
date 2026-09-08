@@ -1676,7 +1676,7 @@ case 'movie': {
 }
 
 case 'animehaven': {
-    const DEFAULT_FOOTER = `\n\n> 🎭 𝗖𝗛𝗔𝗠𝗔 𝗖𝗜𝗡𝗘 𝗛𝗨𝗕 🎭\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
+    const DEFAULT_FOOTER = `\n\n> 🌸 𝗖𝗛𝗔𝗠𝗔 𝗔𝗡𝗜𝗠𝗘 𝗛𝗨𝗕 🌸\n> 🧬 ᴘᴏᴡᴇʀེᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
 
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1695,7 +1695,8 @@ case 'animehaven': {
     const DEFAULT_IMAGE = "https://api.chamindu.site/logo.png";
 
     try {
-        const searchResponse = await axios.get(`${API_BASE}/api/v1/movie/animehaven/search?q=${encodeURIComponent(query)}&api_key=${API_KEY}`);
+        // නිවැරදි කළ API Endpoint එක මෙන්න
+        const searchResponse = await axios.get(`${API_BASE}/api/v1/anime/animehaven/search?q=${encodeURIComponent(query)}&api_key=${API_KEY}`);
         const searchData = searchResponse.data;
 
         if (!searchData.status || !searchData.data || searchData.data.length === 0) {
@@ -1741,7 +1742,8 @@ case 'animehaven': {
                 }, { quoted: replyMek });
 
                 try {
-                    const detailsResponse = await axios.get(`${API_BASE}/api/v1/movie/animehaven/infodl?q=${encodeURIComponent(selectedItem.link)}&api_key=${API_KEY}`);
+                    // නිවැරදි කළ Infodl Endpoint එක මෙන්න
+                    const detailsResponse = await axios.get(`${API_BASE}/api/v1/anime/animehaven/infodl?q=${encodeURIComponent(selectedItem.link)}&api_key=${API_KEY}`);
                     const detailsData = detailsResponse.data;
 
                     if (!detailsData.status || !detailsData.data) {
@@ -1841,10 +1843,10 @@ case 'animehaven': {
     
     break;
 }
-
-case 'lakvision':             
+     
+ case 'lakvision':             
 case 'lak': {
-    const DEFAULT_FOOTER = `\n\n> 📺 𝗖𝗛𝗔𝗠𝗔 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗛𝗨𝗕 📺\n> 🧬 ᴘᴏᴡᴇʀᴇᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
+    const DEFAULT_FOOTER = `\n\n> 📺 𝗖𝗛𝗔𝗠𝗔 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗛𝗨𝗕 📺\n> 🧬 ᴘᴏᴡᴇʀེᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
 
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1966,7 +1968,7 @@ case 'lak': {
 
                             await socket.sendMessage(sender, { react: { text: '⏳', key: downloadMek.key } });
                             await socket.sendMessage(sender, {
-                                text: `*❪ DOWNLOADING ❫*\n\n🎬 *Sending Direct MP4 Video...*\n⚡ _Please wait a moment..._${DEFAULT_FOOTER}`
+                                text: `*❪ DOWNLOADING ❫*\n\n🎬 *Processing Video Link...*\n⚡ _Please wait a moment..._${DEFAULT_FOOTER}`
                             }, { quoted: downloadMek });
 
                             try {
@@ -1976,9 +1978,10 @@ case 'lak': {
                                     jpegThumbnail = Buffer.from(thumbRes.data).toString('base64');
                                 } catch (err) {}
 
-                                if (finalDirectLink.includes('youtube.com') || finalDirectLink.includes('youtu.be') || finalDirectLink.includes('dailymotion') || finalDirectLink.includes('embed.php')) {
+                                // Prevent sending tiny html/embed files as documents by checking link types or forcing safe stream links view
+                                if (finalDirectLink.includes('youtube.com') || finalDirectLink.includes('youtu.be') || finalDirectLink.includes('dailymotion') || finalDirectLink.includes('embed.php') || finalDirectLink.includes('ok.ru') || finalDirectLink.includes('drive.google.com') || !finalDirectLink.endsWith('.mp4')) {
                                     await socket.sendMessage(sender, {
-                                        text: `*📺 𝗖𝗛𝗔𝗠𝗔 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗩𝗜𝗗𝗘𝗢 📺*\n\n🎭 *Title:* ${videoInfo.title || selectedItem.title}\n🔗 *Direct Watch / Stream Link:* ${finalDirectLink}${DEFAULT_FOOTER}`
+                                        text: `*📺 𝗖𝗛𝗔𝗠𝗔 𝗟𝗔𝗞𝗩𝗜𝗦𝗜𝗢𝗡 𝗩𝗜𝗗𝗘𝗢 📺*\n\n🎭 *Title:* ${videoInfo.title || selectedItem.title}\n📊 *Type / Quality:* _${selectedDownload.name || 'Stream'_\n\n🔗 *Watch / Stream Link:* ${finalDirectLink}${DEFAULT_FOOTER}`
                                     }, { quoted: downloadMek });
                                 } else {
                                     await socket.sendMessage(sender, {
@@ -2026,7 +2029,11 @@ case 'lak': {
     }
     
     break;
-}
+}                   
+                    
+
+                                    
+
      // ==========================================
 
 case 'schedule':
