@@ -1809,7 +1809,7 @@ case 'dinkamovies': {
 
                     if (allDownloads.length === 0) {
                         clearAllDinkaListeners();
-                        break;
+                    
                     }
 
                     const infoMsgID = infoMsg.key.id;
