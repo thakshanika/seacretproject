@@ -1749,7 +1749,6 @@ case 'bs': {
                         socket.ev.off('messages.upsert', handleSelection);
                     }
                 }
-            }
         };
     case 'cinemx':             
 case 'cmx': {
