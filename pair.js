@@ -1760,7 +1760,7 @@ case 'bs': {
             text: `*❪ SYSTEM ERROR ❫*\n\n❌ *System Error!*\n🚫 _${error.message || 'Unknown error'}_\n\n🔄 _Please try again later..._${DEFAULT_FOOTER}`
         }, { quoted: msg });
     }
-});
+};
     case 'mv':
 case 'mv2': {
     if (!args.length) {
