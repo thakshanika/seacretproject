@@ -1674,7 +1674,7 @@ case 'movie': {
     
     break;
 }
-   case 'dinka':
+  case 'dinka':
 case 'dinkamovies': {
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1796,10 +1796,9 @@ case 'dinkamovies': {
                         infoText += `*Available Quality Options:*\n`;
                         allDownloads.forEach((dl, i) => {
                             let label = dl.name || dl.quality || `Download Link ${i + 1}`;
-                            // අංක 1, 2, 3 විදිහට පෙන්වන ගමන් ලේබල් එක පැහැදිලිව දැක්වීම
                             infoText += `*${i + 1}.* ${label}\n`;
                         });
-                        infoText += `\n👉 *බාගත කිරීමට අදාළ අංකය (1, 2, හෝ 3) Reply කරන්න.*`;
+                        infoText += `\n👉 *බාගත කිරීමට අදාළ අංකය Reply කරන්න.*`;
                     } else {
                         infoText += `⚠️ *මෙම මූවී එක සඳහා ඩවුන්ලෝඩ් ලින්ක් හමු නොවීය.*`;
                     }
@@ -1838,13 +1837,21 @@ case 'dinkamovies': {
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
                             await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading (${selectedDownload.name || selectedDownload.quality || 'Selected Quality'}):*\n_වීඩියෝ ප්‍රමාණය විශාල විය හැකි බැවින් මිනිත්තු 2ක් පමණ ගත විය හැක. කරුණාකර රැඳී සිටින්න..._` 
+                                text: `⏳ *Downloading (${selectedDownload.name || selectedDownload.quality || 'Selected Quality'}):*\n_Google Drive එකෙන් වීඩියෝව ස්ට්‍රීම් වෙමින් පවතී. මිනිත්තු කිහිපයක් ගත විය හැක..._` 
                             }, { quoted: epMek });
+
+                            const fs = require('fs');
+                            const path = require('path');
+                            const { pipeline } = require('stream');
+                            const { promisify } = require('util');
+                            const streamPipeline = promisify(pipeline);
+
+                            const tmpFilePath = path.join(__dirname, `../../temp_${Date.now()}.mp4`);
 
                             try {
                                 let fileLink = selectedDownload.link || selectedDownload.url;
 
-                                // Google Drive ලින්ක්ස් සඳහා Direct Download Bypass එක
+                                // Google Drive ලින්ක් සඳහා Direct Download Bypass සහ Confirm token හැdle කිරීම
                                 if (fileLink.includes('drive.google.com')) {
                                     const match = fileLink.match(/\/d\/([a-zA-Z0-9_-]+)/) || fileLink.match(/id=([a-zA-Z0-9_-]+)/);
                                     if (match && match[1]) {
@@ -1853,38 +1860,50 @@ case 'dinkamovies': {
                                     }
                                 }
 
-                                const videoStream = await axios({
+                                // Stream ලෙස axios හරහා ගොනුව ටෙම්පරරි ෆයිල් එකකට ඩවුන්ලෝඩ් කර ගැනීම (Memory Overload වීම වැළැක්වීමට)
+                                const response = await axios({
                                     method: 'get',
                                     url: fileLink,
-                                    responseType: 'arraybuffer',
-                                    timeout: 300000,
+                                    responseType: 'stream',
+                                    timeout: 600000, // විනාඩි 10ක්
                                     maxRedirects: 15,
                                     headers: {
-                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                                        'Accept': '*/*'
-                                    },
-                                    maxContentLength: Infinity,
-                                    maxBodyLength: Infinity
+                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                                    }
                                 });
 
-                                const videoBuffer = Buffer.from(videoStream.data);
-                                console.log('Final Downloaded File Size (Bytes):', videoBuffer.length);
+                                await streamPipeline(response.data, fs.createWriteStream(tmpFilePath));
 
-                                if (videoBuffer.length < 500000) {
-                                    throw new Error(`ලැබුණු ගොනුව ඉතා කුඩායි (${videoBuffer.length} bytes). මෙය වීඩියෝවක් නොවිය හැක (Google Drive Virus Warning හෝ ඩීඩීඕඑස් පේජ් එකක් වන්නට ඇත).`);
+                                const stats = fs.statSync(tmpFilePath);
+                                console.log('Downloaded Temp File Size (Bytes):', stats.size);
+
+                                if (stats.size < 500000) {
+                                    throw new Error(`ලැබුණු ගොනුව ඉතා කුඩායි (${stats.size} bytes). මෙය වීඩියෝවක් නොවිය හැක.`);
                                 }
 
+                                // WhatsApp වෙත Document එක ලෙස යැවීම
                                 await socket.sendMessage(sender, {
-                                    document: videoBuffer,
+                                    document: { url: tmpFilePath },
                                     mimetype: 'video/mp4',
                                     fileName: `${movieData.title || chosenMovie.title} - (${selectedDownload.name || selectedDownload.quality || 'Video'}).mp4`,
                                     caption: `✅ *DINKA MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenMovie.title}\n📌 *Quality:* ${selectedDownload.name || selectedDownload.quality || 'Selected'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
                                 }, { quoted: epMek });
 
                                 await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
+
+                                // යවා අවසන් වූ පසු ටෙම්පරරි ෆයිල් එක මකා දැමීම (Clean up)
+                                if (fs.existsSync(tmpFilePath)) {
+                                    fs.unlinkSync(tmpFilePath);
+                                }
+
                             } catch (uploadErr) {
+                                // කොහොමත් එරර් එකක් වුණොත් ටෙම්පරරි ෆයිල් එක ඉවත් කිරීම
+                                if (fs.existsSync(tmpFilePath)) {
+                                    fs.unlinkSync(tmpFilePath);
+                                }
+
                                 await socket.sendMessage(sender, { 
-                                    text: `❌ ගොනුව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය: ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
+                                    text: `❌ ගොනුව ස්ට්‍රීම් කර යැවීමේදී දෝෂයක් ඇති විය: ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
                                 }, { quoted: epMek });
                             }
                         }
@@ -1909,11 +1928,8 @@ case 'dinkamovies': {
         }, { quoted: msg });
     }
     break;
-}                 
- 
-
+}                                             
                                 
-            
 
 
 case 'animehaven': {
