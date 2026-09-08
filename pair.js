@@ -1,4 +1,4 @@
-import express from 'express';
+qimport express from 'express';
 import fs from 'fs-extra';
 import path from 'path';
 import sharp from 'sharp';
@@ -1674,7 +1674,8 @@ case 'movie': {
     
     break;
 }
-                    case 'dinka':
+                    
+     case 'dinka':
 case 'dinkamovies': {
     if (!args.length) {
         await socket.sendMessage(sender, {
@@ -1793,7 +1794,7 @@ case 'dinkamovies': {
                     infoText += `📖 *Synopsis:* ${movieData.synopsis || movieData.description || 'විස්තරයක් නොමැත'}\n\n`;
                     
                     if (allDownloads.length > 0) {
-                        infoText += `*Available Quality / Episodes:*\n`;
+                        infoText += `*Available Quality / Episodes (480p, 720p, 1080p):*\n`;
                         allDownloads.forEach((dl, i) => {
                             infoText += `*${i + 1}.* ${dl.name || dl.quality || 'Download Link ' + (i + 1)}\n`;
                         });
@@ -1809,7 +1810,7 @@ case 'dinkamovies': {
 
                     if (allDownloads.length === 0) {
                         clearAllDinkaListeners();
-                
+                        return;
                     }
 
                     const infoMsgID = infoMsg.key.id;
@@ -1835,14 +1836,29 @@ case 'dinkamovies': {
 
                             await socket.sendMessage(sender, { react: { text: '📥', key: epMek.key } });
 
+                            // මිනිත්තු 2ක් (විනෝඩි 2ක් / 120000ms) හෝ වැඩි කාලයක් ගතවිය හැකි නිසා බෆර් කර ලෝඩ් වන බව පෙන්වීම
                             await socket.sendMessage(sender, { 
-                                text: `⏳ *Downloading:* ${selectedDownload.name || 'File'}\n_කරුණාකර ටික වේලාවක් රැඳී සිටින්න, වීඩියෝව ඩවුන්ලෝඩ් වෙමින් පවතී..._` 
+                                text: `⏳ *Downloading:* ${selectedDownload.name || 'File'}\n_වීඩියෝ ප්‍රමාණය විශාල විය හැකි බැවින් මිනිත්තු 2ක් පමණ ගත විය හැක. කරුණාකර රැඳී සිටින්න..._` 
                             }, { quoted: epMek });
 
                             try {
                                 const fileLink = selectedDownload.link || selectedDownload.url;
+                                
+                                // සම්පූර්ණ වීඩියෝව buffer එකට ഡවුන්ලෝඩ් කර ගැනීම (Timeout විනාඩි 3කට සැකසීම - 180000ms)
+                                const videoStream = await axios({
+                                    method: 'get',
+                                    url: fileLink,
+                                    responseType: 'arraybuffer',
+                                    timeout: 180000,
+                                    maxContentLength: Infinity,
+                                    maxBodyLength: Infinity
+                                });
+
+                                const videoBuffer = Buffer.from(videoStream.data);
+
+                                // නිවැරදි ප්‍රමාණයෙන් (Correct File Size) Document එක ලෙස යැවීම
                                 await socket.sendMessage(sender, {
-                                    document: { url: fileLink },
+                                    document: videoBuffer,
                                     mimetype: 'video/mp4',
                                     fileName: `${movieData.title || chosenMovie.title} - ${selectedDownload.name || 'Video'}.mp4`,
                                     caption: `✅ *DINKA MOVIE DOWNLOADED*\n\n🎬 *Title:* ${movieData.title || chosenMovie.title}\n📌 *Option:* ${selectedDownload.name || 'HD'}\n> ${sessionConfig.BOT_FOOTER || config.BOT_FOOTER}`
@@ -1851,7 +1867,7 @@ case 'dinkamovies': {
                                 await socket.sendMessage(sender, { react: { text: '✅', key: epMek.key } });
                             } catch (uploadErr) {
                                 await socket.sendMessage(sender, { 
-                                    text: `❌ ගොනුව යැවීමේදී දෝෂයක් ඇති විය: ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
+                                    text: `❌ ගොනුව ඩවුන්ලෝඩ් කර යැවීමේදී දෝෂයක් ඇති විය (ටයිම් අවුට් වන්නට ඇත): ${uploadErr.message}\n\n🔗 Direct Link එක: ${selectedDownload.link || selectedDownload.url}` 
                                 }, { quoted: epMek });
                             }
                         }
@@ -1876,7 +1892,11 @@ case 'dinkamovies': {
         }, { quoted: msg });
     }
     break;
-}
+}                   
+                    
+                                
+            
+
 
 case 'animehaven': {
     const DEFAULT_FOOTER = `\n\n> 🌸 𝗖𝗛𝗔𝗠𝗔 𝗔𝗡𝗜𝗠𝗘 𝗛𝗨𝗕 🌸\n> 🧬 ᴘᴏᴡᴇʀེᴅ ʙʏ 🇨🇭𝗔𝗠𝗔 𝗧𝗘𝗖𝗛`;
